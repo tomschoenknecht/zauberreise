@@ -211,8 +211,19 @@
 (function(){
 "use strict";
 var $=function(id){return document.getElementById(id);};
-var LS="yz_state_v1", LS_NAME="yz_fairyName", LS_INTRO="yz_introSeen";
+/* Testmodus: eigener Speicherbereich, rührt Ylvies echten Spielstand nie an.
+   Über index.html?test=1 -> "Tritt ein" betreten, oder direkt app.html?test=1 öffnen. */
+var TEST = new URLSearchParams(location.search).get("test")==="1";
+var NS = TEST ? "_test" : "";
+var LS="yz_state_v1"+NS, LS_NAME="yz_fairyName"+NS, LS_INTRO="yz_introSeen"+NS, LS_MUTED="yz_muted"+NS;
 feeInject();
+if(TEST){
+  var testBadge=document.createElement("div");
+  testBadge.textContent="TESTMODUS - wirkt sich nicht auf Ylvies Spielstand aus";
+  testBadge.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99;text-align:center;"+
+    "background:#222;color:#ffe08a;font:700 12px system-ui,sans-serif;padding:4px;letter-spacing:.5px;";
+  document.body.appendChild(testBadge);
+}
 
 /* ============ Funkeln ============ */
 (function(){
@@ -344,7 +355,7 @@ function giggle(){ if(giggling) return; giggling=true; setTimeout(function(){ gi
   setTimeout(function(){ m.style.transform="none"; },300); } duck(); playGiggle(); }
 
 var BGM_VOL=0.26, bgm=$("bgm"), musicOn=true, bgmNode=null, bgmGain=null, fadeTimer=null;
-try{ musicOn=localStorage.getItem("yz_muted")!=="1"; }catch(e){}
+try{ musicOn=localStorage.getItem(LS_MUTED)!=="1"; }catch(e){}
 function connectBgm(){ if(bgmNode||!audioCtx) return; try{ bgmNode=audioCtx.createMediaElementSource(bgm);
   bgmGain=audioCtx.createGain(); bgmGain.gain.value=0; bgmNode.connect(bgmGain); bgmGain.connect(audioCtx.destination); bgm.volume=1; }catch(e){ bgmGain=null; } }
 function setVol(target,ms){ if(bgmGain&&audioCtx){ bgmGain.gain.cancelScheduledValues(audioCtx.currentTime);
@@ -356,7 +367,7 @@ function startMusic(){ if(!musicOn) return; initAudio(); if(audioCtx&&audioCtx.s
 function duck(){ if(bgm.paused||!musicOn) return; setVol(0.09,150); setTimeout(function(){ if(!bgm.paused&&musicOn) setVol(BGM_VOL,900); },850); }
 function renderTone(){ $("icOn").style.display=musicOn?"block":"none"; $("icOff").style.display=musicOn?"none":"block"; }
 $("toneBtn").addEventListener("click", function(e){ e.stopPropagation(); musicOn=!musicOn;
-  try{ localStorage.setItem("yz_muted",musicOn?"0":"1"); }catch(e2){} renderTone(); if(musicOn) startMusic(); else setVol(0,500); });
+  try{ localStorage.setItem(LS_MUTED,musicOn?"0":"1"); }catch(e2){} renderTone(); if(musicOn) startMusic(); else setVol(0,500); });
 renderTone();
 ["pointerdown","touchstart","touchend","click","keydown"].forEach(function(ev){ window.addEventListener(ev,function(){ initAudio(); startMusic(); },{passive:true}); });
 

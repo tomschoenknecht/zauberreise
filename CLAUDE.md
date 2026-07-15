@@ -28,6 +28,26 @@ Ylvies Rückmeldungen und ihr Lernstand fließen kontinuierlich in Entwicklung u
 Design ein. Siehe ENTWICKLUNGSLOG.md. Die App muss stark an Ylvies Realität und
 Möglichkeiten angepasst werden; ihr Lernstand wird dokumentiert.
 
+## Hosting
+Live unter: https://tomschoenknecht.github.io/zauberreise/
+- Landingpage (Countdown): https://tomschoenknecht.github.io/zauberreise/index.html
+- Lern-App (Land der Feenprinzessin): https://tomschoenknecht.github.io/zauberreise/app.html
+GitHub-Repository: https://github.com/tomschoenknecht/zauberreise (Branch main, GitHub Pages
+aus dem Root-Verzeichnis). Deployment: einfach committen und pushen, Pages baut automatisch neu.
+
+## Testmodus (wichtig für Toms eigenes Ausprobieren)
+Kein Login/Account-System (bewusst, siehe Technik-Abschnitt) - Trennung von Toms Tests und
+Ylvies echtem Spielstand läuft über einen URL-Parameter, nicht über Accounts:
+- **Ylvies echter Link** (kein Parameter): https://tomschoenknecht.github.io/zauberreise/
+- **Toms Test-Link** (eigener, komplett getrennter Speicherbereich): https://tomschoenknecht.github.io/zauberreise/?test=1
+  Zeigt oben ein gelbes "TESTMODUS"-Banner. Rührt Ylvies echten Spielstand nie an, beliebig
+  oft nutzbar. Der Parameter wird beim Wechsel von index.html zu app.html automatisch mitgenommen.
+- **Reset-Link** (nur für Freitag vor dem Start, löscht NUR den echten Spielstand,
+  Testdaten bleiben unberührt): https://tomschoenknecht.github.io/zauberreise/?reset=1
+Technisch: alle localStorage-Schlüssel bekommen im Testmodus das Suffix "_test"
+(z. B. yz_state_v1_test statt yz_state_v1) - komplett getrennte Speicherbereiche
+im selben Browser, keine Accounts nötig. Getestet und bestätigt (2026-07-15).
+
 ## Technik
 - Statische Single-File-Web-App (index.html), tabletfähig, ohne Build-Step.
 - Lokale Speicherung (localStorage), kein Login/Server nötig, WLAN vorausgesetzt.

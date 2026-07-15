@@ -173,4 +173,22 @@ umgesetzt. Bleibt offen: weitere Freischalt-Stufen (Bewegung/Fliegen),
 Zahlenraum 100 + Einmaleins, Zauber-Fragebogen, geheime Eigenschaften,
 großer selbst definierter Wunsch.
 
+### 2026-07-15 – Testmodus (getrennter Speicher für Toms Ausprobieren)
+Tom will die App laufend selbst ausprobieren, ohne Ylvies Fortschritt zu
+verändern. Kein Account-System gebaut (würde Server/Login erfordern, passt nicht
+zur bewusst account-losen, rein lokalen Architektur) - stattdessen ein
+URL-Parameter-Testmodus:
+- ?test=1 (index.html oder app.html) nutzt eigene localStorage-Schlüssel mit
+  Suffix "_test", zeigt ein gelbes TESTMODUS-Banner, wird beim Wechsel von
+  Landingpage zu App automatisch mitgenommen.
+- ?reset=1 auf index.html löscht NUR den echten (nicht-Test) Spielstand und
+  räumt den Parameter aus der URL - gedacht für Freitag kurz vor Ylvies Start,
+  damit egal was Tom vorher getestet hat, sie bei null anfängt.
+Getestet: echter Spielstand (33 Kristalle, Name "Luna", Intro gesehen) blieb
+während eines kompletten Testdurchlaufs im Testmodus unverändert; Testmodus
+startet unabhängig bei null; Reset löschte ausschließlich die echten Schlüssel,
+Testdaten blieben unangetastet. Keine Konsolenfehler.
+Nächstes Mal für Tom: zum Ausprobieren immer den ?test=1-Link nutzen, kurz vor
+Freitag 15 Uhr einmal den ?reset=1-Link öffnen.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_
