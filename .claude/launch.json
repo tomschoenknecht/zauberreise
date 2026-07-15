@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ylvie",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/tomsc/AppData/Local/Temp/claude/C--claude-projekt-Strategie/8b5f7760-c092-4a0d-97e0-59db0b7b6248/scratchpad/server.js"],
+      "port": 5177
+    }
+  ]
+}

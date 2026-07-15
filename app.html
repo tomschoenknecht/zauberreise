@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7b3fa0">
+<title>Land der Feenprinzessin</title>
+<style>
+  :root{
+    --pink:#ff8fce; --pink2:#ff5fb6; --rose:#ffd0ec;
+    --gold:#ffe08a; --gold2:#ffc247; --mint:#8ff0d0; --sky:#8fd6ff;
+    --lila:#c99bf0; --plum:#5a1560; --text:#fff6fd;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%; margin:0;}
+  body{
+    font-family:"Comic Sans MS","Segoe UI Rounded","Baloo 2",system-ui,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(900px 600px at 50% -6%, #a95fd8 0%, transparent 55%),
+      radial-gradient(700px 520px at 8% 20%, #ff7fc6 0%, transparent 46%),
+      radial-gradient(760px 560px at 100% 30%, #7fd4ff 0%, transparent 46%),
+      radial-gradient(820px 640px at 50% 120%, #ffd36b 0%, transparent 50%),
+      linear-gradient(180deg,#6a2fa8 0%, #8a3fb0 40%, #b0559e 72%, #e07fb0 100%);
+    overflow:hidden; position:fixed; inset:0; -webkit-user-select:none; user-select:none;
+  }
+  /* Funkeln */
+  .stars{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0;}
+  .star{position:absolute; background:#fff; border-radius:50%; box-shadow:0 0 6px #fff,0 0 12px var(--gold);
+    animation:tw 3s infinite ease-in-out;}
+  @keyframes tw{0%,100%{opacity:.35; transform:scale(.7);}50%{opacity:1; transform:scale(1.3);}}
+  .spark{position:absolute; pointer-events:none; opacity:0; animation:floatUp linear infinite;}
+  .spark svg{width:16px; height:16px; display:block; filter:drop-shadow(0 0 4px #fff);}
+  @keyframes floatUp{0%{opacity:0; transform:translateY(30px) scale(.4) rotate(0);}
+    18%{opacity:1;}100%{opacity:0; transform:translateY(-150px) scale(1.1) rotate(140deg);}}
+
+  .wrap{position:relative; z-index:2; height:100%; display:flex; flex-direction:column;
+    max-width:680px; margin:0 auto; padding:8px 14px 14px;}
+
+  /* Kopfzeile */
+  .top{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+  .feeMini{width:66px; flex:0 0 66px; cursor:pointer; filter:drop-shadow(0 6px 10px rgba(80,20,90,.4));}
+  .feeMini svg{width:100%; display:block;}
+  .fee-locked{filter:saturate(.25) brightness(1.1);}
+  .bubble{flex:1; background:rgba(255,255,255,.96); color:var(--plum); border-radius:18px;
+    padding:9px 13px; font-size:clamp(13.5px,3.5vw,16.5px); font-weight:700; position:relative;
+    box-shadow:0 8px 20px rgba(90,20,90,.3); min-height:48px; display:flex; align-items:center;}
+  .bubble:after{content:""; position:absolute; left:-8px; top:16px; border:8px solid transparent;
+    border-right-color:rgba(255,255,255,.96); border-left:0;}
+  .crystals{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#fff,#ffe6f7);
+    border:2px solid #fff; border-radius:999px; padding:5px 11px; font-weight:800; color:#c23f8e;
+    font-size:16px; white-space:nowrap; box-shadow:0 6px 14px rgba(90,20,90,.28);}
+
+  .unlockBar{flex:0 0 auto; margin-top:7px;}
+  .unlockBar .lab{font-size:12px; color:#fff; opacity:.96; margin-bottom:3px; font-weight:700;
+    text-shadow:0 1px 6px rgba(80,20,90,.5);}
+  .bar{height:12px; background:rgba(255,255,255,.28); border-radius:999px; overflow:hidden; border:1.5px solid rgba(255,255,255,.7);}
+  .bar i{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--gold),var(--pink2),var(--sky)); transition:width .5s ease;}
+
+  .screen{flex:1 1 auto; overflow:auto; margin-top:10px; -webkit-overflow-scrolling:touch;}
+  h2{margin:2px 0 10px; font-size:clamp(20px,5.4vw,27px); text-align:center; color:#fff;
+    text-shadow:0 2px 12px rgba(80,20,90,.6);}
+
+  .toneBtn{position:fixed; top:10px; right:10px; z-index:6; width:42px; height:42px; border-radius:50%;
+    border:2px solid rgba(255,255,255,.75); background:rgba(255,255,255,.28); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;}
+  .toneBtn svg{width:21px; height:21px; fill:#fff;}
+
+  /* ---------- Eingangsgeschichte ---------- */
+  .story{min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:14px; padding:6px;}
+  .storyFee{width:min(58vw,220px); aspect-ratio:200/236; position:relative;}
+  .storyFee svg{width:100%; height:100%; display:block; filter:drop-shadow(0 14px 24px rgba(70,15,80,.45));}
+  .storyFee .halo{position:absolute; inset:-10% -10%; border-radius:50%; z-index:-1;
+    background:radial-gradient(circle at 50% 45%, rgba(255,240,180,.6), rgba(255,150,220,.25) 46%, transparent 72%);
+    filter:blur(8px); animation:halo 4s ease-in-out infinite;}
+  @keyframes halo{0%,100%{opacity:.7; transform:scale(1);}50%{opacity:1; transform:scale(1.07);}}
+  .floaty{animation:floaty 5s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  .storyText{background:rgba(255,255,255,.96); color:var(--plum); border-radius:22px; padding:16px 18px;
+    max-width:440px; font-size:clamp(16px,4.3vw,20px); font-weight:700; line-height:1.4;
+    box-shadow:0 12px 28px rgba(90,20,90,.3); min-height:92px; display:flex; align-items:center; justify-content:center;}
+  .dots{display:flex; gap:7px;}
+  .dots i{width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.45);}
+  .dots i.on{background:#fff; box-shadow:0 0 8px #fff;}
+  .tapHint{font-size:13px; color:#fff; opacity:.9; font-weight:700;}
+  .challengeBtns{display:flex; flex-direction:column; gap:10px; width:100%; max-width:360px;}
+
+  .btn{appearance:none; border:none; cursor:pointer; font-family:inherit; font-weight:800;
+    color:var(--plum); font-size:clamp(17px,4.6vw,21px); background:linear-gradient(180deg,#fff2c8,var(--gold2));
+    padding:15px 24px; border-radius:999px; box-shadow:0 7px 0 #d99a2e, 0 12px 22px rgba(90,20,90,.3);
+    transition:transform .08s ease, box-shadow .08s ease;}
+  .btn:active{transform:translateY(4px); box-shadow:0 3px 0 #d99a2e,0 8px 16px rgba(90,20,90,.3);}
+  .btn.pink{background:linear-gradient(180deg,#ffd8ef,var(--pink2)); color:#fff; box-shadow:0 7px 0 #c23f8e,0 12px 22px rgba(90,20,90,.3);}
+  .btn.pink:active{box-shadow:0 3px 0 #c23f8e,0 8px 16px rgba(90,20,90,.3);}
+  .btn.ghost{background:rgba(255,255,255,.9); color:var(--plum); box-shadow:0 7px 0 #c9a7d6;}
+  .btn.big{font-size:clamp(19px,5.2vw,24px); padding:17px 28px;}
+
+  /* ---------- Abenteuerkarte ---------- */
+  .path{position:relative; padding:8px 0 20px;}
+  .node{position:relative; display:flex; align-items:center; gap:12px; margin:6px 0; padding:10px 12px;
+    border-radius:26px; cursor:pointer; color:#fff; box-shadow:0 10px 24px rgba(70,15,80,.3);
+    border:3px solid rgba(255,255,255,.85); transition:transform .09s ease;}
+  .node:active{transform:scale(.97);}
+  .node.right{flex-direction:row-reverse; text-align:right; margin-left:22%;}
+  .node.left{margin-right:22%;}
+  .node .orb{flex:0 0 62px; width:62px; height:62px; border-radius:50%; background:rgba(255,255,255,.28);
+    border:3px solid rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center;}
+  .node .orb svg{width:38px; height:38px;}
+  .node .tx{flex:1;}
+  .node .tx b{display:block; font-size:clamp(15px,4vw,18px); text-shadow:0 2px 8px rgba(60,10,70,.5);}
+  .node .tx .stars{position:static; display:inline-block; font-size:14px; margin-top:2px; letter-spacing:1px;}
+  .node.due{animation:bounce 1.3s ease-in-out infinite;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  .node .callout{position:absolute; top:-8px; right:14px; background:#fff; color:#c23f8e; font-size:11px;
+    font-weight:800; padding:2px 9px; border-radius:999px; box-shadow:0 3px 8px rgba(70,15,80,.3);}
+  .node.right .callout{right:auto; left:14px;}
+  .c-pink{background:linear-gradient(160deg,#ff86c4,#e83b8f);}
+  .c-lila{background:linear-gradient(160deg,#b98bff,#7b46d6);}
+  .c-mint{background:linear-gradient(160deg,#5fe0cf,#1aa892);}
+  .c-gold{background:linear-gradient(160deg,#ffcf5f,#f0962f);}
+
+  /* ---------- Aufgabe ---------- */
+  .card{background:rgba(255,255,255,.96); border-radius:24px; padding:16px; color:var(--plum);
+    box-shadow:0 12px 28px rgba(90,20,90,.3); text-align:center;}
+  .q{font-size:clamp(18px,4.8vw,23px); font-weight:800; margin:2px 0 12px;}
+  .visual{min-height:118px; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:12px;}
+  .opts{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .opt{appearance:none; border:none; font-family:inherit; font-weight:800; cursor:pointer;
+    font-size:clamp(22px,6vw,30px); color:var(--plum); padding:16px 8px; border-radius:18px;
+    background:linear-gradient(180deg,#fff2c8,var(--gold2)); box-shadow:0 6px 0 #d99a2e;
+    transition:transform .07s ease, box-shadow .07s ease;}
+  .opt:active{transform:translateY(3px); box-shadow:0 3px 0 #d99a2e;}
+  .opt.right{background:linear-gradient(180deg,#c9ffe9,var(--mint)); box-shadow:0 6px 0 #4fbf9a;}
+  .opt.soft{opacity:.4;}
+  .hintbox{margin-top:12px; background:#fff6fb; border:2px dashed var(--pink); border-radius:16px;
+    padding:10px; font-size:14.5px; font-weight:700; color:var(--plum);}
+
+  .die{background:#fff; border:3px solid var(--plum); border-radius:12px; padding:6px;}
+  .frame10{display:grid; grid-template-columns:repeat(5,1fr); gap:4px; background:var(--plum); padding:4px; border-radius:10px;}
+  .cellf{width:24px; height:24px; background:#fff; border-radius:6px; display:flex; align-items:center; justify-content:center;}
+  .cellf i{width:15px; height:15px; border-radius:50%; background:var(--pink2); display:none;}
+  .cellf.on i{display:block;}
+  .cellf.hi{outline:3px solid var(--gold); outline-offset:-3px;}
+  .coin{width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:#6a4a10; border:3px solid #c9a13c;
+    background:radial-gradient(circle at 35% 30%, #fffbe8, #f0cf7a); box-shadow:0 4px 10px rgba(90,20,90,.25);}
+
+  .back{background:none; border:none; color:#fff; font-family:inherit; font-weight:800; font-size:15px;
+    cursor:pointer; padding:6px 2px; text-shadow:0 2px 8px rgba(80,20,90,.5);}
+  .prog{text-align:center; font-size:13px; color:#fff; margin-top:8px; font-weight:700; opacity:.95;}
+  .big{font-size:clamp(30px,9vw,44px); font-weight:800; color:var(--pink2);}
+  .rewardWrap{text-align:center;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+  <audio id="bgm" src="mirostar-magic-fantasy-fairy-tale-music-560304.mp3" loop preload="auto"></audio>
+  <button class="toneBtn" id="toneBtn" aria-label="Musik an oder aus">
+    <svg id="icOn" viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4z"/></svg>
+    <svg id="icOff" viewBox="0 0 24 24" style="display:none"><path d="M3 10v4h4l5 4V6L7 10H3zm18.3-1.3l-1.4-1.4L17 10.2l-2.9-2.9-1.4 1.4 2.9 2.9-2.9 2.9 1.4 1.4 2.9-2.9 2.9 2.9 1.4-1.4-2.9-2.9z"/></svg>
+  </button>
+
+  <div class="stars" id="stars" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <div class="top" id="topBar" style="display:none">
+      <div class="feeMini" id="feeMini"><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg></div>
+      <div class="bubble" id="bubble">...</div>
+      <div class="crystals"><svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 2l7 6-3 14H8L5 8z" fill="#ff86c4" stroke="#fff" stroke-width="1.5"/></svg><span id="crystalCount">0</span></div>
+    </div>
+    <div class="unlockBar" id="unlockWrap" style="display:none">
+      <div class="lab" id="unlockLab">Nächster Zauber ...</div>
+      <div class="bar"><i id="unlockFill"></i></div>
+    </div>
+    <div class="screen" id="screen"></div>
+  </div>
+
+<script src="fee.js"></script>
+<script src="kichern.js"></script>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var LS="yz_state_v1", LS_NAME="yz_fairyName", LS_INTRO="yz_introSeen";
+feeInject();
+
+/* ============ Funkeln ============ */
+(function(){
+  var box=$("stars"), html="";
+  for(var i=0;i<55;i++){
+    var s=(Math.random()*2+1).toFixed(1), x=(Math.random()*100).toFixed(2),
+        y=(Math.random()*100).toFixed(2), d=(Math.random()*3).toFixed(2);
+    html+='<span class="star" style="width:'+s+'px;height:'+s+'px;left:'+x+'%;top:'+y+'%;animation-delay:'+d+'s"></span>';
+  }
+  var starSvg='<svg viewBox="0 0 24 24"><path d="M12 1l2.6 6.6L21 9l-5 4.4L17.5 21 12 17.3 6.5 21 8 13.4 3 9l6.4-1.4z" fill="#ffe08a"/></svg>';
+  for(var j=0;j<12;j++){
+    var lx=(Math.random()*100).toFixed(1), du=(5+Math.random()*4).toFixed(1), de=(Math.random()*7).toFixed(1);
+    html+='<span class="spark" style="left:'+lx+'%; bottom:-10px; animation-duration:'+du+'s; animation-delay:'+de+'s">'+starSvg+'</span>';
+  }
+  box.innerHTML=html;
+})();
+
+/* ============ Zustand ============ */
+var SKILLS=["mengen","zehner","uebergang","geld"];
+var defaults={ crystals:0, stage:0, solved:0, skills:{} };
+SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
+var S=load();
+function load(){
+  try{ var raw=localStorage.getItem(LS); if(raw){ var o=JSON.parse(raw);
+    SKILLS.forEach(function(s){ if(!o.skills[s]) o.skills[s]=JSON.parse(JSON.stringify(defaults.skills[s])); });
+    return o; } }catch(e){}
+  return JSON.parse(JSON.stringify(defaults));
+}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
+function feeName(){ try{ return localStorage.getItem(LS_NAME)||"deine Fee"; }catch(e){ return "deine Fee"; } }
+
+/* ============ Erinnerungszauber ============ */
+var IV=[2*60e3,10*60e3,60*60e3,6*60*60e3,24*60*60e3,3*24*60*60e3];
+function schedule(skill, correct){
+  var k=S.skills[skill]; k.seen++;
+  if(correct){ k.right++; k.str=Math.min(5,k.str+1); } else { k.str=Math.max(0,k.str-1); }
+  k.due=Date.now()+IV[k.str];
+}
+function dueSkills(){ var now=Date.now(); return SKILLS.filter(function(s){ return S.skills[s].seen>0 && S.skills[s].due<=now; }); }
+
+/* ============ Würfelhaus-Darstellungen ============ */
+var PIP={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[0,2],[2,0],[2,2]],
+         5:[[0,0],[0,2],[1,1],[2,0],[2,2]],6:[[0,0],[0,2],[1,0],[1,2],[2,0],[2,2]]};
+function dieSVG(n,size){ size=size||60; var d=PIP[n]||[], s='<svg class="die" width="'+size+'" height="'+size+'" viewBox="0 0 60 60">';
+  d.forEach(function(p){ s+='<circle cx="'+(10+p[1]*20)+'" cy="'+(10+p[0]*20)+'" r="6" fill="#5a1560"/>'; }); return s+'</svg>'; }
+function diceGroup(n){ return n<=6 ? dieSVG(n) : dieSVG(5)+dieSVG(n-5); }
+function frame10(n, hiEmpty){ var s='<div class="frame10">';
+  for(var i=0;i<10;i++){ var on=i<n, hi=(hiEmpty&&!on)?" hi":""; s+='<div class="cellf'+(on?" on":"")+hi+'"><i></i></div>'; } return s+'</div>'; }
+function coinSVG(v){ var label=(v>=100)?(v/100)+" €":v+" ct"; return '<div class="coin">'+label+'</div>'; }
+
+/* ============ Aufgaben ============ */
+function rnd(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
+function uniqOpts(correct, lo, hi, n){
+  var set=[correct], guard=0;
+  while(set.length<n && guard++<200){ var d=rnd(-3,3); if(d===0) continue; var v=correct+d; if(v<lo||v>hi) continue; if(set.indexOf(v)<0) set.push(v); }
+  while(set.length<n){ var v2=rnd(lo,hi); if(set.indexOf(v2)<0) set.push(v2); }
+  return set.sort(function(){ return Math.random()-.5; });
+}
+function taskMengen(){ var n=rnd(3,10); return {skill:"mengen", q:"Wie viele Punkte hat "+feeName()+" gezaubert?",
+  visual:diceGroup(n), flash:true, answer:n, opts:uniqOpts(n,1,12,4),
+  hint:"Schau auf das Bild: erst die volle Fünf, dann der Rest.", hintVisual:diceGroup(n)}; }
+function taskZehner(){ var n=rnd(1,9); return {skill:"zehner", q:"Wie viele Plätze sind im Zehnerhaus noch frei?",
+  visual:frame10(n,true), answer:10-n, opts:uniqOpts(10-n,0,10,4),
+  hint:"Zähle nicht - schau, wie viele leere Plätze bis zur vollen Zehn fehlen.", hintVisual:frame10(n,true)}; }
+function taskUebergang(){ var a=rnd(6,9), b=rnd(2,7); while(a+b<=10||a+b>18) b=rnd(2,7); var rest=b-(10-a);
+  return {skill:"uebergang", q:a+" + "+b+" = ?", visual:frame10(a)+'<div style="font-size:26px;font-weight:800">+ '+b+'</div>',
+  answer:a+b, opts:uniqOpts(a+b,10,20,4),
+  hint:"Mach erst die Zehn voll: "+a+" + "+(10-a)+" = 10. Dann bleibt noch "+rest+" übrig: 10 + "+rest+" = "+(a+b)+".",
+  hintVisual:frame10(10)+frame10(rest)}; }
+function taskGeld(){ var pool=[1,2,5,10,20], cnt=rnd(2,3), coins=[], sum=0;
+  for(var i=0;i<cnt;i++){ var c=pool[rnd(0,pool.length-1)]; coins.push(c); sum+=c; }
+  var vis=coins.map(coinSVG).join("");
+  return {skill:"geld", q:"Wie viel Geld hat "+feeName()+" im Beutel?", visual:vis, answer:sum, opts:uniqOpts(sum,1,60,4),
+  hint:"Nimm die größte Münze zuerst und zähle die anderen dazu.", hintVisual:vis, unit:" ct"}; }
+var GEN={mengen:taskMengen, zehner:taskZehner, uebergang:taskUebergang, geld:taskGeld};
+
+/* ============ Inseln ============ */
+var ISLANDS=[
+  {id:"funkel", name:"Insel der Funkelsteine", sub:"Mengen auf einen Blick", skill:"mengen", col:"c-pink",
+   ic:'<svg viewBox="0 0 24 24"><path d="M12 2l7 6-3 14H8L5 8z" fill="#fff" stroke="#c23f8e" stroke-width="1.5"/></svg>'},
+  {id:"zehnerhaus", name:"Das Zehnerhaus", sub:"Wie viel fehlt bis Zehn?", skill:"zehner", col:"c-lila",
+   ic:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1H4a1 1 0 01-1-1z" fill="#fff" stroke="#7b46d6" stroke-width="1.5"/></svg>'},
+  {id:"regenbogen", name:"Die Regenbogenbrücke", sub:"Über die Zehn rechnen", skill:"uebergang", col:"c-mint",
+   ic:'<svg viewBox="0 0 24 24"><path d="M3 20a9 9 0 0118 0" fill="none" stroke="#fff" stroke-width="3"/><path d="M7 20a5 5 0 0110 0" fill="none" stroke="#ffe08a" stroke-width="3"/></svg>'},
+  {id:"markt", name:"Der Zaubermarkt", sub:"Mit Münzen bezahlen", skill:"geld", col:"c-gold",
+   ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fff" stroke="#f0962f" stroke-width="1.5"/><text x="12" y="16" font-size="10" text-anchor="middle" fill="#f0962f" font-weight="bold">€</text></svg>'}
+];
+
+/* ============ Fee-Stufen ============ */
+var STAGES=[{at:0,name:"verzaubert"},{at:10,name:"Farbe kehrt zurück"},{at:25,name:"sie öffnet die Augen und lächelt"},{at:45,name:"sie kann sprechen"}];
+function stageFor(c){ var s=0; STAGES.forEach(function(st,i){ if(c>=st.at) s=i; }); return s; }
+function renderFee(){
+  feeStage(S.stage);
+  $("feeMini").classList.toggle("fee-locked", S.stage<1);
+  var next=STAGES[S.stage+1];
+  if(next){ var prev=STAGES[S.stage].at, span=next.at-prev, have=S.crystals-prev;
+    $("unlockFill").style.width=Math.max(0,Math.min(100, have/span*100))+"%";
+    $("unlockLab").textContent="Noch "+Math.max(0,next.at-S.crystals)+" Kristalle bis: "+next.name;
+  } else { $("unlockFill").style.width="100%"; $("unlockLab").textContent=feeName()+" ist ganz erwacht!"; }
+  $("crystalCount").textContent=S.crystals;
+}
+function say(text, speak){
+  $("bubble").textContent=text;
+  if(speak && S.stage>=3){ try{ var u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.pitch=1.5; u.rate=1.0;
+    speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
+}
+function addCrystals(n){ S.crystals+=n; var ns=stageFor(S.crystals); var up=ns>S.stage; S.stage=ns; save(); renderFee(); return up; }
+
+/* ============ Ton ============ */
+var audioCtx=null, kicherBuf=null, kReady=false, lastTake=-1, giggling=false;
+var TAKES=[[2.25,3.32],[3.98,5.10],[5.43,6.45]], PITCH=1.38, KVOL=1.8;
+function initAudio(){ if(audioCtx) return; try{ var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+  audioCtx=new AC(); if(audioCtx.state==="suspended") audioCtx.resume(); decodeK(); }catch(e){} }
+function decodeK(){ if(kicherBuf||!audioCtx||!window.KICHER_B64) return; try{ var bin=atob(window.KICHER_B64), arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); audioCtx.decodeAudioData(arr.buffer, function(b){ kicherBuf=b; kReady=true; }, function(){}); }catch(e){} }
+function playGiggle(){ if(!kReady||!audioCtx||!kicherBuf) return; try{
+  var i; do{ i=Math.floor(Math.random()*TAKES.length); }while(TAKES.length>1&&i===lastTake); lastTake=i;
+  var seg=TAKES[i], dur=seg[1]-seg[0], src=audioCtx.createBufferSource(); src.buffer=kicherBuf;
+  src.playbackRate.value=PITCH*(0.97+Math.random()*0.08); var g=audioCtx.createGain(); var t=audioCtx.currentTime;
+  var play=dur/src.playbackRate.value; g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(KVOL,t+0.03);
+  g.gain.setValueAtTime(KVOL,t+play-0.06); g.gain.exponentialRampToValueAtTime(0.0001,t+play);
+  src.connect(g); g.connect(audioCtx.destination); src.start(t,seg[0],dur); src.stop(t+play+0.02); }catch(e){} }
+function giggle(){ if(giggling) return; giggling=true; setTimeout(function(){ giggling=false; },900);
+  var m=$("feeMini"); if(m){ m.style.transition="transform .3s"; m.style.transform="scale(1.12) rotate(-4deg)";
+  setTimeout(function(){ m.style.transform="none"; },300); } duck(); playGiggle(); }
+
+var BGM_VOL=0.26, bgm=$("bgm"), musicOn=true, bgmNode=null, bgmGain=null, fadeTimer=null;
+try{ musicOn=localStorage.getItem("yz_muted")!=="1"; }catch(e){}
+function connectBgm(){ if(bgmNode||!audioCtx) return; try{ bgmNode=audioCtx.createMediaElementSource(bgm);
+  bgmGain=audioCtx.createGain(); bgmGain.gain.value=0; bgmNode.connect(bgmGain); bgmGain.connect(audioCtx.destination); bgm.volume=1; }catch(e){ bgmGain=null; } }
+function setVol(target,ms){ if(bgmGain&&audioCtx){ bgmGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    bgmGain.gain.setTargetAtTime(target,audioCtx.currentTime,Math.max(.05,(ms/1000)/3)); if(target===0) setTimeout(function(){ if(!musicOn) bgm.pause(); },ms+80); return; }
+  clearInterval(fadeTimer); var from=bgm.volume, steps=Math.max(1,Math.round(ms/50)), i=0;
+  fadeTimer=setInterval(function(){ i++; bgm.volume=Math.max(0,Math.min(1,from+(target-from)*(i/steps))); if(i>=steps){ clearInterval(fadeTimer); if(target===0) bgm.pause(); } },50); }
+function startMusic(){ if(!musicOn) return; initAudio(); if(audioCtx&&audioCtx.state==="suspended") audioCtx.resume(); connectBgm();
+  if(bgm.paused){ if(!bgmGain) bgm.volume=0; var p=bgm.play(); if(p&&p.catch) p.catch(function(){}); setVol(BGM_VOL,2500); } }
+function duck(){ if(bgm.paused||!musicOn) return; setVol(0.09,150); setTimeout(function(){ if(!bgm.paused&&musicOn) setVol(BGM_VOL,900); },850); }
+function renderTone(){ $("icOn").style.display=musicOn?"block":"none"; $("icOff").style.display=musicOn?"none":"block"; }
+$("toneBtn").addEventListener("click", function(e){ e.stopPropagation(); musicOn=!musicOn;
+  try{ localStorage.setItem("yz_muted",musicOn?"0":"1"); }catch(e2){} renderTone(); if(musicOn) startMusic(); else setVol(0,500); });
+renderTone();
+["pointerdown","touchstart","touchend","click","keydown"].forEach(function(ev){ window.addEventListener(ev,function(){ initAudio(); startMusic(); },{passive:true}); });
+
+/* ============ Eingangsgeschichte ============ */
+function showChrome(on){ $("topBar").style.display=on?"flex":"none"; $("unlockWrap").style.display=on?"block":"none"; }
+function feeSvgBlock(){ return '<div class="storyFee floaty" id="storyFeeBox"><div class="halo"></div><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg></div>'; }
+
+function screenStory(){
+  showChrome(false);
+  var hasName=false; try{ hasName=!!localStorage.getItem(LS_NAME); }catch(e){}
+  var nm=feeName();
+  var whoSleeps = hasName ? ("die kleine Feenprinzessin "+nm) : "eine kleine Feenprinzessin";
+  var whoWhispers = hasName ? nm : "Sie";
+  var beats=[
+    "Du trittst durch die magische Tür ... und stehst mitten im Land der Feenprinzessin.",
+    "Aber etwas stimmt nicht: Alles ist ganz still. Und mitten drin schläft "+whoSleeps+", verzaubert und ohne ihre Farben.",
+    whoWhispers+" flüstert leise: \"Ein alter Zauber hat mich eingeschlafen. Nur echte Zauberkraft kann mich wecken ...\"",
+    "\"Und diese Zauberkraft ... ist das Rechnen! Jede Aufgabe, die du löst, gibt mir ein Stück Leben zurück.\"",
+    "\"Willst du mich befreien und mit mir die ganze Zauberwelt zum Leuchten bringen?\""
+  ];
+  var idx=0;
+  function render(){
+    var last=idx===beats.length-1;
+    var html='<div class="story">'+feeSvgBlock()+
+      '<div class="storyText" id="storyText">'+beats[idx]+'</div>'+
+      '<div class="dots">'+beats.map(function(_,i){ return '<i class="'+(i<=idx?'on':'')+'"></i>'; }).join("")+'</div>';
+    if(!last){ html+='<div class="tapHint">Tipp weiter ...</div>'; }
+    else{ html+='<div class="challengeBtns">'+
+        '<button class="btn pink big" id="yes">Ja! Ich nehme die Challenge an!</button>'+
+        '<button class="btn ghost" id="later" style="font-size:15px;padding:11px 18px">Erzähl mir das nochmal</button>'+
+      '</div>'; }
+    html+='</div>';
+    $("screen").innerHTML=html;
+    feeStage(S.stage);
+    if(!last){ $("screen").querySelector(".story").addEventListener("click", function h(){ idx++; render(); }, {once:true}); }
+    else{
+      $("yes").addEventListener("click", function(e){ e.stopPropagation(); try{ localStorage.setItem(LS_INTRO,"1"); }catch(x){}
+        burst(); setTimeout(screenMap, 500); });
+      $("later").addEventListener("click", function(e){ e.stopPropagation(); idx=0; render(); });
+    }
+  }
+  render();
+}
+function burst(){ // kleiner Funkel-Ausbruch
+  var b=$("storyFeeBox"); if(!b) return;
+  for(var i=0;i<14;i++){ var s=document.createElement("div"); s.textContent="✦";
+    s.style.cssText="position:absolute;left:50%;top:45%;color:#ffe08a;font-size:"+(12+Math.random()*14)+"px;pointer-events:none;text-shadow:0 0 8px #fff;";
+    b.appendChild(s); (function(el){ var ang=Math.random()*6.28, dist=60+Math.random()*70, t=0;
+      var iv=setInterval(function(){ t+=0.06; el.style.transform="translate("+(Math.cos(ang)*dist*t)+"px,"+(Math.sin(ang)*dist*t)+"px)"; el.style.opacity=1-t;
+        if(t>=1){ clearInterval(iv); el.remove(); } },16); })(s); }
+}
+
+/* ============ Karte ============ */
+function screenMap(){
+  showChrome(true); renderFee();
+  var due=dueSkills();
+  var html='<h2>Deine Zauberkarte</h2><div class="path">';
+  ISLANDS.forEach(function(is,i){
+    var k=S.skills[is.skill], isDue=due.indexOf(is.skill)>=0, side=i%2?"right":"left";
+    html+='<div class="node '+is.col+' '+side+(isDue?' due':'')+'" data-id="'+is.id+'">'+
+      (isDue?'<div class="callout">ruft dich!</div>':'')+
+      '<div class="orb">'+is.ic+'</div>'+
+      '<div class="tx"><b>'+is.name+'</b><span class="stars">'+"★".repeat(k.str)+"☆".repeat(5-k.str)+'</span></div></div>';
+  });
+  html+='</div>';
+  $("screen").innerHTML=html;
+  Array.prototype.forEach.call(document.querySelectorAll(".node"), function(el){
+    el.addEventListener("click", function(){ startLesson(el.getAttribute("data-id")); });
+  });
+  var nm=feeName();
+  say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin zaubern wir, Ylvie? Tipp eine Insel an!", true);
+}
+
+var lesson=null;
+function startLesson(id){
+  var is=ISLANDS.filter(function(i){return i.id===id;})[0];
+  var plan=[], due=dueSkills().filter(function(s){ return s!==is.skill; });
+  for(var i=0;i<6;i++){ if(i>0 && i%3===0 && due.length) plan.push(due[rnd(0,due.length-1)]); else plan.push(is.skill); }
+  lesson={island:is, plan:plan, idx:0, tries:0, gained:0};
+  nextTask();
+}
+function pick(a){ return a[rnd(0,a.length-1)]; }
+function nextTask(){ if(lesson.idx>=lesson.plan.length) return screenReward(); lesson.task=GEN[lesson.plan[lesson.idx]](); lesson.tries=0; renderTask(); }
+
+function renderTask(){
+  var t=lesson.task;
+  $("screen").innerHTML='<button class="back" id="backBtn">‹ Zurück zur Karte</button>'+
+    '<div class="card"><div class="q">'+t.q+'</div><div class="visual" id="visual">'+t.visual+'</div>'+
+    '<div class="opts" id="opts">'+t.opts.map(function(o){ return '<button class="opt" data-v="'+o+'">'+o+(t.unit||"")+'</button>'; }).join("")+'</div>'+
+    '<div id="hintSlot"></div></div><div class="prog">Aufgabe '+(lesson.idx+1)+' von '+lesson.plan.length+'</div>';
+  $("backBtn").addEventListener("click", screenMap);
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(b){ b.addEventListener("click", function(){ answer(parseInt(b.getAttribute("data-v"),10), b); }); });
+  if(t.flash){ var v=$("visual"); setTimeout(function(){ if(v&&lesson&&lesson.task===t){ v.style.transition="opacity .3s"; v.style.opacity="0"; } }, 1500); }
+  say(lesson.idx===0 ? ("Los geht's! "+lesson.island.name) : pick(["Und weiter!","Du schaffst das.","Noch eine!"]), false);
+}
+function answer(v, btn){
+  var t=lesson.task;
+  if(v===t.answer){
+    btn.classList.add("right"); var first=(lesson.tries===0), got=first?2:1;
+    lesson.gained+=got; schedule(t.skill, first); var up=addCrystals(got);
+    say(pick(["Ja! Genau richtig.","Wunderbar!","Das war zauberhaft.","Richtig!"]), true);
+    Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(b){ b.disabled=true; if(b!==btn) b.classList.add("soft"); });
+    setTimeout(function(){ lesson.idx++; if(up) return screenLevelUp(); nextTask(); }, 850);
+  } else {
+    lesson.tries++; btn.classList.add("soft"); btn.disabled=true;
+    if(t.flash){ var v=$("visual"); if(v) v.style.opacity="1"; }
+    if(lesson.tries===1){ say("Fast! Schau mal ...", true); $("hintSlot").innerHTML='<div class="hintbox">'+t.hint+'</div>'; if(t.hintVisual) $("visual").innerHTML=t.hintVisual; }
+    else{ schedule(t.skill,false); var up2=addCrystals(1); lesson.gained+=1;
+      $("hintSlot").innerHTML='<div class="hintbox">Die Antwort ist <b>'+t.answer+(t.unit||"")+'</b>. '+t.hint+'</div>';
+      say("Das machen wir zusammen - beim nächsten Mal kannst du es.", true);
+      var b=document.createElement("button"); b.className="btn pink"; b.textContent="Weiter";
+      b.addEventListener("click", function(){ lesson.idx++; if(up2) return screenLevelUp(); nextTask(); });
+      $("hintSlot").appendChild(b);
+      Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(x){ x.disabled=true; });
+    }
+  }
+  save();
+}
+function screenLevelUp(){
+  var st=STAGES[S.stage];
+  $("screen").innerHTML='<div class="card rewardWrap">'+feeSvgBlock().replace("storyFee","storyFee").replace('style="','style="width:min(42vw,170px);')+
+    '<h2 style="color:#5a1560;text-shadow:none">Ein Zauber ist geschehen!</h2>'+
+    '<p style="font-weight:800;font-size:19px;color:#ff5fb6">'+st.name+'</p>'+
+    '<p style="font-weight:700">'+feeName()+' wird lebendiger. Du hast sie ein Stück befreit!</p>'+
+    '<button class="btn pink" id="goOn">Weiter zaubern</button></div>';
+  feeStage(S.stage); burst();
+  say(feeName()+" strahlt: "+st.name+"!", true);
+  $("goOn").addEventListener("click", function(){ if(lesson && lesson.idx<lesson.plan.length) nextTask(); else screenReward(); });
+}
+function screenReward(){
+  S.solved+=lesson.plan.length; save();
+  $("screen").innerHTML='<div class="card rewardWrap"><h2 style="color:#5a1560;text-shadow:none">Geschafft!</h2>'+
+    '<p class="big">+'+lesson.gained+'</p><p style="font-weight:700">Kristalle für '+lesson.island.name+'</p>'+
+    '<button class="btn pink" id="toMap">Zurück zur Zauberkarte</button></div>';
+  say("Du hast "+lesson.gained+" Kristalle gesammelt!", true);
+  $("toMap").addEventListener("click", screenMap); lesson=null;
+}
+
+/* ============ Start ============ */
+$("feeMini").addEventListener("click", function(){ giggle(); say(S.stage>=3 ? ("Ich bin "+feeName()+". Schön, dass du da bist!") : (feeName()+" schaut dich an ..."), true); });
+var seen=false; try{ seen=localStorage.getItem(LS_INTRO)==="1"; }catch(e){}
+if(seen) screenMap(); else screenStory();
+})();
+</script>
+</body>
+</html>

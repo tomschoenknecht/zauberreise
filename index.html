@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#c977cf">
+<title>Ylvies Zauberreise</title>
+<style>
+  :root{
+    --pink:#ff8fce; --pink2:#ff5fb6; --rose:#ffd0ec;
+    --gold:#ffe08a; --gold2:#ffc247;
+    --lila:#c99bf0; --lila2:#a86ad8; --lav:#f3d9ff;
+    --plum:#6a1a63; --text:#fff6fd;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%; margin:0;}
+  body{
+    font-family:"Comic Sans MS","Segoe UI Rounded","Baloo 2",system-ui,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 680px at 50% -8%, #f2b6f5 0%, transparent 58%),
+      radial-gradient(820px 560px at 12% 112%, #ff9ed0 0%, transparent 55%),
+      radial-gradient(760px 520px at 92% 8%, #d9a9ff 0%, transparent 50%),
+      linear-gradient(180deg,#bd86e6 0%, #c977cf 46%, #ef97c4 100%);
+    overflow:hidden; position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    -webkit-user-select:none; user-select:none;
+  }
+  .stars{position:absolute; inset:0; overflow:hidden; pointer-events:none;}
+  .star{position:absolute; background:#fff; border-radius:50%;
+    box-shadow:0 0 6px #fff, 0 0 10px var(--gold); animation:tw 3s infinite ease-in-out;}
+  @keyframes tw{0%,100%{opacity:.35; transform:scale(.8);}50%{opacity:1; transform:scale(1.25);}}
+  .spark{position:absolute; width:12px;height:12px; pointer-events:none;
+    background:radial-gradient(circle, #fff 0%, var(--gold) 40%, transparent 70%);
+    border-radius:50%; opacity:0; animation:floatUp linear infinite;}
+  @keyframes floatUp{
+    0%{opacity:0; transform:translateY(24px) scale(.4);}
+    18%{opacity:1;} 100%{opacity:0; transform:translateY(-140px) scale(1.1);}
+  }
+
+  .stage{position:relative; z-index:2; width:100%; max-width:660px; padding:18px 16px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;}
+
+  h1{
+    font-size:clamp(32px,8.5vw,58px); margin:0; line-height:1.05;
+    background:linear-gradient(180deg,#fff 0%, #ffd6f2 30%, var(--gold) 70%, var(--gold2) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(150,40,120,.5)) drop-shadow(0 8px 20px rgba(255,180,230,.5));
+    letter-spacing:.5px;
+  }
+  .sub{font-size:clamp(15px,4.2vw,20px); color:#fff; margin:0; font-weight:600;
+    text-shadow:0 2px 8px rgba(140,40,110,.4);}
+
+  .scene{position:relative; width:min(84vw,340px); aspect-ratio:200/236; margin:2px 0;}
+  .glow{position:absolute; inset:-8% -8%; border-radius:50%;
+    background:radial-gradient(circle at 50% 44%, rgba(255,240,180,.65), rgba(255,170,225,.3) 46%, transparent 72%);
+    filter:blur(8px); animation:pulse 4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.7; transform:scale(1);}50%{opacity:1; transform:scale(1.06);}}
+  .scene svg{position:absolute; inset:0; width:100%; height:100%;
+    filter:drop-shadow(0 16px 26px rgba(120,30,100,.3));}
+  .fairy{transition:opacity 1.2s ease; cursor:pointer;}
+  .shimmer{animation:shine 3.6s ease-in-out infinite;}
+  @keyframes shine{0%,100%{opacity:.12;}50%{opacity:.5;}}
+  .floaty{animation:floaty 5s ease-in-out infinite; transform-origin:100px 120px;}
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  .wingL{animation:wingL 4s ease-in-out infinite; transform-origin:96px 120px;}
+  .wingR{animation:wingR 4s ease-in-out infinite; transform-origin:104px 120px;}
+  @keyframes wingL{0%,100%{transform:rotate(0);}50%{transform:rotate(-4deg);}}
+  @keyframes wingR{0%,100%{transform:rotate(0);}50%{transform:rotate(4deg);}}
+  .giggle-anim{animation:gigglew .62s ease;}
+  @keyframes gigglew{0%,100%{transform:rotate(0) scale(1);}
+    25%{transform:rotate(-2.2deg) scale(1.03);}50%{transform:rotate(2.2deg) scale(1.02);}
+    75%{transform:rotate(-1.2deg) scale(1.01);}}
+
+  .lead{font-size:clamp(17px,4.8vw,23px); font-weight:800; color:#fff; margin:4px 0 0;
+    text-shadow:0 2px 10px rgba(140,30,110,.5); line-height:1.25;}
+  .lead b{color:var(--gold); white-space:nowrap;}
+
+  .count{display:flex; gap:8px; justify-content:center; margin:8px 0 2px; flex-wrap:wrap;}
+  .cell{background:linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,.16));
+    border:2px solid rgba(255,255,255,.75); border-radius:16px; padding:8px 12px; min-width:62px;
+    box-shadow:0 6px 16px rgba(150,40,120,.28), inset 0 1px 0 rgba(255,255,255,.6);}
+  .cell b{display:block; font-size:clamp(24px,7vw,38px); line-height:1; color:#fff;
+    text-shadow:0 2px 6px rgba(180,60,150,.6);}
+  .cell span{display:block; font-size:11px; letter-spacing:1px; color:#fff0fb;
+    text-transform:uppercase; margin-top:4px;}
+
+  .btn{appearance:none; border:none; cursor:pointer; font-family:inherit; font-weight:800;
+    color:#6a1550; font-size:clamp(17px,4.6vw,21px);
+    background:linear-gradient(180deg,#fff2c8,var(--gold2));
+    padding:14px 26px; border-radius:999px; margin-top:10px;
+    box-shadow:0 8px 0 #d99a2e, 0 12px 20px rgba(120,30,100,.3);
+    transition:transform .08s ease, box-shadow .08s ease;}
+  .btn:active{transform:translateY(4px); box-shadow:0 4px 0 #d99a2e, 0 8px 14px rgba(120,30,100,.3);}
+  .btn.pink{background:linear-gradient(180deg,#ffd8ef,var(--pink2)); color:#fff;
+    text-shadow:0 1px 4px rgba(150,30,110,.5); box-shadow:0 8px 0 #c23f8e,0 12px 20px rgba(120,30,100,.3);}
+  .btn.pink:active{box-shadow:0 4px 0 #c23f8e,0 8px 14px rgba(120,30,100,.3);}
+
+  .panel{background:rgba(255,255,255,.9); border:2px solid rgba(255,150,215,.7);
+    border-radius:22px; padding:16px 16px 18px; margin-top:10px; width:100%; max-width:430px;
+    box-shadow:0 12px 26px rgba(140,40,120,.28);}
+  .panel p{margin:0 0 10px; font-size:clamp(15px,4vw,18px); color:var(--plum); font-weight:600;}
+  input.name{font-family:inherit; font-size:22px; text-align:center; font-weight:800;
+    color:#6a1550; border:none; border-radius:14px; padding:12px 14px; width:100%;
+    outline:3px solid var(--pink); background:#fff5fb;}
+  .named{font-size:clamp(20px,5.5vw,26px); font-weight:800; color:var(--pink2);}
+  .hint{font-size:12.5px; color:#fff0fb; margin-top:12px; opacity:.85;}
+  .hidden{display:none !important;}
+
+  /* Ton-Schalter */
+  .sound{position:fixed; top:12px; right:12px; z-index:6; width:46px; height:46px; border-radius:50%;
+    border:2px solid rgba(255,255,255,.75); background:rgba(255,255,255,.28); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;
+    box-shadow:0 6px 16px rgba(120,30,100,.3); backdrop-filter:blur(3px);}
+  .sound:active{transform:scale(.94);}
+  .sound svg{width:23px; height:23px; fill:#fff;}
+</style>
+</head>
+<body>
+  <audio id="bgm" src="mirostar-magic-fantasy-fairy-tale-music-560304.mp3" loop preload="auto"></audio>
+
+  <button class="sound" id="soundBtn" aria-label="Musik an oder aus">
+    <svg id="icOn" viewBox="0 0 24 24"><path d="M3 10v4h4l5 4V6L7 10H3zm13.5 2a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4zM14 3.2v2.1a6.8 6.8 0 010 13.4v2.1a8.9 8.9 0 000-17.6z"/></svg>
+    <svg id="icOff" viewBox="0 0 24 24" style="display:none"><path d="M3 10v4h4l5 4V6L7 10H3zm18.3-1.3l-1.4-1.4L17 10.2l-2.9-2.9-1.4 1.4 2.9 2.9-2.9 2.9 1.4 1.4 2.9-2.9 2.9 2.9 1.4-1.4-2.9-2.9 2.9-2.9z"/></svg>
+  </button>
+
+  <div class="stars" id="stars" aria-hidden="true"></div>
+
+  <div class="stage">
+    <p class="sub" id="topSub">Bald beginnt ein Zauber ...</p>
+    <h1>Ylvies Zauberreise</h1>
+
+    <div class="scene" id="scene">
+      <div class="glow"></div>
+      <svg id="sceneSvg" viewBox="0 0 200 236" role="img" aria-label="Eine große Feenprinzessin schläft vor einer magischen Tür">
+        <defs>
+          <radialGradient id="portal" cx="50%" cy="46%" r="60%">
+            <stop offset="0" stop-color="#fff3fc"/><stop offset="55%" stop-color="#f2c2f2"/>
+            <stop offset="100%" stop-color="#c98fe0"/>
+          </radialGradient>
+          <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff0c2"/><stop offset="1" stop-color="#e6a52f"/>
+          </linearGradient>
+          <linearGradient id="hair" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#fff2c6"/><stop offset="55%" stop-color="#ffdf87"/>
+            <stop offset="100%" stop-color="#ff9ecf"/>
+          </linearGradient>
+          <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffe6d6"/><stop offset="1" stop-color="#ffd2bd"/>
+          </linearGradient>
+          <linearGradient id="gown" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffe0f6"/><stop offset="50%" stop-color="#f0a8ec"/>
+            <stop offset="100%" stop-color="#c97ce0"/>
+          </linearGradient>
+          <linearGradient id="bodice" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffd0ee"/><stop offset="1" stop-color="#e58fd8"/>
+          </linearGradient>
+          <radialGradient id="wing" cx="50%" cy="40%" r="60%">
+            <stop offset="0" stop-color="#ffffff" stop-opacity=".92"/>
+            <stop offset="55%" stop-color="#ffd6f5" stop-opacity=".6"/>
+            <stop offset="100%" stop-color="#c4e6ff" stop-opacity=".25"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Magisches Portal (Türbogen) -->
+        <path d="M40 214 L40 78 Q100 20 160 78 L160 214 Z" fill="url(#frame)"/>
+        <path id="portalInner" d="M48 210 L48 82 Q100 30 152 82 L152 210 Z" fill="url(#portal)"/>
+        <path class="shimmer" d="M48 210 L48 82 Q100 30 152 82 L152 210 Z" fill="#fff" opacity=".18"/>
+
+        <!-- FEE (groß, detailliert) -->
+        <g class="fairy floaty" id="fairy">
+          <!-- Flügel hinten -->
+          <g class="wingL" opacity=".8">
+            <path d="M96 118 C60 96 44 108 46 128 C48 150 74 150 96 128 Z" fill="url(#wing)" stroke="#ffd0f2" stroke-width="1"/>
+            <path d="M96 128 C66 120 52 138 58 156 C64 172 86 160 96 140 Z" fill="url(#wing)" stroke="#ffd0f2" stroke-width="1"/>
+          </g>
+          <g class="wingR" opacity=".8">
+            <path d="M104 118 C140 96 156 108 154 128 C152 150 126 150 104 128 Z" fill="url(#wing)" stroke="#ffd0f2" stroke-width="1"/>
+            <path d="M104 128 C134 120 148 138 142 156 C136 172 114 160 104 140 Z" fill="url(#wing)" stroke="#ffd0f2" stroke-width="1"/>
+          </g>
+
+          <!-- Haare hinten -->
+          <path d="M78 74 C64 92 66 138 74 168 C82 150 86 150 92 156 C90 120 92 96 100 84 C108 96 110 120 108 156 C114 150 118 150 126 168 C134 138 136 92 122 74 Z" fill="url(#hair)"/>
+
+          <!-- Kleid -->
+          <path d="M100 112 C92 112 86 118 84 128 L72 200 C84 210 116 210 128 200 L116 128 C114 118 108 112 100 112 Z" fill="url(#gown)"/>
+          <path d="M100 120 L94 198 M100 120 L108 198 M88 150 L84 196 M112 150 L116 196" stroke="#fff" stroke-width="1.2" opacity=".45" fill="none" stroke-linecap="round"/>
+          <path d="M72 200 C84 210 116 210 128 200" fill="none" stroke="#fff" stroke-width="2" opacity=".7"/>
+
+          <!-- Oberkörper / Mieder -->
+          <path d="M100 100 C93 100 89 106 90 116 C94 122 106 122 110 116 C111 106 107 100 100 100 Z" fill="url(#bodice)"/>
+          <!-- Arme -->
+          <path d="M92 114 C82 120 78 134 80 146" stroke="url(#skin)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path d="M108 114 C118 120 122 134 120 146" stroke="url(#skin)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <circle cx="80" cy="147" r="4" fill="url(#skin)"/>
+          <circle cx="120" cy="147" r="4" fill="url(#skin)"/>
+
+          <!-- Hals -->
+          <rect x="96" y="90" width="8" height="12" rx="4" fill="url(#skin)"/>
+          <!-- Kopf -->
+          <circle cx="100" cy="80" r="15" fill="url(#skin)"/>
+          <circle cx="91" cy="83" r="3.2" fill="#ff9ec6" opacity=".55"/>
+          <circle cx="109" cy="83" r="3.2" fill="#ff9ec6" opacity=".55"/>
+          <!-- geschlossene Augen mit langen Wimpern (schlummernd) -->
+          <path d="M90 78 q4 4 8 0" stroke="#7a4a6a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <path d="M102 78 q4 4 8 0" stroke="#7a4a6a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <path d="M90 78 l-2 3 M92 79 l-1.5 3.2 M110 78 l2 3 M108 79 l1.5 3.2" stroke="#7a4a6a" stroke-width="1" stroke-linecap="round"/>
+          <!-- Augenbrauen -->
+          <path d="M90 73 q4 -2 8 0 M102 73 q4 -2 8 0" stroke="#e2b06a" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <!-- Näschen + Lippen -->
+          <path d="M100 82 q1 1 0 2" stroke="#e0a48a" stroke-width="1" fill="none"/>
+          <path d="M96 87 q4 3 8 0 q-4 1 -8 0 Z" fill="#ff7fb0"/>
+
+          <!-- Haare vorne -->
+          <path d="M85 74 C82 66 90 60 100 60 C110 60 118 66 115 74 C110 68 108 66 100 66 C92 66 90 68 85 74 Z" fill="url(#hair)"/>
+          <path d="M85 74 C80 86 82 96 88 104 C86 92 86 82 90 74 Z" fill="url(#hair)"/>
+          <path d="M115 74 C120 86 118 96 112 104 C114 92 114 82 110 74 Z" fill="url(#hair)"/>
+
+          <!-- Tiara -->
+          <path d="M89 63 L94 55 L100 61 L106 55 L111 63 Z" fill="url(#frame)" stroke="#fff" stroke-width=".6"/>
+          <circle cx="100" cy="60" r="2.4" fill="#bff7e6" stroke="#fff" stroke-width=".6"/>
+
+          <path class="shimmer" d="M72 60 L132 190 L142 190 L82 60 Z" fill="#fff" opacity=".14"/>
+        </g>
+
+        <!-- Kristall-Siegel (Verzauberung) -->
+        <g id="lock">
+          <path d="M100 206 l7 5 -3 9 -8 0 -3 -9 Z" fill="#bff7e6" stroke="#fff" stroke-width="1.4" opacity=".95"/>
+          <circle cx="100" cy="212" r="1.6" fill="#fff"/>
+        </g>
+
+        <g fill="#fff">
+          <path class="shimmer" d="M60 96 l1.5 3 3 1.5 -3 1.5 -1.5 3 -1.5 -3 -3 -1.5 3 -1.5 Z"/>
+          <path class="shimmer" d="M142 104 l1.2 2.4 2.4 1.2 -2.4 1.2 -1.2 2.4 -1.2 -2.4 -2.4 -1.2 2.4 -1.2 Z"/>
+          <path class="shimmer" d="M132 150 l1 2 2 1 -2 1 -1 2 -1 -2 -2 -1 2 -1 Z"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- COUNTDOWN -->
+    <div id="stateCountdown">
+      <p class="lead" id="leadLine">In <b>...</b> beginnt Ylvies Zauberreise</p>
+      <div class="count" id="count"></div>
+      <p class="sub" id="teaser">Dann öffnet sich die magische Tür zum Land der Feenprinzessin.</p>
+    </div>
+
+    <!-- NAMING (ab Donnerstag) -->
+    <div id="stateNaming" class="hidden">
+      <div class="panel" id="namePanel">
+        <p>Die kleine Feenprinzessin schläft noch verzaubert hinter der Tür.<br>
+           Sie wartet darauf, dass <b>du</b> ihr einen Namen gibst.</p>
+        <input class="name" id="nameInput" maxlength="14" placeholder="Name der Fee" autocomplete="off" spellcheck="false">
+        <button class="btn pink" id="nameBtn">Diesen Namen schenken</button>
+      </div>
+      <div id="namedBox" class="panel hidden">
+        <p>Deine Fee heißt jetzt</p>
+        <p class="named" id="namedName">...</p>
+        <p>Am Freitag um 15 Uhr erwacht sie mit dir. Bis dahin träumt sie von dir.</p>
+        <button class="btn pink" id="renameBtn" style="font-size:15px; padding:10px 18px;">Anderen Namen wählen</button>
+      </div>
+      <p class="lead" id="leadLine2" style="margin-top:14px;">In <b>...</b> beginnt Ylvies Zauberreise</p>
+      <div class="count" id="count2"></div>
+    </div>
+
+    <!-- OPEN (Freitag 15 Uhr) -->
+    <div id="stateOpen" class="hidden">
+      <p class="lead" id="openLead">Die Tür ist offen!</p>
+      <p class="sub">Das Land der Feenprinzessin wartet auf dich.</p>
+      <button class="btn" id="enterBtn">Tritt ein</button>
+    </div>
+
+    <p class="hint" id="hint"></p>
+  </div>
+
+<script src="kichern.js"></script>
+<script>
+(function(){
+  "use strict";
+  var OPEN   = new Date(2026, 6, 17, 15, 0, 0); // Freitag 15:00
+  var NAMING = new Date(2026, 6, 16, 0, 0, 0);  // Donnerstag 00:00
+  var override = new URLSearchParams(location.search).get("preview");
+  var $ = function(id){ return document.getElementById(id); };
+  var LS_NAME = "yz_fairyName";
+
+  (function makeStars(){
+    var box=$("stars"), html="";
+    for(var i=0;i<60;i++){
+      var s=(Math.random()*2+1).toFixed(1), x=(Math.random()*100).toFixed(2),
+          y=(Math.random()*100).toFixed(2), d=(Math.random()*3).toFixed(2);
+      html+='<span class="star" style="width:'+s+'px;height:'+s+'px;left:'+x+'%;top:'+y+'%;animation-delay:'+d+'s"></span>';
+    }
+    for(var j=0;j<12;j++){
+      var lx=(Math.random()*100).toFixed(1), du=(4+Math.random()*4).toFixed(1), de=(Math.random()*6).toFixed(1);
+      html+='<span class="spark" style="left:'+lx+'%; bottom:0; animation-duration:'+du+'s; animation-delay:'+de+'s"></span>';
+    }
+    box.innerHTML=html;
+  })();
+
+  function fmt(target){
+    var ms=target-new Date(); if(ms<0)ms=0;
+    var s=Math.floor(ms/1000);
+    var d=Math.floor(s/86400); s-=d*86400;
+    var h=Math.floor(s/3600);  s-=h*3600;
+    var m=Math.floor(s/60);    s-=m*60;
+    return {d:d,h:h,m:m,s:s};
+  }
+  function cells(t){
+    function c(v,l){ return '<div class="cell"><b>'+v+'</b><span>'+l+'</span></div>'; }
+    var out="";
+    if(t.d>0) out+=c(t.d, t.d===1?"Tag":"Tage");
+    return out+c(t.h,"Std")+c(t.m,"Min")+c(t.s,"Sek");
+  }
+  function sentence(t){
+    var p=[];
+    if(t.d>0) p.push(t.d+(t.d===1?" Tag":" Tagen"));
+    if(t.h>0||t.d>0) p.push(t.h+(t.h===1?" Stunde":" Stunden"));
+    p.push(t.m+(t.m===1?" Minute":" Minuten"));
+    if(t.d===0) p.push(t.s+(t.s===1?" Sekunde":" Sekunden"));
+    var txt;
+    if(p.length>=2) txt=p.slice(0,-1).join(", ")+" und "+p[p.length-1];
+    else txt=p[0];
+    return 'In <b>'+txt+'</b> beginnt Ylvies Zauberreise';
+  }
+
+  function currentState(){
+    if(override) return override;
+    var now=new Date();
+    if(now>=OPEN)   return "open";
+    if(now>=NAMING) return "naming";
+    return "countdown";
+  }
+  function show(id){
+    ["stateCountdown","stateNaming","stateOpen"].forEach(function(s){
+      $(s).classList.toggle("hidden", s!==id);
+    });
+  }
+
+  function savedName(){ try{ return localStorage.getItem(LS_NAME)||""; }catch(e){ return ""; } }
+  function setName(v){ try{ localStorage.setItem(LS_NAME,v); }catch(e){} }
+  function renderNaming(){
+    var nm=savedName(), has=nm.length>0;
+    $("namePanel").classList.toggle("hidden", has);
+    $("namedBox").classList.toggle("hidden", !has);
+    if(has){ $("namedName").textContent=nm; $("topSub").textContent=nm+" träumt von dir ..."; }
+    else   { $("topSub").textContent="Deine Fee braucht einen Namen ..."; }
+  }
+  $("nameBtn").addEventListener("click", function(){
+    var v=$("nameInput").value.trim();
+    if(v.length<2){ $("nameInput").focus(); return; }
+    v=v.charAt(0).toUpperCase()+v.slice(1);
+    setName(v); renderNaming();
+  });
+  $("renameBtn").addEventListener("click", function(){
+    $("namePanel").classList.remove("hidden"); $("namedBox").classList.add("hidden");
+    $("nameInput").value=savedName(); $("nameInput").focus();
+  });
+
+  $("enterBtn").addEventListener("click", function(){ location.href="app.html"; });
+  function renderOpen(){
+    var nm=savedName();
+    $("openLead").textContent = nm ? ("Die Tür ist offen, "+nm+" ist erwacht!") : "Die Tür ist offen!";
+    $("topSub").textContent="Willkommen im Land der Feenprinzessin";
+    var lock=$("lock"); if(lock) lock.style.display="none";
+    $("fairy").setAttribute("opacity","1");
+  }
+
+  /* ---------- Geheimnisvolles Kichern (echte Aufnahme) ---------- */
+  // Die drei Takes aus Toms Aufnahme, als Ausschnitte [Start, Ende] in Sekunden.
+  var TAKES=[[2.25,3.32],[3.98,5.10],[5.43,6.45]];
+  var PITCH=1.38;   // hebt die Tonhöhe an -> Feenstimme
+  var VOL=1.8;      // Aufnahme war eher leise
+  var audioCtx=null, kicherBuf=null, audioReady=false, lastTake=-1;
+
+  function initAudio(){
+    if(audioCtx) return;
+    try{
+      var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+      audioCtx=new AC();
+      if(audioCtx.state==="suspended") audioCtx.resume();
+      decodeKicher();
+    }catch(e){}
+  }
+  function decodeKicher(){
+    if(kicherBuf||!audioCtx||!window.KICHER_B64) return;
+    try{
+      var bin=atob(window.KICHER_B64);
+      var arr=new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      audioCtx.decodeAudioData(arr.buffer, function(buf){ kicherBuf=buf; audioReady=true; }, function(){});
+    }catch(e){}
+  }
+  // Ton wird beim ersten Antippen freigeschaltet (Browser-Regel gegen Auto-Ton)
+  window.addEventListener("pointerdown", initAudio);
+
+  function playGiggle(){
+    if(!audioReady||!audioCtx||!kicherBuf) return;
+    try{
+      // nie zweimal hintereinander derselbe Take
+      var i; do { i=Math.floor(Math.random()*TAKES.length); } while(TAKES.length>1 && i===lastTake);
+      lastTake=i;
+      var seg=TAKES[i], dur=seg[1]-seg[0];
+      var src=audioCtx.createBufferSource(); src.buffer=kicherBuf;
+      src.playbackRate.value=PITCH*(0.97+Math.random()*0.08); // leichte Variation
+      var g=audioCtx.createGain(); g.gain.value=VOL;
+      // sanft ein- und ausblenden, damit keine Knackser entstehen
+      var t=audioCtx.currentTime;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(VOL,t+0.03);
+      var play=dur/src.playbackRate.value;
+      g.gain.setValueAtTime(VOL,t+play-0.06);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+play);
+      src.connect(g); g.connect(audioCtx.destination);
+      src.start(t, seg[0], dur);
+      src.stop(t+play+0.02);
+    }catch(e){}
+  }
+
+  // Kichern ausschliesslich beim Antippen der Fee - und nie überlappend
+  var giggling=false;
+  function giggle(){
+    if(giggling) return;
+    giggling=true;
+    setTimeout(function(){ giggling=false; }, 900);
+    var svg=$("sceneSvg");
+    svg.classList.remove("giggle-anim"); void svg.offsetWidth; svg.classList.add("giggle-anim");
+    setTimeout(function(){ svg.classList.remove("giggle-anim"); }, 700);
+    duck();          // Musik kurz leiser, damit das Kichern trägt
+    playGiggle();
+  }
+  $("fairy").addEventListener("click", function(){ initAudio(); giggle(); });
+
+  /* ---------- Hintergrundmusik ---------- */
+  var BGM_VOL=0.30, bgm=$("bgm"), musicOn=true, fadeTimer=null;
+  var bgmNode=null, bgmGain=null;   // Web-Audio-Weg: auf dem iPad wird .volume ignoriert
+  try{ musicOn = localStorage.getItem("yz_muted")!=="1"; }catch(e){}
+
+  // Musik durch die Web-Audio-Kette leiten, damit Ein-/Ausblenden überall funktioniert
+  function connectBgm(){
+    if(bgmNode||!audioCtx) return;
+    try{
+      bgmNode=audioCtx.createMediaElementSource(bgm);
+      bgmGain=audioCtx.createGain(); bgmGain.gain.value=0;
+      bgmNode.connect(bgmGain); bgmGain.connect(audioCtx.destination);
+      bgm.volume=1;
+    }catch(e){ bgmGain=null; }
+  }
+  function setVol(target, ms){
+    if(bgmGain&&audioCtx){
+      bgmGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      bgmGain.gain.setTargetAtTime(target, audioCtx.currentTime, Math.max(.05,(ms/1000)/3));
+      if(target===0) setTimeout(function(){ if(!musicOn) bgm.pause(); }, ms+80);
+      return;
+    }
+    clearInterval(fadeTimer);                    // Rückfallweg ohne Web Audio
+    var from=bgm.volume, steps=Math.max(1,Math.round(ms/50)), i=0;
+    fadeTimer=setInterval(function(){
+      i++;
+      bgm.volume=Math.max(0,Math.min(1, from+(target-from)*(i/steps)));
+      if(i>=steps){ clearInterval(fadeTimer); if(target===0) bgm.pause(); }
+    },50);
+  }
+  function startMusic(){
+    if(!musicOn) return;
+    initAudio();
+    if(audioCtx&&audioCtx.state==="suspended") audioCtx.resume();
+    connectBgm();
+    if(bgm.paused){
+      if(!bgmGain) bgm.volume=0;
+      var p=bgm.play();
+      if(p&&p.catch) p.catch(function(){});
+      setVol(BGM_VOL, 2500);   // sanft einblenden
+    }
+  }
+  function duck(){
+    if(bgm.paused||!musicOn) return;
+    setVol(0.10, 150);
+    setTimeout(function(){ if(!bgm.paused && musicOn) setVol(BGM_VOL, 900); }, 850);
+  }
+  function renderSound(){
+    $("icOn").style.display  = musicOn ? "block":"none";
+    $("icOff").style.display = musicOn ? "none":"block";
+  }
+  $("soundBtn").addEventListener("click", function(e){
+    e.stopPropagation();
+    musicOn=!musicOn;
+    try{ localStorage.setItem("yz_muted", musicOn?"0":"1"); }catch(e2){}
+    renderSound();
+    if(musicOn){ startMusic(); } else { setVol(0, 500); }
+  });
+  renderSound();
+  // Browser erlauben Ton erst nach der ersten Berührung - deshalb auf alles horchen,
+  // was als Berührung zählt (Tablet, Maus, Tastatur)
+  ["pointerdown","touchstart","touchend","click","keydown"].forEach(function(ev){
+    window.addEventListener(ev, function(){ initAudio(); startMusic(); }, {passive:true});
+  });
+
+  function tick(){
+    var st=currentState();
+    if(st==="open"){ show("stateOpen"); renderOpen(); return; }
+    if(st==="naming"){
+      show("stateNaming"); renderNaming();
+      var t2=fmt(OPEN);
+      $("leadLine2").innerHTML=sentence(t2);
+      $("count2").innerHTML=cells(t2);
+    } else {
+      show("stateCountdown");
+      var t=fmt(OPEN);
+      $("leadLine").innerHTML=sentence(t);
+      $("count").innerHTML=cells(t);
+      $("topSub").textContent="Bald beginnt ein Zauber ...";
+    }
+  }
+
+  if(override){ $("hint").textContent="Vorschau-Modus: "+override; }
+  tick(); setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>

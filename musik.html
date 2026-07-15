@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musik auswählen für Ylvies Zauberreise</title>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0; min-height:100vh; font-family:"Segoe UI",system-ui,sans-serif;
+    background:linear-gradient(180deg,#bd86e6,#c977cf 46%,#ef97c4); color:#fff; padding:22px;}
+  .box{max-width:620px; margin:0 auto;}
+  h1{font-size:26px; margin:0 0 4px;}
+  .sub{opacity:.92; margin:0 0 18px; font-size:14.5px; line-height:1.45;}
+  .card{background:rgba(255,255,255,.95); color:#5a1550; border-radius:18px; padding:16px; margin-bottom:12px;
+    box-shadow:0 10px 24px rgba(120,30,100,.25);}
+  .card h2{margin:0 0 3px; font-size:19px;}
+  .card p{margin:0 0 12px; font-size:13.5px; opacity:.85;}
+  button{font-family:inherit; font-weight:700; cursor:pointer; border:none; border-radius:999px;
+    padding:11px 20px; font-size:15px; background:#ffc247; color:#5a1550;}
+  button.on{background:#e83b6f; color:#fff;}
+  .vol{display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.2);
+    border:2px solid rgba(255,255,255,.5); border-radius:14px; padding:10px 14px; margin-bottom:16px;}
+  .vol input{flex:1;}
+  .note{font-size:13px; opacity:.9; line-height:1.5; margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Welche Musik soll laufen?</h1>
+  <p class="sub">Vier Stimmungen zum Anhören. Jede läuft endlos und wiederholt sich nie exakt -
+     es gibt also keine nervige Schleife. Hör jede mindestens 30 Sekunden an, damit du die
+     langsamen Wechsel mitbekommst.</p>
+
+  <div class="vol">
+    <span>Lautstärke</span>
+    <input type="range" id="vol" min="0" max="100" value="45">
+    <span id="volVal">45</span>
+  </div>
+
+  <div class="card">
+    <h2>1. Sternenhimmel</h2>
+    <p>Sehr ruhig und schlicht. Nur weiche Flächen, langsame Wechsel, keine Glöckchen.
+       Zurückhaltend - stört beim Rechnen am wenigsten.</p>
+    <button data-p="stern">Anhören</button>
+  </div>
+
+  <div class="card">
+    <h2>2. Zauberwald</h2>
+    <p>Warme Flächen plus zarte Glöckchen, die immer wieder neu perlen.
+       Freundlich und märchenhaft - am ehesten "Feenland".</p>
+    <button data-p="wald">Anhören</button>
+  </div>
+
+  <div class="card">
+    <h2>3. Kristallhöhle</h2>
+    <p>Tiefer Drone, dunklere Fläche, seltene hohe Kristalltöne mit viel Hall.
+       Geheimnisvoll - passt zur verzauberten, schlafenden Fee.</p>
+    <button data-p="kristall">Anhören</button>
+  </div>
+
+  <div class="card">
+    <h2>4. Wolkenreise</h2>
+    <p>Heller und fröhlicher, sanfte Bewegung, leichte Glöckchen.
+       Optimistisch - trägt eher als dass es beruhigt.</p>
+    <button data-p="wolke">Anhören</button>
+  </div>
+
+  <p class="note"><b>Wenn dir keine gefällt:</b> Du kannst auch eine fertige, lizenzfreie Musik
+     nehmen (z. B. von Pixabay Music) und mir die Datei geben - die baue ich genauso ein wie
+     dein Kichern. Sag mir dann nur den Dateinamen.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var ctx=null, master=null, current=null, timers=[], voices=[];
+
+/* ---- Presets: Akkorde als MIDI-Noten, Klangfarbe, Tempo ---- */
+var P={
+  stern:{ chords:[[45,52,57,64],[41,48,53,60],[43,50,55,62],[40,47,52,59]],
+          hold:11, cutoff:620, type:"sawtooth", chime:null, drone:null, padGain:.20 },
+  wald:{  chords:[[50,57,62,69],[45,52,57,64],[43,50,55,62],[47,54,59,66]],
+          hold:9, cutoff:900, type:"sawtooth", chime:{scale:[74,76,79,81,83,86], min:1.8, max:4.2, gain:.16}, drone:null, padGain:.18 },
+  kristall:{ chords:[[40,47,52,59],[36,43,48,55],[38,45,50,57],[35,42,47,54]],
+          hold:13, cutoff:480, type:"sawtooth", chime:{scale:[83,86,88,90,93,95], min:3.5, max:7.5, gain:.13}, drone:28, padGain:.19 },
+  wolke:{ chords:[[48,55,60,67],[45,52,57,64],[41,48,53,60],[43,50,55,62]],
+          hold:8, cutoff:1150, type:"triangle", chime:{scale:[72,74,76,79,81,84], min:2.2, max:5, gain:.14}, drone:null, padGain:.22 }
+};
+
+function f(m){ return 440*Math.pow(2,(m-69)/12); }
+
+function ensure(){
+  if(ctx) return;
+  ctx=new (window.AudioContext||window.webkitAudioContext)();
+  master=ctx.createGain(); master.gain.value=vol();
+  // einfacher Hall-Ersatz: Delay mit Rückkopplung
+  var d=ctx.createDelay(1.0); d.delayTime.value=.36;
+  var fb=ctx.createGain(); fb.gain.value=.38;
+  var lp=ctx.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=2200;
+  d.connect(fb); fb.connect(lp); lp.connect(d);
+  var wet=ctx.createGain(); wet.gain.value=.5;
+  d.connect(wet); wet.connect(ctx.destination);
+  master.connect(ctx.destination); master.connect(d);
+  window.__send=d;
+}
+function vol(){ return $("vol").value/100*0.6; }
+$("vol").addEventListener("input", function(){
+  $("volVal").textContent=$("vol").value;
+  if(master) master.gain.setTargetAtTime(vol(), ctx.currentTime, .1);
+});
+
+function stopAll(){
+  timers.forEach(clearTimeout); timers=[];
+  voices.forEach(function(v){
+    try{ v.g.gain.cancelScheduledValues(ctx.currentTime);
+      v.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 1.2);
+      v.o.stop(ctx.currentTime+5);
+    }catch(e){}
+  });
+  voices=[];
+}
+
+function pad(notes, cfg){
+  notes.forEach(function(n,i){
+    var o=ctx.createOscillator(); o.type=cfg.type;
+    o.frequency.value=f(n);
+    o.detune.value=(Math.random()*10-5);
+    var g=ctx.createGain(); g.gain.value=0.0001;
+    var lp=ctx.createBiquadFilter(); lp.type="lowpass";
+    lp.frequency.value=cfg.cutoff; lp.Q.value=.7;
+    // langsame Filterbewegung -> "atmet"
+    var lfo=ctx.createOscillator(); lfo.frequency.value=0.03+Math.random()*0.05;
+    var lg=ctx.createGain(); lg.gain.value=cfg.cutoff*0.35;
+    lfo.connect(lg); lg.connect(lp.frequency); lfo.start();
+    o.connect(g); g.connect(lp); lp.connect(master);
+    o.start();
+    g.gain.setTargetAtTime(cfg.padGain/notes.length*(i===0?1.4:1), ctx.currentTime, 2.2);
+    voices.push({o:o,g:g});
+    voices.push({o:lfo,g:lg});
+  });
+}
+function chime(cfg){
+  var n=cfg.chime.scale[Math.floor(Math.random()*cfg.chime.scale.length)];
+  var t=ctx.currentTime;
+  [1,2.01].forEach(function(mult,i){
+    var o=ctx.createOscillator(); o.type="sine"; o.frequency.value=f(n)*mult;
+    var g=ctx.createGain(); g.gain.value=0.0001;
+    o.connect(g); g.connect(master); if(window.__send) g.connect(window.__send);
+    var peak=cfg.chime.gain*(i?0.35:1);
+    g.gain.exponentialRampToValueAtTime(peak, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+2.6);
+    o.start(t); o.stop(t+2.8);
+  });
+}
+
+function play(key, btn){
+  ensure();
+  if(ctx.state==="suspended") ctx.resume();
+  if(current===key){ stopAll(); current=null; btn.textContent="Anhören"; btn.classList.remove("on"); return; }
+  stopAll();
+  document.querySelectorAll("button[data-p]").forEach(function(b){ b.textContent="Anhören"; b.classList.remove("on"); });
+  current=key; btn.textContent="Läuft - Stopp"; btn.classList.add("on");
+  var cfg=P[key], idx=0;
+  if(cfg.drone){
+    var o=ctx.createOscillator(); o.type="sine"; o.frequency.value=f(cfg.drone);
+    var g=ctx.createGain(); g.gain.value=0.0001;
+    o.connect(g); g.connect(master); o.start();
+    g.gain.setTargetAtTime(.13, ctx.currentTime, 3);
+    voices.push({o:o,g:g});
+  }
+  function nextChord(){
+    if(current!==key) return;
+    // alte Fläche ausblenden, neue rein (überlappend -> fließender Übergang)
+    var old=voices.slice();
+    pad(cfg.chords[idx%cfg.chords.length], cfg);
+    old.forEach(function(v){
+      if(cfg.drone && v.o.type==="sine") return;
+      try{ v.g.gain.setTargetAtTime(0.0001, ctx.currentTime, 2.0); v.o.stop(ctx.currentTime+9); }catch(e){}
+    });
+    voices=voices.filter(function(v){ return old.indexOf(v)<0 || (cfg.drone&&v.o.type==="sine"); });
+    idx++;
+    timers.push(setTimeout(nextChord, cfg.hold*1000));
+  }
+  nextChord();
+  if(cfg.chime){
+    (function loop(){
+      if(current!==key) return;
+      chime(cfg);
+      var w=(cfg.chime.min+Math.random()*(cfg.chime.max-cfg.chime.min))*1000;
+      timers.push(setTimeout(loop, w));
+    })();
+  }
+}
+
+document.querySelectorAll("button[data-p]").forEach(function(b){
+  b.addEventListener("click", function(){ play(b.getAttribute("data-p"), b); });
+});
+})();
+</script>
+</body>
+</html>
