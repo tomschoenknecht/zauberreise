@@ -223,4 +223,36 @@ Einordnung: das ist ein mehrwöchiger Ausbau, kein Tagesprojekt. Reihenfolge mit
 Tom noch abzustimmen - siehe KONZEPT-YLVIES-ZAUBERREISE.md im Strategie-Projekt
 für den fortlaufenden MVP-Fahrplan.
 
+### 2026-07-15 – Lineare Inseln + reichhaltigere Kartengrafik
+Tom-Feedback: Inseln sollen nacheinander freigeschaltet werden (nicht frei
+wählbar), und die Karte/Grafik wirkte "billig und lieblos", soll deutlich
+detaillierter/realistischer werden.
+
+Wichtige Klarstellung geklärt: echte Fotorealität ist mit handgezeichnetem
+SVG-Code technisch nicht erreichbar (kein Bildgenerator in dieser Umgebung
+verfügbar). Tom hat sich per Rückfrage für "beste erreichbare Vektor-
+Illustration" entschieden (statt fertige/generierte Bilder einzubinden) -
+bleibt damit umfärbbar und animierbar, was für Salon/Stufen essenziell ist.
+
+Umgesetzt:
+- **Lineare Fortschrittslogik:** neues Feld S.progress (Index der am weitesten
+  erreichten Insel). Nur Inseln mit Index <= progress sind antippbar; alle
+  weiteren zeigen ein Schloss-Symbol und "gesperrt". Erstes Abschließen einer
+  Insel schaltet automatisch die nächste frei ("Eine neue Insel taucht aus dem
+  Nebel auf ..." auf dem Belohnungsschirm). Bereits gemeisterte Inseln bleiben
+  offen (wichtig für den Erinnerungszauber/Wiederholungen). Der Zauber-Salon
+  bleibt separat über die Fee-Stufe gesteuert (unverändert).
+- **Reichhaltigere Kartengrafik:** Ozean-Hintergrund mit Wellenlinien, Pergament
+  jetzt mit unregelmäßigem "zerknittertem" Rand statt perfektem Rechteck, altes
+  gefaltetes Eckstück, mehrere Alterungsflecken, Vignette für Tiefe. Jede Insel
+  hat jetzt Wasserringe/Schatten am Fuß, einen Lichtreflex, und eine zur
+  Insel passende kleine Landschafts-Deko (Kristallspitzen, Häuschen mit Dach,
+  Regenbogen mit Wolken, Schatzkiste mit Münzen, Zelt mit Fähnchen für den
+  Salon). Gesperrte Inseln sind gräulich mit Schloss-Icon. Kompassrose
+  aufwendiger (N/S/O/W, doppelter Stern, rote Spitze).
+Getestet: gesperrte Insel öffnet sich nicht (nur Hinweistext), Abschluss der
+ersten Insel schaltet korrekt die zweite frei (progress 0->1), bereits
+gemeisterte Inseln bleiben klickbar, dritte Insel bleibt weiterhin gesperrt.
+Keine Konsolenfehler.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_

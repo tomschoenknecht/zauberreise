@@ -234,13 +234,14 @@ if(TEST){
 var SKILLS=["mengen","zehner","uebergang","geld"];
 var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],head:["tiara"],extra:["keine"]},
                     equipped:{hair:"goldrosa",dress:"rosalila",face:"zart",head:"tiara",extra:"keine"} };
-var defaults={ crystals:0, stage:0, solved:0, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
+var defaults={ crystals:0, stage:0, solved:0, progress:0, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
 function load(){
   try{ var raw=localStorage.getItem(LS); if(raw){ var o=JSON.parse(raw);
     SKILLS.forEach(function(s){ if(!o.skills[s]) o.skills[s]=JSON.parse(JSON.stringify(defaults.skills[s])); });
     if(!o.salon) o.salon=JSON.parse(JSON.stringify(defaultSalon));
+    if(typeof o.progress!=="number") o.progress=0;
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -414,22 +415,36 @@ function burst(){ // kleiner Funkel-Ausbruch
 
 /* ============ Schatzkarte ============ */
 var SALON_ID="salon";
-var ISLAND_BLOB="M0,-34 C18,-33 33,-19 34,-1 C35,17 21,33 2,34 C-17,35 -34,21 -34,2 C-35,-17 -19,-34 0,-34 Z";
+var ISLAND_BLOB="M0,-36 C14,-37 26,-33 33,-23 C40,-13 40,3 34,13 C28,23 22,31 8,35 C-8,39 -26,34 -33,20 C-40,6 -38,-10 -30,-22 C-22,-34 -10,-35 0,-36 Z";
 
-function islandNode(id, x, y, land, landD, iconInner, isDue, locked, labelHtml, subHtml){
-  var callout = isDue ? '<rect x="-33" y="-60" width="66" height="19" rx="9.5" fill="#fff"/><text class="isleCallout" x="0" y="-46">ruft dich!</text>' : '';
-  var lockRing = locked ? '<circle cx="0" cy="-2" r="34" fill="rgba(60,20,60,.28)"/>' : '';
-  return '<g class="isle'+(isDue?' due':'')+(locked?' locked':'')+'" data-id="'+id+'" style="'+(locked?'opacity:.7':'')+'" transform="translate('+x+','+y+')">'+
-    '<g class="bob">'+
-      '<path d="'+ISLAND_BLOB+'" fill="'+landD+'" transform="translate(0,4) scale(1.04)"/>'+
+/* kleine Landschafts-Deko je Insel, gibt der Karte Charakter statt gleicher Farbblasen */
+var ISLAND_DECO = {
+  funkel: '<g transform="translate(-14,10)"><path d="M0,10 L-4,-6 L0,-14 L4,-6 Z" fill="#fff" opacity=".85"/><path d="M9,12 L6,0 L9,-6 L12,0 Z" fill="#ffd0ee" opacity=".8"/></g>',
+  zehnerhaus: '<g transform="translate(12,4)"><rect x="-8" y="-2" width="16" height="12" fill="#fff8ea" stroke="#8a5a2a" stroke-width="1"/><path d="M-10,-2 L0,-13 L10,-2 Z" fill="#e05fa0"/></g>',
+  regenbogen: '<g transform="translate(-10,8)" opacity=".9"><path d="M-14,4 A14,14 0 0 1 14,4" fill="none" stroke="#fff" stroke-width="3"/><path d="M-14,4 A14,14 0 0 1 14,4" fill="none" stroke="#ffe08a" stroke-width="1.6" stroke-dasharray="0 6.5" stroke-linecap="round" transform="translate(0,0)"/><circle cx="-14" cy="4" r="4" fill="#fff" opacity=".85"/><circle cx="14" cy="4" r="5" fill="#fff" opacity=".85"/></g>',
+  markt: '<g transform="translate(12,8)"><path d="M-10,2 L10,2 L8,-6 L-8,-6 Z" fill="#8a5a2a"/><circle cx="-4" cy="-9" r="3.4" fill="#ffe08a" stroke="#e6a52f" stroke-width=".6"/><circle cx="3" cy="-11" r="3.4" fill="#ffe08a" stroke="#e6a52f" stroke-width=".6"/></g>',
+  salon: '<g transform="translate(10,6)"><path d="M-12,4 L0,-12 L12,4 Z" fill="#ffd0ee" stroke="#fff" stroke-width="1"/><path d="M-12,4 L-4,4 L-4,-4 L4,-4 L4,4 L12,4" fill="none" stroke="#fff" stroke-width="1"/><path d="M0,-12 L0,-18" stroke="#c97ce0" stroke-width="1.4"/><path d="M0,-18 L6,-16 L0,-14 Z" fill="#ff5fb6"/></g>'
+};
+var LOCK_ICON='<circle r="19" fill="#8a8a9a"/><rect x="-7" y="-2" width="14" height="11" rx="2.4" fill="#5a5a6a"/><path d="M-5,-2 v-4 a5,5 0 0 1 10,0 v4" fill="none" stroke="#5a5a6a" stroke-width="2.6"/>';
+
+function islandNode(id, x, y, land, landD, iconInner, isDue, locked, labelHtml, subHtml, deco){
+  var callout = isDue ? '<rect x="-33" y="-64" width="66" height="19" rx="9.5" fill="#fff"/><text class="isleCallout" x="0" y="-50">ruft dich!</text>' : '';
+  var content = locked
+    ? '<path d="'+ISLAND_BLOB+'" fill="#b9b9c4"/><path d="'+ISLAND_BLOB+'" fill="#9c9ca8" opacity=".55" transform="translate(0,3) scale(1.03)"/>'+
+      '<circle cx="0" cy="-2" r="20" fill="#e8e8ee" stroke="#fff" stroke-width="2"/><g transform="translate(0,-2)">'+LOCK_ICON+'</g>'
+    : '<path d="'+ISLAND_BLOB+'" fill="'+landD+'" transform="translate(0,5) scale(1.05)"/>'+
       '<path d="'+ISLAND_BLOB+'" fill="'+land+'"/>'+
-      '<ellipse cx="-11" cy="-15" rx="10" ry="6" fill="#fff" opacity=".3"/>'+
+      '<ellipse cx="0" cy="24" rx="30" ry="7" fill="#2a6a7a" opacity=".18"/>'+
+      '<path d="M-30,4 A30,10 0 0 0 30,4" fill="none" stroke="#fff" stroke-width="1.4" opacity=".35"/>'+
+      '<path d="M-24,14 A24,8 0 0 0 24,14" fill="none" stroke="#fff" stroke-width="1.2" opacity=".3"/>'+
+      '<ellipse cx="-12" cy="-17" rx="11" ry="6.5" fill="#fff" opacity=".32"/>'+
+      (deco||'')+
       '<circle cx="0" cy="-2" r="20" fill="#fff" stroke="#fff" stroke-width="2"/>'+
-      '<svg x="-13" y="-15" width="26" height="26" viewBox="0 0 24 24">'+iconInner+'</svg>'+
-      lockRing+callout+
-    '</g>'+
-    '<text class="isleName" x="0" y="35">'+labelHtml+'</text>'+
-    '<text class="isleStars" x="0" y="49">'+subHtml+'</text>'+
+      '<svg x="-13" y="-15" width="26" height="26" viewBox="0 0 24 24">'+iconInner+'</svg>';
+  return '<g class="isle'+(isDue?' due':'')+(locked?' locked':'')+'" data-id="'+id+'" transform="translate('+x+','+y+')">'+
+    '<g class="bob">'+content+callout+'</g>'+
+    '<text class="isleName" x="0" y="39" style="'+(locked?'opacity:.65':'')+'">'+labelHtml+'</text>'+
+    '<text class="isleStars" x="0" y="53">'+subHtml+'</text>'+
   '</g>';
 }
 
@@ -439,34 +454,52 @@ function screenMap(){
   var salonOpen=S.stage>=1;
 
   var islandsSvg="";
-  ISLANDS.forEach(function(is){
-    var k=S.skills[is.skill], isDue=due.indexOf(is.skill)>=0;
+  ISLANDS.forEach(function(is,i){
+    var k=S.skills[is.skill], isDue=due.indexOf(is.skill)>=0, locked=i>S.progress;
     islandsSvg+=islandNode(is.id, is.x, is.y, is.land, is.landD, is.ic.replace(/^<svg[^>]*>|<\/svg>$/g,""),
-      isDue, false, is.name, "★".repeat(k.str)+"☆".repeat(5-k.str));
+      isDue&&!locked, locked, is.name, locked?"gesperrt":("★".repeat(k.str)+"☆".repeat(5-k.str)), ISLAND_DECO[is.id]);
   });
   var salonIcon='<path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#c97ce0" stroke-width="1.3"/>';
   islandsSvg+=islandNode(SALON_ID, SALON_POS.x, SALON_POS.y, SALON_POS.land, SALON_POS.landD, salonIcon,
-    false, !salonOpen, "Der Zauber-Salon", salonOpen?"Style deine Fee!":"noch verschlossen");
+    false, !salonOpen, "Der Zauber-Salon", salonOpen?"Style deine Fee!":"noch verschlossen", ISLAND_DECO.salon);
 
   var html='<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 600" xmlns="http://www.w3.org/2000/svg">'+
     '<defs>'+
       '<linearGradient id="parchment" x1="0" y1="0" x2="1" y2="1">'+
-        '<stop offset="0" stop-color="#f6e6b8"/><stop offset="1" stop-color="#e6c583"/>'+
+        '<stop offset="0" stop-color="#f8ecc8"/><stop offset="55%" stop-color="#efd49c"/><stop offset="1" stop-color="#dcb877"/>'+
       '</linearGradient>'+
+      '<radialGradient id="ocean" cx="50%" cy="45%" r="70%">'+
+        '<stop offset="0" stop-color="#3fb0c9"/><stop offset="1" stop-color="#1c6f8c"/>'+
+      '</radialGradient>'+
+      '<radialGradient id="vignette" cx="50%" cy="45%" r="75%">'+
+        '<stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a220a" stop-opacity=".22"/>'+
+      '</radialGradient>'+
     '</defs>'+
-    '<rect x="8" y="8" width="364" height="584" rx="22" fill="url(#parchment)" stroke="#8a5a2a" stroke-width="4"/>'+
-    '<rect x="18" y="18" width="344" height="564" rx="16" fill="none" stroke="#a8763f" stroke-width="1.5" stroke-dasharray="3 6" opacity=".7"/>'+
-    '<ellipse cx="60" cy="470" rx="34" ry="20" fill="#c9a15f" opacity=".18"/>'+
-    '<ellipse cx="320" cy="230" rx="28" ry="16" fill="#c9a15f" opacity=".16"/>'+
-    '<ellipse cx="180" cy="470" rx="22" ry="14" fill="#c9a15f" opacity=".14"/>'+
+    '<rect x="0" y="0" width="380" height="600" rx="24" fill="url(#ocean)"/>'+
+    (function(){ var w=""; for(var i=0;i<5;i++){ var yy=30+i*115; w+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; } return w; })()+
+    '<path d="M14,26 C10,60 18,90 12,130 C6,180 16,220 10,270 C4,330 16,380 10,430 C5,480 16,520 14,556 '+
+      'C40,574 90,566 130,572 C180,580 230,568 270,574 C310,580 350,568 366,554 '+
+      'C372,510 364,470 370,430 C376,380 366,340 372,290 C378,240 368,190 374,140 '+
+      'C380,90 370,50 366,24 C330,10 280,18 240,10 C190,0 140,12 90,6 C55,2 26,12 14,26 Z" '+
+      'fill="url(#parchment)" stroke="#8a5a2a" stroke-width="3.5" stroke-linejoin="round"/>'+
+    '<rect x="20" y="20" width="340" height="560" rx="14" fill="none" stroke="#a8763f" stroke-width="1.3" stroke-dasharray="2 7" opacity=".65"/>'+
+    '<path d="M330,14 L366,20 L360,54 Z" fill="#dcb877" stroke="#8a5a2a" stroke-width="2" opacity=".9"/>'+
+    '<ellipse cx="70" cy="470" rx="36" ry="20" fill="#8a5a2a" opacity=".1"/>'+
+    '<ellipse cx="320" cy="230" rx="30" ry="17" fill="#8a5a2a" opacity=".09"/>'+
+    '<ellipse cx="170" cy="60" rx="26" ry="13" fill="#8a5a2a" opacity=".08"/>'+
     '<path d="M96,118 C150,90 230,70 288,96 C250,180 180,220 104,322 C180,300 260,300 296,352 C260,430 220,470 200,520" '+
       'fill="none" stroke="#8a5a2a" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="1 15" opacity=".85"/>'+
-    '<g transform="translate(332,44)" opacity=".8">'+
-      '<circle r="22" fill="none" stroke="#8a5a2a" stroke-width="1.5"/>'+
-      '<path d="M0,-20 L4,-4 L20,0 L4,4 L0,20 L-4,4 L-20,0 L-4,-4 Z" fill="#8a5a2a"/>'+
-      '<text y="-26" text-anchor="middle" font="800 11px sans-serif" fill="#8a5a2a">N</text>'+
+    '<g transform="translate(332,50)" opacity=".85">'+
+      '<circle r="24" fill="#f8ecc8" stroke="#8a5a2a" stroke-width="1.5"/>'+
+      '<path d="M0,-21 L4.5,-4.5 L21,0 L4.5,4.5 L0,21 L-4.5,4.5 L-21,0 L-4.5,-4.5 Z" fill="#8a5a2a"/>'+
+      '<path d="M0,-15 L2,-2 L15,0 L2,2 L0,15 L-2,2 L-15,0 L-2,-2 Z" fill="#c23f2f"/>'+
+      '<text y="-29" text-anchor="middle" font="800 10px sans-serif" fill="#8a5a2a">N</text>'+
+      '<text y="34" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">S</text>'+
+      '<text x="30" y="3" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">O</text>'+
+      '<text x="-30" y="3" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">W</text>'+
     '</g>'+
     islandsSvg+
+    '<rect x="0" y="0" width="380" height="600" rx="24" fill="url(#vignette)"/>'+
   '</svg></div>';
   $("screen").innerHTML=html;
   Array.prototype.forEach.call(document.querySelectorAll(".isle"), function(el){
@@ -477,7 +510,7 @@ function screenMap(){
     });
   });
   var nm=feeName();
-  say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp eine Insel an!", true);
+  say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp die Insel an!", true);
 }
 
 /* ============ Zauber-Salon ============ */
@@ -519,7 +552,10 @@ function screenSalon(){
 }
 
 var lesson=null;
+function islandIndex(id){ for(var i=0;i<ISLANDS.length;i++){ if(ISLANDS[i].id===id) return i; } return -1; }
+function islandLocked(id){ return islandIndex(id) > S.progress; }
 function startLesson(id){
+  if(islandLocked(id)){ say(feeName()+" flüstert: Eine Insel nach der anderen - lass uns erst hierbleiben.", true); return; }
   var is=ISLANDS.filter(function(i){return i.id===id;})[0];
   var plan=[], due=dueSkills().filter(function(s){ return s!==is.skill; });
   for(var i=0;i<6;i++){ if(i>0 && i%3===0 && due.length) plan.push(due[rnd(0,due.length-1)]); else plan.push(is.skill); }
@@ -575,11 +611,16 @@ function screenLevelUp(){
   $("goOn").addEventListener("click", function(){ if(lesson && lesson.idx<lesson.plan.length) nextTask(); else screenReward(); });
 }
 function screenReward(){
-  S.solved+=lesson.plan.length; save();
+  S.solved+=lesson.plan.length;
+  var justIdx=islandIndex(lesson.island.id), unlockedNew=false, nextIsland=null;
+  if(justIdx===S.progress && S.progress<ISLANDS.length-1){ S.progress++; unlockedNew=true; nextIsland=ISLANDS[S.progress]; }
+  save();
+  var extra = unlockedNew ?
+    '<p style="font-weight:700;color:#7b46d6">Eine neue Insel taucht aus dem Nebel auf: '+nextIsland.name+'!</p>' : '';
   $("screen").innerHTML='<div class="card rewardWrap"><h2 style="color:#5a1560;text-shadow:none">Geschafft!</h2>'+
-    '<p class="big">+'+lesson.gained+'</p><p style="font-weight:700">Kristalle für '+lesson.island.name+'</p>'+
+    '<p class="big">+'+lesson.gained+'</p><p style="font-weight:700">Kristalle für '+lesson.island.name+'</p>'+extra+
     '<button class="btn pink" id="toMap">Zurück zur Zauberkarte</button></div>';
-  say("Du hast "+lesson.gained+" Kristalle gesammelt!", true);
+  say(unlockedNew ? ("Du hast "+lesson.gained+" Kristalle gesammelt - und eine neue Insel entdeckt!") : ("Du hast "+lesson.gained+" Kristalle gesammelt!"), true);
   $("toMap").addEventListener("click", screenMap); lesson=null;
 }
 
