@@ -191,4 +191,36 @@ Testdaten blieben unangetastet. Keine Konsolenfehler.
 Nächstes Mal für Tom: zum Ausprobieren immer den ?test=1-Link nutzen, kurz vor
 Freitag 15 Uhr einmal den ?reset=1-Link öffnen.
 
+### 2026-07-15 – Schatzkarte statt Liste
+Tom-Feedback: "die Zauberkarte ist langweilig, mach eine richtige Schatzkarte
+auf verschiedenen Inseln draus." Umgesetzt: die vertikale Insel-Liste ist einem
+echten SVG-Kartenbild gewichen - Pergament-Hintergrund mit doppeltem Rand und
+Alterungsflecken, Kompassrose oben rechts, ein gepunkteter Schatzpfad, der sich
+in Kurven durch die Landschaft schlängelt, fünf frei im Raum verteilte
+Insel-Blobs (eigene Farbe je Insel, Symbol im weißen Medaillon, Name + Sterne
+als Beschriftung, sanftes Wippen, "ruft dich!"-Sprechblase bei fälligen
+Wiederholungen). Der Salon ist als eigene, andersfarbene Insel Teil der Karte.
+Getestet: alle 5 Inseln klickbar und starten die richtige Aufgabe bzw. den
+Salon, gesperrter Salon zeigt weiterhin nur den Hinweistext statt sich zu
+öffnen, Sterne/Fälligkeiten korrekt aus dem Spielstand abgeleitet, keine
+Konsolenfehler.
+
+### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
+Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
+hier nur festgehalten, damit nichts verloren geht):
+- Die Fee soll mit der Zeit nicht nur Stufen freischalten, sondern zunehmend
+  **plastischer, beweglicher und interaktiver** werden (mehr als die aktuellen
+  4 Stufen Farbe/Lächeln/Sprechen) - **bevor** der Style-Teil kommt.
+- Der Schmink-/Anzieh-Teil (Zauber-Salon) soll **grafisch anspruchsvoller**
+  werden als der aktuelle Stand.
+- Später: die Fee bekommt **eine oder mehrere Freundinnen** mit eigenen,
+  unterschiedlichen Charakteren und eigenem Design - inklusive eigener
+  Geschichte dazu.
+- **Haustiere.**
+- Ein **Märchenwald** als neue Welt/Umgebung.
+- Ein **Haus, das Ylvie einrichten kann.**
+Einordnung: das ist ein mehrwöchiger Ausbau, kein Tagesprojekt. Reihenfolge mit
+Tom noch abzustimmen - siehe KONZEPT-YLVIES-ZAUBERREISE.md im Strategie-Projekt
+für den fortlaufenden MVP-Fahrplan.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_

@@ -95,29 +95,18 @@
   .btn.ghost{background:rgba(255,255,255,.9); color:var(--plum); box-shadow:0 7px 0 #c9a7d6;}
   .btn.big{font-size:clamp(19px,5.2vw,24px); padding:17px 28px;}
 
-  /* ---------- Abenteuerkarte ---------- */
-  .path{position:relative; padding:8px 0 20px;}
-  .node{position:relative; display:flex; align-items:center; gap:12px; margin:6px 0; padding:10px 12px;
-    border-radius:26px; cursor:pointer; color:#fff; box-shadow:0 10px 24px rgba(70,15,80,.3);
-    border:3px solid rgba(255,255,255,.85); transition:transform .09s ease;}
-  .node:active{transform:scale(.97);}
-  .node.right{flex-direction:row-reverse; text-align:right; margin-left:22%;}
-  .node.left{margin-right:22%;}
-  .node .orb{flex:0 0 62px; width:62px; height:62px; border-radius:50%; background:rgba(255,255,255,.28);
-    border:3px solid rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center;}
-  .node .orb svg{width:38px; height:38px;}
-  .node .tx{flex:1;}
-  .node .tx b{display:block; font-size:clamp(15px,4vw,18px); text-shadow:0 2px 8px rgba(60,10,70,.5);}
-  .node .tx .stars{position:static; display:inline-block; font-size:14px; margin-top:2px; letter-spacing:1px;}
-  .node.due{animation:bounce 1.3s ease-in-out infinite;}
-  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-  .node .callout{position:absolute; top:-8px; right:14px; background:#fff; color:#c23f8e; font-size:11px;
-    font-weight:800; padding:2px 9px; border-radius:999px; box-shadow:0 3px 8px rgba(70,15,80,.3);}
-  .node.right .callout{right:auto; left:14px;}
-  .c-pink{background:linear-gradient(160deg,#ff86c4,#e83b8f);}
-  .c-lila{background:linear-gradient(160deg,#b98bff,#7b46d6);}
-  .c-mint{background:linear-gradient(160deg,#5fe0cf,#1aa892);}
-  .c-gold{background:linear-gradient(160deg,#ffcf5f,#f0962f);}
+  /* ---------- Schatzkarte ---------- */
+  .mapWrap{position:relative; padding:4px 0 16px;}
+  .mapWrap svg{width:100%; height:auto; display:block; filter:drop-shadow(0 14px 30px rgba(50,15,60,.4));}
+  .isle{cursor:pointer;}
+  .isle .bob{animation:isleBob 4.5s ease-in-out infinite;}
+  @keyframes isleBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+  .isle.due .bob{animation:isleDue 1.1s ease-in-out infinite;}
+  @keyframes isleDue{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-7px) scale(1.05);}}
+  .isle:active .bob{transform:scale(.95);}
+  .isleName{font:800 12.5px "Comic Sans MS",system-ui,sans-serif; fill:#4a2a12; text-anchor:middle;}
+  .isleStars{font:700 11px "Comic Sans MS",system-ui,sans-serif; fill:#c23f8e; text-anchor:middle;}
+  .isleCallout{font:800 10.5px "Comic Sans MS",system-ui,sans-serif; fill:#c23f8e; text-anchor:middle;}
 
   /* ---------- Aufgabe ---------- */
   .card{background:rgba(255,255,255,.96); border-radius:24px; padding:16px; color:var(--plum);
@@ -305,15 +294,16 @@ var GEN={mengen:taskMengen, zehner:taskZehner, uebergang:taskUebergang, geld:tas
 
 /* ============ Inseln ============ */
 var ISLANDS=[
-  {id:"funkel", name:"Insel der Funkelsteine", sub:"Mengen auf einen Blick", skill:"mengen", col:"c-pink",
+  {id:"funkel", name:"Funkelstein-Insel", sub:"Mengen auf einen Blick", skill:"mengen", land:"#ff8fce", landD:"#e83b8f", x:96, y:118,
    ic:'<svg viewBox="0 0 24 24"><path d="M12 2l7 6-3 14H8L5 8z" fill="#fff" stroke="#c23f8e" stroke-width="1.5"/></svg>'},
-  {id:"zehnerhaus", name:"Das Zehnerhaus", sub:"Wie viel fehlt bis Zehn?", skill:"zehner", col:"c-lila",
+  {id:"zehnerhaus", name:"Das Zehnerhaus", sub:"Wie viel fehlt bis Zehn?", skill:"zehner", land:"#b98bff", landD:"#7b46d6", x:288, y:96,
    ic:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1H4a1 1 0 01-1-1z" fill="#fff" stroke="#7b46d6" stroke-width="1.5"/></svg>'},
-  {id:"regenbogen", name:"Die Regenbogenbrücke", sub:"Über die Zehn rechnen", skill:"uebergang", col:"c-mint",
+  {id:"regenbogen", name:"Regenbogenbucht", sub:"Über die Zehn rechnen", skill:"uebergang", land:"#5fe0cf", landD:"#1aa892", x:104, y:322,
    ic:'<svg viewBox="0 0 24 24"><path d="M3 20a9 9 0 0118 0" fill="none" stroke="#fff" stroke-width="3"/><path d="M7 20a5 5 0 0110 0" fill="none" stroke="#ffe08a" stroke-width="3"/></svg>'},
-  {id:"markt", name:"Der Zaubermarkt", sub:"Mit Münzen bezahlen", skill:"geld", col:"c-gold",
+  {id:"markt", name:"Zaubermarkt-Insel", sub:"Mit Münzen bezahlen", skill:"geld", land:"#ffcf5f", landD:"#f0962f", x:296, y:352,
    ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fff" stroke="#f0962f" stroke-width="1.5"/><text x="12" y="16" font-size="10" text-anchor="middle" fill="#f0962f" font-weight="bold">€</text></svg>'}
 ];
+var SALON_POS={x:200, y:520, land:"#ffe0f6", landD:"#c97ce0"};
 
 /* ============ Fee-Stufen ============ */
 var STAGES=[{at:0,name:"verzaubert"},{at:10,name:"Farbe kehrt zurück"},{at:25,name:"sie öffnet die Augen und lächelt"},{at:45,name:"sie kann sprechen"}];
@@ -422,26 +412,64 @@ function burst(){ // kleiner Funkel-Ausbruch
         if(t>=1){ clearInterval(iv); el.remove(); } },16); })(s); }
 }
 
-/* ============ Karte ============ */
+/* ============ Schatzkarte ============ */
 var SALON_ID="salon";
+var ISLAND_BLOB="M0,-34 C18,-33 33,-19 34,-1 C35,17 21,33 2,34 C-17,35 -34,21 -34,2 C-35,-17 -19,-34 0,-34 Z";
+
+function islandNode(id, x, y, land, landD, iconInner, isDue, locked, labelHtml, subHtml){
+  var callout = isDue ? '<rect x="-33" y="-60" width="66" height="19" rx="9.5" fill="#fff"/><text class="isleCallout" x="0" y="-46">ruft dich!</text>' : '';
+  var lockRing = locked ? '<circle cx="0" cy="-2" r="34" fill="rgba(60,20,60,.28)"/>' : '';
+  return '<g class="isle'+(isDue?' due':'')+(locked?' locked':'')+'" data-id="'+id+'" style="'+(locked?'opacity:.7':'')+'" transform="translate('+x+','+y+')">'+
+    '<g class="bob">'+
+      '<path d="'+ISLAND_BLOB+'" fill="'+landD+'" transform="translate(0,4) scale(1.04)"/>'+
+      '<path d="'+ISLAND_BLOB+'" fill="'+land+'"/>'+
+      '<ellipse cx="-11" cy="-15" rx="10" ry="6" fill="#fff" opacity=".3"/>'+
+      '<circle cx="0" cy="-2" r="20" fill="#fff" stroke="#fff" stroke-width="2"/>'+
+      '<svg x="-13" y="-15" width="26" height="26" viewBox="0 0 24 24">'+iconInner+'</svg>'+
+      lockRing+callout+
+    '</g>'+
+    '<text class="isleName" x="0" y="35">'+labelHtml+'</text>'+
+    '<text class="isleStars" x="0" y="49">'+subHtml+'</text>'+
+  '</g>';
+}
+
 function screenMap(){
   showChrome(true); renderFee();
   var due=dueSkills();
-  var html='<h2>Deine Zauberkarte</h2><div class="path">';
-  ISLANDS.forEach(function(is,i){
-    var k=S.skills[is.skill], isDue=due.indexOf(is.skill)>=0, side=i%2?"right":"left";
-    html+='<div class="node '+is.col+' '+side+(isDue?' due':'')+'" data-id="'+is.id+'">'+
-      (isDue?'<div class="callout">ruft dich!</div>':'')+
-      '<div class="orb">'+is.ic+'</div>'+
-      '<div class="tx"><b>'+is.name+'</b><span class="stars">'+"★".repeat(k.str)+"☆".repeat(5-k.str)+'</span></div></div>';
+  var salonOpen=S.stage>=1;
+
+  var islandsSvg="";
+  ISLANDS.forEach(function(is){
+    var k=S.skills[is.skill], isDue=due.indexOf(is.skill)>=0;
+    islandsSvg+=islandNode(is.id, is.x, is.y, is.land, is.landD, is.ic.replace(/^<svg[^>]*>|<\/svg>$/g,""),
+      isDue, false, is.name, "★".repeat(k.str)+"☆".repeat(5-k.str));
   });
-  var salonSide=ISLANDS.length%2?"right":"left", salonOpen=S.stage>=1;
-  html+='<div class="node c-lila '+salonSide+'" data-id="'+SALON_ID+'" style="'+(salonOpen?'':'opacity:.6')+'">'+
-    '<div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#7b46d6" stroke-width="1.3"/></svg></div>'+
-    '<div class="tx"><b>Der Zauber-Salon</b><span class="stars">'+(salonOpen?"Style deine Fee!":"noch verschlossen")+'</span></div></div>';
-  html+='</div>';
+  var salonIcon='<path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#c97ce0" stroke-width="1.3"/>';
+  islandsSvg+=islandNode(SALON_ID, SALON_POS.x, SALON_POS.y, SALON_POS.land, SALON_POS.landD, salonIcon,
+    false, !salonOpen, "Der Zauber-Salon", salonOpen?"Style deine Fee!":"noch verschlossen");
+
+  var html='<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 600" xmlns="http://www.w3.org/2000/svg">'+
+    '<defs>'+
+      '<linearGradient id="parchment" x1="0" y1="0" x2="1" y2="1">'+
+        '<stop offset="0" stop-color="#f6e6b8"/><stop offset="1" stop-color="#e6c583"/>'+
+      '</linearGradient>'+
+    '</defs>'+
+    '<rect x="8" y="8" width="364" height="584" rx="22" fill="url(#parchment)" stroke="#8a5a2a" stroke-width="4"/>'+
+    '<rect x="18" y="18" width="344" height="564" rx="16" fill="none" stroke="#a8763f" stroke-width="1.5" stroke-dasharray="3 6" opacity=".7"/>'+
+    '<ellipse cx="60" cy="470" rx="34" ry="20" fill="#c9a15f" opacity=".18"/>'+
+    '<ellipse cx="320" cy="230" rx="28" ry="16" fill="#c9a15f" opacity=".16"/>'+
+    '<ellipse cx="180" cy="470" rx="22" ry="14" fill="#c9a15f" opacity=".14"/>'+
+    '<path d="M96,118 C150,90 230,70 288,96 C250,180 180,220 104,322 C180,300 260,300 296,352 C260,430 220,470 200,520" '+
+      'fill="none" stroke="#8a5a2a" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="1 15" opacity=".85"/>'+
+    '<g transform="translate(332,44)" opacity=".8">'+
+      '<circle r="22" fill="none" stroke="#8a5a2a" stroke-width="1.5"/>'+
+      '<path d="M0,-20 L4,-4 L20,0 L4,4 L0,20 L-4,4 L-20,0 L-4,-4 Z" fill="#8a5a2a"/>'+
+      '<text y="-26" text-anchor="middle" font="800 11px sans-serif" fill="#8a5a2a">N</text>'+
+    '</g>'+
+    islandsSvg+
+  '</svg></div>';
   $("screen").innerHTML=html;
-  Array.prototype.forEach.call(document.querySelectorAll(".node"), function(el){
+  Array.prototype.forEach.call(document.querySelectorAll(".isle"), function(el){
     el.addEventListener("click", function(){
       var id=el.getAttribute("data-id");
       if(id===SALON_ID){ if(salonOpen) screenSalon(); else say(feeName()+" flüstert: Erst muss ich meine Farbe zurückbekommen, dann kannst du mich schminken.", true); return; }
@@ -449,7 +477,7 @@ function screenMap(){
     });
   });
   var nm=feeName();
-  say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin zaubern wir, Ylvie? Tipp eine Insel an!", true);
+  say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp eine Insel an!", true);
 }
 
 /* ============ Zauber-Salon ============ */
