@@ -137,4 +137,40 @@ Offen (nächste Schritte laut Priorisierung): Zauber-Salon (Fee selbst gestalten
 weitere Freischalt-Stufen, Zahlenraum 100 + Einmaleins, Zauber-Fragebogen, echte
 Kicher-Aufnahme falls gewünscht, Deployment.
 
+### 2026-07-15 – Deployment auf GitHub Pages
+Eigenes Repository tomschoenknecht/zauberreise angelegt (getrennt vom Gartenplaner),
+GitHub Pages aus main/root aktiviert. Live geprüft (HTTP 200): Landingpage, App,
+fee.js, kichern.js, Musikdatei. Damit läuft der Countdown jetzt dauerhaft, unabhängig
+von Toms Rechner oder einer laufenden Chat-Sitzung.
+- Landingpage: https://tomschoenknecht.github.io/zauberreise/index.html
+- Lern-App: https://tomschoenknecht.github.io/zauberreise/app.html
+Für künftige Änderungen: lokal bearbeiten, dann im Projektordner committen und
+pushen (git add -A / git commit / git push) - Pages baut automatisch neu, meist
+innerhalb 1-2 Minuten live.
+
+### 2026-07-15 – Namensvergabe auf Do 15 Uhr + Story-Erweiterung + Zauber-Salon
+Auf Toms Wunsch:
+- Namensvergabe (index.html) von "Donnerstag 00:00" auf "Donnerstag 15:00" verschoben.
+- Eingangsgeschichte um zwei Sätze erweitert: die 6-Wochen-Klammer ("wir werden
+  zusammen Abenteuer erleben, ich erwache Stück für Stück, wenn du mir hilfst")
+  und das Schmink-/Anzieh-Versprechen für später. Getestet: alle 7 Beats laufen
+  korrekt durch bis zur Challenge-Frage.
+- **Zauber-Salon gebaut** (Toms Kernidee: Fee selbst gestalten). fee.js zu einem
+  parametrisierbaren System umgebaut: Haare/Kleid als CSS-Variablen-Farbverläufe,
+  Wangen/Lippen als Farbvariable, Kopfschmuck (Tiara/Blütenkranz/Schleife/große
+  Krone) und Extra-Zauber (Schmetterlinge/Glitzerspur/Sternenstaub) als
+  austauschbare SVG-Gruppen. Katalog mit 5 Kategorien, ca. 19 Kombinationen,
+  gestaffelte Kristallpreise (0-25). Salon schaltet sich erst mit Fee-Stufe 1
+  frei (narrativ: "ich brauche erst meine Farbe zurück") - koppelt Fortschritt
+  und Gestalten sauber aneinander.
+  Getestet: Kauf mit ausreichend Kristallen (Abzug korrekt, Farbe wechselt sofort
+  global inkl. Kopfzeilen-Fee), Kauf bei zu wenig Kristallen wird abgelehnt ohne
+  Abzug, bereits gekaufte Artikel lassen sich kostenlos erneut anziehen,
+  Kopfschmuck/Extra schließen sich pro Kategorie gegenseitig aus (nur ein Item
+  sichtbar). Keine Konsolenfehler.
+Damit ist der wichtigste noch fehlende Baustein aus Toms Prioritätenliste
+umgesetzt. Bleibt offen: weitere Freischalt-Stufen (Bewegung/Fliegen),
+Zahlenraum 100 + Einmaleins, Zauber-Fragebogen, geheime Eigenschaften,
+großer selbst definierter Wunsch.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_

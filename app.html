@@ -145,6 +145,36 @@
     font-weight:800; font-size:14px; color:#6a4a10; border:3px solid #c9a13c;
     background:radial-gradient(circle at 35% 30%, #fffbe8, #f0cf7a); box-shadow:0 4px 10px rgba(90,20,90,.25);}
 
+  /* ---------- Zauber-Salon ---------- */
+  .salonPreview{width:min(46vw,190px); margin:0 auto 6px; aspect-ratio:200/236;}
+  .salonPreview svg{width:100%; display:block; filter:drop-shadow(0 12px 20px rgba(70,15,80,.4));}
+  .salonCat{margin:14px 0;}
+  .salonCat h3{color:#fff; font-size:15px; margin:0 0 8px; text-shadow:0 2px 8px rgba(80,20,90,.5);}
+  .swatches{display:flex; gap:10px; overflow-x:auto; padding:2px 2px 8px; -webkit-overflow-scrolling:touch;}
+  .swatch{flex:0 0 auto; width:74px; display:flex; flex-direction:column; align-items:center; gap:4px;
+    cursor:pointer; opacity:.55;}
+  .swatch.owned{opacity:1;}
+  .swatch.equipped .ring{outline:3px solid var(--gold); outline-offset:2px;}
+  .swatch .ring{width:52px; height:52px; border-radius:50%; border:3px solid #fff; box-shadow:0 6px 14px rgba(90,20,90,.3);}
+  .swatch .lbl{font-size:11px; color:#fff; font-weight:700; text-align:center; text-shadow:0 1px 5px rgba(80,20,90,.5);}
+  .swatch .cost{font-size:10.5px; color:var(--gold); font-weight:800;}
+  .sw-hair-goldrosa{background:linear-gradient(160deg,#fff2c6,#ff9ecf);}
+  .sw-hair-lila{background:linear-gradient(160deg,#f3e2ff,#a663e0);}
+  .sw-hair-meer{background:linear-gradient(160deg,#e3fbff,#3fa8cf);}
+  .sw-hair-feuer{background:linear-gradient(160deg,#ffe3c6,#e0503f);}
+  .sw-hair-regenbogen{background:linear-gradient(120deg,#fff2c6,#ff9ecf,#a663e0);}
+  .sw-dress-rosalila{background:linear-gradient(160deg,#ffe0f6,#c97ce0);}
+  .sw-dress-minze{background:linear-gradient(160deg,#e3fff5,#3fbf9a);}
+  .sw-dress-sonne{background:linear-gradient(160deg,#fff9e0,#f0b23f);}
+  .sw-dress-sternennacht{background:linear-gradient(160deg,#e3e9ff,#3f4fa0);}
+  .sw-dress-kristall{background:linear-gradient(160deg,#ffffff,#e6a52f);}
+  .sw-face-zart{background:linear-gradient(160deg,#fff,#ff9ec6);}
+  .sw-face-beere{background:linear-gradient(160deg,#fff,#e05fa0);}
+  .sw-face-koralle{background:linear-gradient(160deg,#fff,#ff8a6a);}
+  .sw-face-glitzer{background:linear-gradient(160deg,#fff,#ff5fd0);}
+  .sw-head-tiara,.sw-head-blume,.sw-head-schleife,.sw-head-krone,.sw-extra-keine,.sw-extra-schmetterlinge,.sw-extra-glitzerspur,.sw-extra-sternenstaub{
+    background:linear-gradient(160deg,#fff,#ffe08a); display:flex; align-items:center; justify-content:center; font-size:22px;}
+
   .back{background:none; border:none; color:#fff; font-family:inherit; font-weight:800; font-size:15px;
     cursor:pointer; padding:6px 2px; text-shadow:0 2px 8px rgba(80,20,90,.5);}
   .prog{text-align:center; font-size:13px; color:#fff; margin-top:8px; font-weight:700; opacity:.95;}
@@ -202,12 +232,15 @@ feeInject();
 
 /* ============ Zustand ============ */
 var SKILLS=["mengen","zehner","uebergang","geld"];
-var defaults={ crystals:0, stage:0, solved:0, skills:{} };
+var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],head:["tiara"],extra:["keine"]},
+                    equipped:{hair:"goldrosa",dress:"rosalila",face:"zart",head:"tiara",extra:"keine"} };
+var defaults={ crystals:0, stage:0, solved:0, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
 function load(){
   try{ var raw=localStorage.getItem(LS); if(raw){ var o=JSON.parse(raw);
     SKILLS.forEach(function(s){ if(!o.skills[s]) o.skills[s]=JSON.parse(JSON.stringify(defaults.skills[s])); });
+    if(!o.salon) o.salon=JSON.parse(JSON.stringify(defaultSalon));
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -276,6 +309,7 @@ var STAGES=[{at:0,name:"verzaubert"},{at:10,name:"Farbe kehrt zurück"},{at:25,n
 function stageFor(c){ var s=0; STAGES.forEach(function(st,i){ if(c>=st.at) s=i; }); return s; }
 function renderFee(){
   feeStage(S.stage);
+  feeCustomize(S.salon.equipped);
   $("feeMini").classList.toggle("fee-locked", S.stage<1);
   var next=STAGES[S.stage+1];
   if(next){ var prev=STAGES[S.stage].at, span=next.at-prev, have=S.crystals-prev;
@@ -378,6 +412,7 @@ function burst(){ // kleiner Funkel-Ausbruch
 }
 
 /* ============ Karte ============ */
+var SALON_ID="salon";
 function screenMap(){
   showChrome(true); renderFee();
   var due=dueSkills();
@@ -389,13 +424,59 @@ function screenMap(){
       '<div class="orb">'+is.ic+'</div>'+
       '<div class="tx"><b>'+is.name+'</b><span class="stars">'+"★".repeat(k.str)+"☆".repeat(5-k.str)+'</span></div></div>';
   });
+  var salonSide=ISLANDS.length%2?"right":"left", salonOpen=S.stage>=1;
+  html+='<div class="node c-lila '+salonSide+'" data-id="'+SALON_ID+'" style="'+(salonOpen?'':'opacity:.6')+'">'+
+    '<div class="orb"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#7b46d6" stroke-width="1.3"/></svg></div>'+
+    '<div class="tx"><b>Der Zauber-Salon</b><span class="stars">'+(salonOpen?"Style deine Fee!":"noch verschlossen")+'</span></div></div>';
   html+='</div>';
   $("screen").innerHTML=html;
   Array.prototype.forEach.call(document.querySelectorAll(".node"), function(el){
-    el.addEventListener("click", function(){ startLesson(el.getAttribute("data-id")); });
+    el.addEventListener("click", function(){
+      var id=el.getAttribute("data-id");
+      if(id===SALON_ID){ if(salonOpen) screenSalon(); else say(feeName()+" flüstert: Erst muss ich meine Farbe zurückbekommen, dann kannst du mich schminken.", true); return; }
+      startLesson(id);
+    });
   });
   var nm=feeName();
   say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin zaubern wir, Ylvie? Tipp eine Insel an!", true);
+}
+
+/* ============ Zauber-Salon ============ */
+function salonBuy(cat, id){
+  var owned=S.salon.owned[cat];
+  if(owned.indexOf(id)>=0){ S.salon.equipped[cat]=id; save(); renderFee(); screenSalon(); return; }
+  var item=FEE_CATALOG[cat].filter(function(o){ return o.id===id; })[0];
+  if(!item || S.crystals<item.cost) { say("Dafür brauchst du noch mehr Kristalle - übe weiter!", true); return; }
+  S.crystals-=item.cost; owned.push(id); S.salon.equipped[cat]=id; save(); renderFee();
+  say(feeName()+" strahlt: Wie schön!", true); screenSalon();
+}
+function salonCatHtml(cat, title){
+  var owned=S.salon.owned[cat], equipped=S.salon.equipped[cat];
+  var html='<div class="salonCat"><h3>'+title+'</h3><div class="swatches">';
+  FEE_CATALOG[cat].forEach(function(it){
+    var isOwned=owned.indexOf(it.id)>=0, isEq=equipped===it.id;
+    var glyph = cat==="head" ? {tiara:"♛",blume:"✿",schleife:"🎀",krone:"♛"}[it.id]
+              : cat==="extra" ? {keine:"—",schmetterlinge:"🦋",glitzerspur:"✨",sternenstaub:"⋆"}[it.id] : "";
+    html+='<div class="swatch'+(isOwned?" owned":"")+(isEq?" equipped":"")+'" data-cat="'+cat+'" data-id="'+it.id+'">'+
+      '<div class="ring sw-'+cat+'-'+it.id+'">'+glyph+'</div>'+
+      '<div class="lbl">'+it.name+'</div>'+
+      (isOwned?'':'<div class="cost">'+it.cost+' ✦</div>')+'</div>';
+  });
+  return html+'</div></div>';
+}
+function screenSalon(){
+  showChrome(true); renderFee();
+  var html='<button class="back" id="backBtn">‹ Zurück zur Karte</button>'+
+    '<h2>Der Zauber-Salon</h2>'+
+    '<div class="salonPreview"><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg></div>'+
+    salonCatHtml("hair","Haare")+salonCatHtml("dress","Kleid")+salonCatHtml("face","Wangen &amp; Lippen")+
+    salonCatHtml("head","Kopfschmuck")+salonCatHtml("extra","Extra-Zauber");
+  $("screen").innerHTML=html;
+  $("backBtn").addEventListener("click", screenMap);
+  Array.prototype.forEach.call(document.querySelectorAll(".swatch"), function(el){
+    el.addEventListener("click", function(){ salonBuy(el.getAttribute("data-cat"), el.getAttribute("data-id")); });
+  });
+  say(feeName()+" freut sich: Wie soll ich heute aussehen?", true);
 }
 
 var lesson=null;
