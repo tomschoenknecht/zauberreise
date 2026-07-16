@@ -499,7 +499,7 @@ function screenMap(){
       '<text x="-30" y="3" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">W</text>'+
     '</g>'+
     islandsSvg+
-    '<rect x="0" y="0" width="380" height="600" rx="24" fill="url(#vignette)"/>'+
+    '<rect x="0" y="0" width="380" height="600" rx="24" fill="url(#vignette)" pointer-events="none"/>'+
   '</svg></div>';
   $("screen").innerHTML=html;
   Array.prototype.forEach.call(document.querySelectorAll(".isle"), function(el){

@@ -205,6 +205,40 @@ Salon, gesperrter Salon zeigt weiterhin nur den Hinweistext statt sich zu
 öffnen, Sterne/Fälligkeiten korrekt aus dem Spielstand abgeleitet, keine
 Konsolenfehler.
 
+### 2026-07-15 – Lineare Reise + reichere Kartengrafik + Klick-Fehler behoben
+Tom-Feedback: Inseln sollen linear nacheinander bearbeitet werden (Ylvie kann
+nicht frei wählen), Karte soll deutlich hochwertiger aussehen.
+- **Lineare Freischaltung:** neues Feld `progress` im Spielstand. Nur Inseln bis
+  einschließlich `progress` sind betretbar, der Rest zeigt eine graue Insel mit
+  Schloss und "gesperrt". Abschluss der aktuellen Insel schaltet die nächste frei
+  ("Eine neue Insel taucht aus dem Nebel auf: ..."). Klick auf gesperrte Insel:
+  freundlicher Hinweis der Fee statt Start.
+- **Kartengrafik deutlich aufgewertet:** Ozean-Verlauf mit Wellenlinien, gerissenes
+  Pergament mit unregelmäßiger Kontur statt Rechteck, Eselsohr, Alterungsflecken,
+  ausgearbeitete Kompassrose mit Himmelsrichtungen und roter Nadel, Vignette,
+  organischere Inselformen mit Schattenwurf, Wasserlinie und Uferschaum, dazu je
+  Insel eigene Landschafts-Deko (Kristalle, Haus, Regenbogen, Marktstand, Salon).
+- **WICHTIGER FEHLER (von Tom gefunden): Inseln waren nicht anklickbar.** Ursache:
+  die neue Vignette lag als transparentes Rechteck ÜBER allen Inseln und fing
+  sämtliche Klicks ab. Fix: `pointer-events="none"` auf der Vignette.
+  **Lehre für künftige Tests:** Mein Test hatte den Fehler NICHT gefunden, weil ich
+  Klicks per `dispatchEvent` direkt an das Element geschickt habe - das überspringt
+  die Ebenen-/Trefferprüfung des Browsers und meldet fälschlich Erfolg. Bei
+  Klick-Themen künftig immer mit echtem Klick an Bildschirmkoordinaten bzw.
+  `elementFromPoint` gegenprüfen.
+Getestet (echter Klick, nicht per Skript): Funkelstein-Insel startet, gesperrte
+Insel startet nicht und zeigt Fee-Hinweis, Durchspielen von Insel 1 schaltet
+Insel 2 frei, Insel 3/4 bleiben gesperrt, keine Konsolenfehler.
+
+### 2026-07-15 – Grafik-Richtung entschieden
+Tom wollte "annähernd fotorealistisch". Ehrlich eingeordnet: mit den hier
+verfügbaren Mitteln (handgeschriebenes Vektor-SVG, kein Bildgenerator) ist echte
+Fotorealität nicht erreichbar. Tom hat sich nach Rückfrage für "beste
+Illustration, die ich zeichnen kann" entschieden - also reichere Vektor-Grafik
+mit mehr Details/Schattierung, dafür weiterhin umfärbbar und animierbar.
+Alternative (fertige Bilder einbinden) bleibt möglich, kostet aber die
+Umfärb-/Animierbarkeit an den betreffenden Stellen.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):

@@ -1,8 +1,11 @@
 /* Die Fee - EINE gemeinsame Quelle für alle Seiten.
    Einbinden: <script src="fee.js"></script> und dann feeInject() aufrufen.
    Danach überall verwendbar mit: <svg viewBox="0 0 200 236"><use href="#feeArt"/></svg>
-   Stufen steuern:      feeStage(n)        -> 0 verzaubert, 1 Farbe, 2 Augen auf + Lächeln, 3+ spricht
-   Gestalten (Salon):   feeCustomize(cfg)  -> {hair,dress,face,head,extra} Kategorie-IDs, siehe FEE_CATALOG */
+   Stufen steuern:      feeStage(n)  -> 0 verzaubert, 1 Farbe (leichtes Schwanken),
+                         2 Augen auf + Lächeln + Blinzeln, 3 spricht, 4 winkt & bewegt sich lebendiger,
+                         5 tanzt/fliegt (schnellerer Flügelschlag, gelegentliches Flattern von allein)
+   Gestalten (Salon):   feeCustomize(cfg)  -> {hair,dress,face,head,extra} Kategorie-IDs, siehe FEE_CATALOG
+   Interaktion:         feeTap()  -> von Berührung aufrufen; winkt ab Stufe 4, sonst kleines Wackeln */
 (function(){
 "use strict";
 
