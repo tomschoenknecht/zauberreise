@@ -307,7 +307,14 @@ var ISLANDS=[
 var SALON_POS={x:200, y:520, land:"#ffe0f6", landD:"#c97ce0"};
 
 /* ============ Fee-Stufen ============ */
-var STAGES=[{at:0,name:"verzaubert"},{at:10,name:"Farbe kehrt zurück"},{at:25,name:"sie öffnet die Augen und lächelt"},{at:45,name:"sie kann sprechen"}];
+var STAGES=[
+  {at:0,   name:"verzaubert"},
+  {at:10,  name:"Farbe kehrt zurück"},
+  {at:25,  name:"sie öffnet die Augen und lächelt"},
+  {at:45,  name:"sie kann sprechen"},
+  {at:70,  name:"sie kann sich bewegen und winken"},
+  {at:100, name:"sie kann fliegen und tanzen"}
+];
 function stageFor(c){ var s=0; STAGES.forEach(function(st,i){ if(c>=st.at) s=i; }); return s; }
 function renderFee(){
   feeStage(S.stage);
@@ -342,8 +349,12 @@ function playGiggle(){ if(!kReady||!audioCtx||!kicherBuf) return; try{
   g.gain.setValueAtTime(KVOL,t+play-0.06); g.gain.exponentialRampToValueAtTime(0.0001,t+play);
   src.connect(g); g.connect(audioCtx.destination); src.start(t,seg[0],dur); src.stop(t+play+0.02); }catch(e){} }
 function giggle(){ if(giggling) return; giggling=true; setTimeout(function(){ giggling=false; },900);
-  var m=$("feeMini"); if(m){ m.style.transition="transform .3s"; m.style.transform="scale(1.12) rotate(-4deg)";
-  setTimeout(function(){ m.style.transform="none"; },300); } duck(); playGiggle(); }
+  var gesture=feeTap();           // ab Stufe 4 winkt sie selbst - dann kein Hüpfen nötig
+  if(gesture!=="wave"){
+    var m=$("feeMini"); if(m){ m.style.transition="transform .3s"; m.style.transform="scale(1.12) rotate(-4deg)";
+      setTimeout(function(){ m.style.transform="none"; },300); }
+  }
+  duck(); playGiggle(); }
 
 var BGM_VOL=0.26, bgm=$("bgm"), musicOn=true, bgmNode=null, bgmGain=null, fadeTimer=null;
 try{ musicOn=localStorage.getItem(LS_MUTED)!=="1"; }catch(e){}
@@ -625,7 +636,16 @@ function screenReward(){
 }
 
 /* ============ Start ============ */
-$("feeMini").addEventListener("click", function(){ giggle(); say(S.stage>=3 ? ("Ich bin "+feeName()+". Schön, dass du da bist!") : (feeName()+" schaut dich an ..."), true); });
+$("feeMini").addEventListener("click", function(){
+  giggle();
+  var t;
+  if(S.stage>=5)      t=feeName()+" tanzt vor Freude in der Luft!";
+  else if(S.stage>=4) t=feeName()+" winkt dir zu!";
+  else if(S.stage>=3) t="Ich bin "+feeName()+". Schön, dass du da bist!";
+  else if(S.stage>=2) t=feeName()+" lächelt dich an ...";
+  else                t=feeName()+" schläft noch tief und fest ...";
+  say(t, true);
+});
 var seen=false; try{ seen=localStorage.getItem(LS_INTRO)==="1"; }catch(e){}
 if(seen) screenMap(); else screenStory();
 })();

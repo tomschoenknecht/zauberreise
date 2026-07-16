@@ -239,6 +239,34 @@ mit mehr Details/Schattierung, dafür weiterhin umfärbbar und animierbar.
 Alternative (fertige Bilder einbinden) bleibt möglich, kostet aber die
 Umfärb-/Animierbarkeit an den betreffenden Stellen.
 
+### 2026-07-15 – Fee wird über die Reise lebendiger (Punkt 1 der Vision)
+Zwei neue Stufen ergänzt, Freischaltung jetzt: 0 verzaubert (reglos) / 10 Farbe
+(atmet, Flügel regen sich leicht) / 25 Augen auf, lächelt, blinzelt von allein /
+45 spricht / **70 bewegt sich und winkt beim Antippen** / **100 fliegt und tanzt
+(kräftiger Flügelschlag, flattert gelegentlich von allein hoch)**.
+
+**Wichtiger technischer Fund (hätte die ganze Bewegung unsichtbar gemacht):**
+Die Fee steht einmal in <defs> und wird überall per <use> eingebunden. Nachgemessen:
+**CSS-Animationen auf dem Original wirken NICHT auf die <use>-Kopien** - sie liefen
+laut getAnimations(), aber die gezeichnete Fee stand komplett still (0,00 px
+Bewegung). Direkt gesetzte transform-Attribute dagegen kommen zuverlässig in allen
+Kopien an (mit 60-px-Gegenprobe verifiziert). Deshalb umgebaut: eine zentrale
+requestAnimationFrame-Schleife rechnet die Bewegung und setzt transform-Attribute
+am Original - eine Schleife, alle Kopien laufen synchron.
+
+**Testmethodik (zwei Fallstricke, beide dokumentiert):**
+1. Die Vorschau läuft als *hidden* Tab -> requestAnimationFrame wird vom Browser
+   komplett angehalten, Messung ergab fälschlich "keine Bewegung". Lösung: rAF im
+   Test durch eine eigene Uhr ersetzen und Frames manuell durchfahren.
+2. Zwei Verdachtsfälle auf Fehler ("Arm bleibt nach dem Winken gedreht") waren
+   beide Artefakte der Testuhr (unterschiedliche Zeitbasis bzw. Schleife noch mit
+   altem Zeiger belegt). Nach sauberem Neuladen: alles korrekt.
+
+Verifiziert mit gemessener Geometrie der gerenderten Kopie: Stufe 0 = 0,00 px
+Bewegung (schläft), Stufe 1 = 1,59 px (atmet), Stufe 4 = 1,90 px + Neigung,
+Stufe 5 = 3,96 px. Flügelausschlag 0° / 4° / 6° / 17°. Winken nur ab Stufe 4
+(Stufe 3 liefert "nod"), Arm hebt auf -41° und kehrt vollständig zurück.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):
