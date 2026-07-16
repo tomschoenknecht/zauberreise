@@ -267,6 +267,30 @@ Bewegung (schläft), Stufe 1 = 1,59 px (atmet), Stufe 4 = 1,90 px + Neigung,
 Stufe 5 = 3,96 px. Flügelausschlag 0° / 4° / 6° / 17°. Winken nur ab Stufe 4
 (Stufe 3 liefert "nod"), Arm hebt auf -41° und kehrt vollständig zurück.
 
+### 2026-07-15 – Längere Etappen + schwerer Fehler behoben (Fee schlief nach Einkauf ein)
+Tom: "der Erfolg kommt zu schnell, mindestens doppelt so viele Aufgaben pro Etappe."
+- **Etappenlänge von 6 auf 12 Aufgaben verdoppelt** (TASKS_PER_ISLAND). Getestet:
+  "Aufgabe 1 von 12".
+- **Schwerer Fehler beim Reinschauen gefunden und nachgestellt:** Die Fee-Stufe wurde
+  aus dem *aktuellen Kristall-Guthaben* berechnet - und der Salon zieht Kristalle ab.
+  Folge: Ylvie kauft etwas im Salon, löst danach eine Aufgabe, und die Fee **fällt in
+  den Schlaf zurück**. Nachgestellt und gemessen: Stufe 2 -> nach Einkauf (30 auf 5
+  Kristalle) und einer Aufgabe -> **Stufe 0**, grau, Augen zu. Das hätte genau die
+  Belohnung zerstört, die das ganze Konzept trägt: erst freuen, dann bestraft werden.
+  **Fix:** Guthaben (`crystals`, ausgebbar) und Lebensleistung (`earned`, nur wachsend)
+  sind jetzt getrennt. Die Fee-Stufe richtet sich allein nach `earned` und kann nie
+  mehr sinken. Zusätzlich Absicherung: `S.stage` wird nur noch erhöht, nie gesenkt.
+  Migration für bestehende Spielstände: `earned` wird mindestens auf die Schwelle der
+  bereits erreichten Stufe gesetzt - getestet mit altem Stand (Stufe 3, nur 3 Kristalle
+  Guthaben): Stufe bleibt 3, `earned` wird 45, auch nach weiteren Aufgaben stabil.
+  Keine Konsolenfehler.
+
+**Offene Pacing-Frage an Tom (noch nicht entschieden):** Mit 12 Aufgaben pro Etappe
+gibt eine Etappe bis zu 24 Kristalle. Die Fee-Stufen liegen bei 10/25/45/70/100 -
+damit wäre sie nach etwa 5 Etappen komplett erwacht, also evtl. schon in der ersten
+Ferienwoche. Für einen 6-Wochen-Bogen müssten die Schwellen deutlich höher (Vorschlag:
+z. B. 20/60/120/200/300) oder es braucht mehr Stufen. Mit Tom klären.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):

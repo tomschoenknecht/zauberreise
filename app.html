@@ -234,7 +234,10 @@ if(TEST){
 var SKILLS=["mengen","zehner","uebergang","geld"];
 var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],head:["tiara"],extra:["keine"]},
                     equipped:{hair:"goldrosa",dress:"rosalila",face:"zart",head:"tiara",extra:"keine"} };
-var defaults={ crystals:0, stage:0, solved:0, progress:0, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
+/* crystals = Guthaben zum Ausgeben (Salon senkt es)
+   earned   = insgesamt je verdiente Kristalle - NUR daraus wächst die Fee.
+   Beides muss getrennt bleiben, sonst schläft die Fee nach einem Einkauf wieder ein. */
+var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
 function load(){
@@ -242,6 +245,7 @@ function load(){
     SKILLS.forEach(function(s){ if(!o.skills[s]) o.skills[s]=JSON.parse(JSON.stringify(defaults.skills[s])); });
     if(!o.salon) o.salon=JSON.parse(JSON.stringify(defaultSalon));
     if(typeof o.progress!=="number") o.progress=0;
+    if(typeof o.earned!=="number") o.earned=o.crystals||0;  // Feinschliff unten, sobald STAGES bekannt ist
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -316,14 +320,17 @@ var STAGES=[
   {at:100, name:"sie kann fliegen und tanzen"}
 ];
 function stageFor(c){ var s=0; STAGES.forEach(function(st,i){ if(c>=st.at) s=i; }); return s; }
+/* Nachtrag der Migration: eine schon erreichte Stufe darf nie verloren gehen. */
+if(S.earned < STAGES[S.stage||0].at){ S.earned = STAGES[S.stage||0].at; save(); }
+
 function renderFee(){
   feeStage(S.stage);
   feeCustomize(S.salon.equipped);
   $("feeMini").classList.toggle("fee-locked", S.stage<1);
   var next=STAGES[S.stage+1];
-  if(next){ var prev=STAGES[S.stage].at, span=next.at-prev, have=S.crystals-prev;
+  if(next){ var prev=STAGES[S.stage].at, span=next.at-prev, have=S.earned-prev;
     $("unlockFill").style.width=Math.max(0,Math.min(100, have/span*100))+"%";
-    $("unlockLab").textContent="Noch "+Math.max(0,next.at-S.crystals)+" Kristalle bis: "+next.name;
+    $("unlockLab").textContent="Noch "+Math.max(0,next.at-S.earned)+" Kristalle bis: "+next.name;
   } else { $("unlockFill").style.width="100%"; $("unlockLab").textContent=feeName()+" ist ganz erwacht!"; }
   $("crystalCount").textContent=S.crystals;
 }
@@ -332,7 +339,14 @@ function say(text, speak){
   if(speak && S.stage>=3){ try{ var u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.pitch=1.5; u.rate=1.0;
     speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){} }
 }
-function addCrystals(n){ S.crystals+=n; var ns=stageFor(S.crystals); var up=ns>S.stage; S.stage=ns; save(); renderFee(); return up; }
+/* Guthaben UND Lebensleistung erhöhen. Die Stufe richtet sich allein nach "earned"
+   und kann deshalb durch Einkäufe im Salon nie wieder sinken. */
+function addCrystals(n){
+  S.crystals+=n; S.earned+=n;
+  var ns=stageFor(S.earned); var up=ns>S.stage;
+  if(ns>S.stage) S.stage=ns;
+  save(); renderFee(); return up;
+}
 
 /* ============ Ton ============ */
 var audioCtx=null, kicherBuf=null, kReady=false, lastTake=-1, giggling=false;
@@ -563,13 +577,15 @@ function screenSalon(){
 }
 
 var lesson=null;
+var TASKS_PER_ISLAND=12;   // vorher 6 - Erfolg kam zu schnell
 function islandIndex(id){ for(var i=0;i<ISLANDS.length;i++){ if(ISLANDS[i].id===id) return i; } return -1; }
 function islandLocked(id){ return islandIndex(id) > S.progress; }
 function startLesson(id){
   if(islandLocked(id)){ say(feeName()+" flüstert: Eine Insel nach der anderen - lass uns erst hierbleiben.", true); return; }
   var is=ISLANDS.filter(function(i){return i.id===id;})[0];
   var plan=[], due=dueSkills().filter(function(s){ return s!==is.skill; });
-  for(var i=0;i<6;i++){ if(i>0 && i%3===0 && due.length) plan.push(due[rnd(0,due.length-1)]); else plan.push(is.skill); }
+  /* Etappenlänge: der Erfolg soll erarbeitet sein, nicht nach drei Klicks kommen. */
+  for(var i=0;i<TASKS_PER_ISLAND;i++){ if(i>0 && i%3===0 && due.length) plan.push(due[rnd(0,due.length-1)]); else plan.push(is.skill); }
   lesson={island:is, plan:plan, idx:0, tries:0, gained:0};
   nextTask();
 }
