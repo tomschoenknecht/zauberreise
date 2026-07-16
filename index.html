@@ -349,6 +349,7 @@
 
   function currentState(){
     if(override) return override;
+    if(TEST) return "open";   // im Testmodus ist die Tür immer offen, damit Tom durchkommt
     var now=new Date();
     if(now>=OPEN)   return "open";
     if(now>=NAMING) return "naming";
