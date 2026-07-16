@@ -237,7 +237,7 @@ var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],hea
 /* crystals = Guthaben zum Ausgeben (Salon senkt es)
    earned   = insgesamt je verdiente Kristalle - NUR daraus wächst die Fee.
    Beides muss getrennt bleiben, sonst schläft die Fee nach einem Einkauf wieder ein. */
-var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
+var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, sections:{}, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
 function load(){
@@ -246,6 +246,7 @@ function load(){
     if(!o.salon) o.salon=JSON.parse(JSON.stringify(defaultSalon));
     if(typeof o.progress!=="number") o.progress=0;
     if(typeof o.earned!=="number") o.earned=o.crystals||0;  // Feinschliff unten, sobald STAGES bekannt ist
+    if(!o.sections) o.sections={};
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -481,8 +482,12 @@ function screenMap(){
   var islandsSvg="";
   ISLANDS.forEach(function(is,i){
     var k=S.skills[is.skill], isDue=due.indexOf(is.skill)>=0, locked=i>S.progress;
+    var sec=sectionDone(is.id), unter;
+    if(locked)                     unter="gesperrt";
+    else if(sec>0 && sec<SECTIONS.length) unter="Abschnitt "+(sec+1)+" von "+SECTIONS.length;   // angefangen
+    else                           unter="★".repeat(k.str)+"☆".repeat(5-k.str);
     islandsSvg+=islandNode(is.id, is.x, is.y, is.land, is.landD, is.ic.replace(/^<svg[^>]*>|<\/svg>$/g,""),
-      isDue&&!locked, locked, is.name, locked?"gesperrt":("★".repeat(k.str)+"☆".repeat(5-k.str)), ISLAND_DECO[is.id]);
+      isDue&&!locked, locked, is.name, unter, ISLAND_DECO[is.id]);
   });
   var salonIcon='<path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#c97ce0" stroke-width="1.3"/>';
   islandsSvg+=islandNode(SALON_ID, SALON_POS.x, SALON_POS.y, SALON_POS.land, SALON_POS.landD, salonIcon,
@@ -577,27 +582,52 @@ function screenSalon(){
 }
 
 var lesson=null;
-var TASKS_PER_ISLAND=12;   // vorher 6 - Erfolg kam zu schnell
+/* Eine Insel ist ein kleines Abenteuer in drei Abschnitten statt einer langen Liste.
+   Nach jedem Abschnitt gibt es einen Rastplatz: Ylvie kann dort gefahrlos aufhören
+   und später genau da weitermachen - wichtig bei ihrer kurzen Aufmerksamkeitsspanne. */
+var SECTIONS=[
+  {tasks:8, name:"Zum Aufwärmen",      line:"Der erste Abschnitt ist geschafft!"},
+  {tasks:8, name:"Jetzt wird gezaubert", line:"Nur noch ein Abschnitt bis zum Schatz!"},
+  {tasks:8, name:"Die letzte Prüfung",  line:"Der Schatz der Insel gehört dir!"}
+];
+var TASKS_PER_ISLAND=SECTIONS.reduce(function(a,s){ return a+s.tasks; },0);   // 24
+
 function islandIndex(id){ for(var i=0;i<ISLANDS.length;i++){ if(ISLANDS[i].id===id) return i; } return -1; }
 function islandLocked(id){ return islandIndex(id) > S.progress; }
+function sectionDone(id){ return (S.sections && S.sections[id]) || 0; }
+function setSectionDone(id, n){ if(!S.sections) S.sections={}; S.sections[id]=n; save(); }
+
 function startLesson(id){
   if(islandLocked(id)){ say(feeName()+" flüstert: Eine Insel nach der anderen - lass uns erst hierbleiben.", true); return; }
   var is=ISLANDS.filter(function(i){return i.id===id;})[0];
-  var plan=[], due=dueSkills().filter(function(s){ return s!==is.skill; });
-  /* Etappenlänge: der Erfolg soll erarbeitet sein, nicht nach drei Klicks kommen. */
-  for(var i=0;i<TASKS_PER_ISLAND;i++){ if(i>0 && i%3===0 && due.length) plan.push(due[rnd(0,due.length-1)]); else plan.push(is.skill); }
-  lesson={island:is, plan:plan, idx:0, tries:0, gained:0};
+  var sec=sectionDone(id);
+  if(sec>=SECTIONS.length) sec=0;              // Insel erneut spielen -> wieder von vorn
+  lesson={island:is, section:sec, idx:0, tries:0, gained:0, total:0, plan:[]};
+  buildSectionPlan();
   nextTask();
 }
+/* Aufgaben nur für den aktuellen Abschnitt bauen (Schwerpunkt der Insel + fällige Wiederholungen) */
+function buildSectionPlan(){
+  var is=lesson.island, n=SECTIONS[lesson.section].tasks;
+  var due=dueSkills().filter(function(s){ return s!==is.skill; });
+  var plan=[];
+  for(var i=0;i<n;i++){ if(i>0 && i%3===0 && due.length) plan.push(due[rnd(0,due.length-1)]); else plan.push(is.skill); }
+  lesson.plan=plan; lesson.idx=0;
+}
 function pick(a){ return a[rnd(0,a.length-1)]; }
-function nextTask(){ if(lesson.idx>=lesson.plan.length) return screenReward(); lesson.task=GEN[lesson.plan[lesson.idx]](); lesson.tries=0; renderTask(); }
+function nextTask(){
+  if(lesson.idx>=lesson.plan.length) return screenSectionDone();
+  lesson.task=GEN[lesson.plan[lesson.idx]](); lesson.tries=0; renderTask();
+}
 
 function renderTask(){
   var t=lesson.task;
   $("screen").innerHTML='<button class="back" id="backBtn">‹ Zurück zur Karte</button>'+
     '<div class="card"><div class="q">'+t.q+'</div><div class="visual" id="visual">'+t.visual+'</div>'+
     '<div class="opts" id="opts">'+t.opts.map(function(o){ return '<button class="opt" data-v="'+o+'">'+o+(t.unit||"")+'</button>'; }).join("")+'</div>'+
-    '<div id="hintSlot"></div></div><div class="prog">Aufgabe '+(lesson.idx+1)+' von '+lesson.plan.length+'</div>';
+    '<div id="hintSlot"></div></div><div class="prog">'+SECTIONS[lesson.section].name+
+      ' &middot; Aufgabe '+(lesson.idx+1)+' von '+lesson.plan.length+
+      ' &middot; Abschnitt '+(lesson.section+1)+' von '+SECTIONS.length+'</div>';
   $("backBtn").addEventListener("click", screenMap);
   Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(b){ b.addEventListener("click", function(){ answer(parseInt(b.getAttribute("data-v"),10), b); }); });
   if(t.flash){ var v=$("visual"); setTimeout(function(){ if(v&&lesson&&lesson.task===t){ v.style.transition="opacity .3s"; v.style.opacity="0"; } }, 1500); }
@@ -607,7 +637,7 @@ function answer(v, btn){
   var t=lesson.task;
   if(v===t.answer){
     btn.classList.add("right"); var first=(lesson.tries===0), got=first?2:1;
-    lesson.gained+=got; schedule(t.skill, first); var up=addCrystals(got);
+    lesson.gained+=got; lesson.total+=got; schedule(t.skill, first); var up=addCrystals(got);
     say(pick(["Ja! Genau richtig.","Wunderbar!","Das war zauberhaft.","Richtig!"]), true);
     Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(b){ b.disabled=true; if(b!==btn) b.classList.add("soft"); });
     setTimeout(function(){ lesson.idx++; if(up) return screenLevelUp(); nextTask(); }, 850);
@@ -615,7 +645,7 @@ function answer(v, btn){
     lesson.tries++; btn.classList.add("soft"); btn.disabled=true;
     if(t.flash){ var v=$("visual"); if(v) v.style.opacity="1"; }
     if(lesson.tries===1){ say("Fast! Schau mal ...", true); $("hintSlot").innerHTML='<div class="hintbox">'+t.hint+'</div>'; if(t.hintVisual) $("visual").innerHTML=t.hintVisual; }
-    else{ schedule(t.skill,false); var up2=addCrystals(1); lesson.gained+=1;
+    else{ schedule(t.skill,false); var up2=addCrystals(1); lesson.gained+=1; lesson.total+=1;
       $("hintSlot").innerHTML='<div class="hintbox">Die Antwort ist <b>'+t.answer+(t.unit||"")+'</b>. '+t.hint+'</div>';
       say("Das machen wir zusammen - beim nächsten Mal kannst du es.", true);
       var b=document.createElement("button"); b.className="btn pink"; b.textContent="Weiter";
@@ -635,19 +665,45 @@ function screenLevelUp(){
     '<button class="btn pink" id="goOn">Weiter zaubern</button></div>';
   feeStage(S.stage); burst();
   say(feeName()+" strahlt: "+st.name+"!", true);
-  $("goOn").addEventListener("click", function(){ if(lesson && lesson.idx<lesson.plan.length) nextTask(); else screenReward(); });
+  $("goOn").addEventListener("click", function(){ if(lesson && lesson.idx<lesson.plan.length) nextTask(); else screenSectionDone(); });
+}
+
+/* Rastplatz nach jedem Abschnitt. Ylvie darf hier gefahrlos aufhören -
+   der Abschnitt ist gespeichert, sie steigt später genau hier wieder ein. */
+function screenSectionDone(){
+  var secIdx=lesson.section, isLast=(secIdx>=SECTIONS.length-1);
+  setSectionDone(lesson.island.id, secIdx+1);
+  S.solved+=lesson.plan.length; save();
+  if(isLast) return screenReward();
+
+  var sec=SECTIONS[secIdx];
+  $("screen").innerHTML='<div class="card rewardWrap">'+
+    '<h2 style="color:#5a1560;text-shadow:none">'+sec.line+'</h2>'+
+    '<p class="big">+'+lesson.gained+'</p>'+
+    '<p style="font-weight:700">Kristalle im Abschnitt "'+sec.name+'"</p>'+
+    '<p style="font-weight:700;color:#7b46d6">Noch '+(SECTIONS.length-secIdx-1)+' von '+SECTIONS.length+
+      ' Abschnitten auf '+lesson.island.name+'.</p>'+
+    '<button class="btn pink" id="goNext">Weiter zum nächsten Abschnitt</button>'+
+    '<button class="btn ghost" id="pause" style="font-size:15px;padding:11px 18px;margin-top:8px">Pause machen</button>'+
+    '<p style="font-size:12.5px;opacity:.75;margin-top:8px">Dein Abschnitt ist gespeichert - du kannst jederzeit hier weitermachen.</p>'+
+    '</div>';
+  say(sec.line+" Willst du weiter, oder machen wir Pause?", true);
+  $("goNext").addEventListener("click", function(){
+    lesson.section=secIdx+1; lesson.gained=0; buildSectionPlan(); nextTask();
+  });
+  $("pause").addEventListener("click", function(){ lesson=null; screenMap(); });
 }
 function screenReward(){
-  S.solved+=lesson.plan.length;
+  /* solved wurde bereits im Rastplatz gezählt - hier nicht doppelt zählen. */
   var justIdx=islandIndex(lesson.island.id), unlockedNew=false, nextIsland=null;
   if(justIdx===S.progress && S.progress<ISLANDS.length-1){ S.progress++; unlockedNew=true; nextIsland=ISLANDS[S.progress]; }
   save();
   var extra = unlockedNew ?
     '<p style="font-weight:700;color:#7b46d6">Eine neue Insel taucht aus dem Nebel auf: '+nextIsland.name+'!</p>' : '';
   $("screen").innerHTML='<div class="card rewardWrap"><h2 style="color:#5a1560;text-shadow:none">Geschafft!</h2>'+
-    '<p class="big">+'+lesson.gained+'</p><p style="font-weight:700">Kristalle für '+lesson.island.name+'</p>'+extra+
+    '<p class="big">+'+lesson.total+'</p><p style="font-weight:700">Kristalle auf '+lesson.island.name+'</p>'+extra+
     '<button class="btn pink" id="toMap">Zurück zur Zauberkarte</button></div>';
-  say(unlockedNew ? ("Du hast "+lesson.gained+" Kristalle gesammelt - und eine neue Insel entdeckt!") : ("Du hast "+lesson.gained+" Kristalle gesammelt!"), true);
+  say(unlockedNew ? ("Du hast "+lesson.total+" Kristalle gesammelt - und eine neue Insel entdeckt!") : ("Du hast "+lesson.total+" Kristalle gesammelt!"), true);
   $("toMap").addEventListener("click", screenMap); lesson=null;
 }
 

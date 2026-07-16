@@ -291,6 +291,24 @@ damit wäre sie nach etwa 5 Etappen komplett erwacht, also evtl. schon in der er
 Ferienwoche. Für einen 6-Wochen-Bogen müssten die Schwellen deutlich höher (Vorschlag:
 z. B. 20/60/120/200/300) oder es braucht mehr Stufen. Mit Tom klären.
 
+### 2026-07-15 – Inseln länger und als kleines Abenteuer in Abschnitten
+Tom: "der Erfolg kommt zu schnell, mindestens doppelt so viele Aufgaben pro
+Etappe, da kann mehr passieren."
+- Aufgaben pro Insel von 12 auf **24 verdoppelt**.
+- Statt einer langen Liste: **3 Abschnitte** je 8 Aufgaben ("Zum Aufwärmen",
+  "Jetzt wird gezaubert", "Die letzte Prüfung"). Nach jedem Abschnitt ein
+  **Rastplatz** mit Zwischenbelohnung und der Wahl "Weiter" oder "Pause machen".
+- **Wiedereinstieg punktgenau:** der erreichte Abschnitt wird pro Insel gespeichert
+  (S.sections[inselId]); bei Pause/Verlassen steigt Ylvie später genau im nächsten
+  Abschnitt wieder ein, nicht von vorn. Das ist bei ihrer ~10-Minuten-Spanne
+  wichtig - eine 24-Aufgaben-Insel am Stück würde sie sonst mittendrin abbrechen
+  und alles verlieren. Karte zeigt bei angefangenen Inseln "Abschnitt x von 3".
+- Insel-Gesamtbelohnung summiert jetzt über alle Abschnitte (lesson.total).
+Getestet (echte Klicks, kompletter Durchlauf): Abschnitt 1 endet am Rastplatz statt
+sofort "Geschafft"; Pause führt zur Karte, Karte zeigt "Abschnitt 2 von 3";
+Wiedereinstieg startet in Abschnitt 2 Aufgabe 1; nach Abschnitt 3 kommt "Geschafft!"
+mit Gesamtsumme +38 und Freischaltung der nächsten Insel. Keine Konsolenfehler.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):
