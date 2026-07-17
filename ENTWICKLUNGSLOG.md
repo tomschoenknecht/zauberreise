@@ -341,6 +341,45 @@ Getestet:
   "fehlt", Subtraktion mit 10 "kommt nicht vor") - beides war Zufall in zu
   kleinen Stichproben. Bei Zufallsinhalten immer ausreichend groß stichproben.
 
+### 2026-07-17 – YLVIE HAT GESTARTET. Erste echte Rückmeldung: **"sie hat Spaß"**
+Ferienstart, Tür ging um 15:00 auf, Ylvie hat gespielt. Toms Rückmeldung nach der
+ersten Sitzung: **"sie hat spaß"**. Das ist die wichtigste Bestätigung des ganzen
+Konzepts - Motivation war das Kernproblem, und der Einstieg trägt.
+Zwischenfall: Tom meldete "App läuft bei Ylvie nicht", kurz darauf "läuft jetzt".
+Live-Version war durchgehend erreichbar (alle Dateien HTTP 200, keine Fehler in
+der Konsole, Eingangsgeschichte startete sauber). Ursache blieb ungeklärt -
+vermutlich Zwischenspeicher oder Seite noch nicht fertig geladen. Keine Änderung
+an der Live-App nötig. Beobachten, ob es wiederkommt.
+Noch offen und wichtig: konkretes Feedback von Ylvie (was macht Spaß, wo hakt es,
+wo gibt sie auf) - das steuert den weiteren Ausbau.
+
+### 2026-07-17 – Der große Wunsch + Sechs-Wochen-Takt korrigiert
+**Wichtiger Fund vor dem Einbau:** Mit den alten Stufen-Schwellen (10/25/45/70/100)
+wäre die Fee schon nach ca. 3 Inseln komplett erwacht - also nach 1-2 Wochen,
+danach hätte es für die restlichen 4 Wochen nichts mehr freizuschalten gegeben.
+Genau das Sechs-Wochen-Problem, das Tom früh angesprochen hatte.
+- **Schwellen gestreckt auf 12/35/75/140/220.** Rechnung: eine Insel bringt ca. 38
+  Kristalle (24 Aufgaben), sechs Inseln also ca. 230 - die volle Befreiung der Fee
+  ist damit der Höhepunkt am ENDE der Reise. Erste Stufe bewusst früh (12, noch im
+  ersten Abschnitt), damit Ylvie die Wirkung sofort sieht (Persona: Fortschritt
+  früh und sichtbar).
+- **Der große Wunsch gebaut:** Ylvie legt direkt nach der Challenge ihr eigenes
+  Fernziel fest (Freitext + 8 Ideen-Vorschläge zum Antippen). Erfüllt wird er,
+  wenn die Fee ganz frei ist (220 Kristalle) - also am Ende der sechs Wochen.
+  Banner auf der Karte zeigt Wunsch + Restweg und ist antippbar (Wunsch änderbar).
+  Eigener Erfüllungs-Bildschirm mit Funkel-Ausbruch. Hinweis im Wunsch-Dialog:
+  "Besprich deinen Wunsch mit Mama oder Papa" - er muss ja einlösbar sein.
+- **Migration ohne Verlust getestet** (kritisch, da Ylvie schon echten Fortschritt
+  hat): simulierter Altstand (Stufe 3 bei 45 Kristallen) behält nach dem Update
+  Stufe 3, earned wird auf die neue Schwelle (75) angehoben statt die Stufe zu
+  entziehen. Guthaben, Insel-Fortschritt, Abschnitte und Wunsch bleiben unberührt.
+  Grundsatz: es wird nie etwas weggenommen.
+- **Gefundener Fehler:** "Noch 1 Kristalle" (Mehrzahl bei Einzahl) an drei Stellen -
+  Helfer kristalle(n) eingeführt, korrigiert zu "1 Kristall", bestätigt.
+Getestet: Wunsch-Bildschirm erscheint nach der Challenge, Ideen-Knopf füllt das
+Feld, zu kurze Eingabe wird abgelehnt, Banner zählt korrekt runter, Erfüllung
+löst bei Zielerreichung aus und wird gespeichert, Fee auf Stufe 5. Keine Fehler.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):

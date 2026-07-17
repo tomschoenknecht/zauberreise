@@ -134,6 +134,22 @@
     font-weight:800; font-size:14px; color:#6a4a10; border:3px solid #c9a13c;
     background:radial-gradient(circle at 35% 30%, #fffbe8, #f0cf7a); box-shadow:0 4px 10px rgba(90,20,90,.25);}
 
+  /* ---------- Großer Wunsch ---------- */
+  .wishBanner{display:flex; align-items:center; gap:10px; background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,240,252,.96));
+    color:var(--plum); border:3px solid var(--gold); border-radius:20px; padding:9px 12px; margin-bottom:10px;
+    box-shadow:0 8px 20px rgba(90,20,90,.28); cursor:pointer;}
+  .wishBanner .wstar{flex:0 0 34px; width:34px; height:34px;}
+  .wishBanner .wtx{flex:1; min-width:0;}
+  .wishBanner .wtx b{display:block; font-size:14.5px; line-height:1.2;}
+  .wishBanner .wtx span{font-size:11.5px; opacity:.8;}
+  .wishBanner .wbar{height:8px; background:#f0d9ee; border-radius:999px; overflow:hidden; margin-top:5px;}
+  .wishBanner .wbar i{display:block; height:100%; background:linear-gradient(90deg,var(--gold2),var(--pink2)); width:0%;}
+  .wishInput{font-family:inherit; font-size:19px; text-align:center; font-weight:800; color:#6a1550;
+    border:none; border-radius:14px; padding:12px 14px; width:100%; outline:3px solid var(--pink); background:#fff5fb;}
+  .wishIdeas{display:flex; flex-wrap:wrap; gap:7px; justify-content:center; margin:10px 0 4px;}
+  .wishIdea{background:#fff; border:2px solid var(--pink); color:var(--plum); border-radius:999px;
+    padding:7px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;}
+
   /* ---------- Zauber-Salon ---------- */
   .salonPreview{width:min(46vw,190px); margin:0 auto 6px; aspect-ratio:200/236;}
   .salonPreview svg{width:100%; display:block; filter:drop-shadow(0 12px 20px rgba(70,15,80,.4));}
@@ -237,7 +253,8 @@ var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],hea
 /* crystals = Guthaben zum Ausgeben (Salon senkt es)
    earned   = insgesamt je verdiente Kristalle - NUR daraus wächst die Fee.
    Beides muss getrennt bleiben, sonst schläft die Fee nach einem Einkauf wieder ein. */
-var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, sections:{}, skills:{}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
+var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, sections:{}, skills:{},
+               wish:{text:"", granted:false}, salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
 function load(){
@@ -247,6 +264,7 @@ function load(){
     if(typeof o.progress!=="number") o.progress=0;
     if(typeof o.earned!=="number") o.earned=o.crystals||0;  // Feinschliff unten, sobald STAGES bekannt ist
     if(!o.sections) o.sections={};
+    if(!o.wish) o.wish={text:"", granted:false};
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -353,16 +371,24 @@ var ISLANDS=[
 var SALON_POS={x:190, y:690, land:"#ffe0f6", landD:"#c97ce0"};
 var MAP_H=760;   // Kartenhöhe (viewBox), gewachsen mit den zusätzlichen Inseln
 
-/* ============ Fee-Stufen ============ */
+/* ============ Fee-Stufen ============
+   Takt für SECHS Wochen: eine Insel bringt ca. 38 Kristalle (24 Aufgaben),
+   sechs Inseln also ca. 230. Die Schwellen sind so gesetzt, dass die volle
+   Befreiung der Fee der Höhepunkt am ENDE der Reise ist - und nicht schon
+   nach der dritten Insel alles freigeschaltet wäre. Erste Stufe kommt bewusst
+   früh (noch im ersten Abschnitt), damit Ylvie die Wirkung sofort sieht. */
 var STAGES=[
   {at:0,   name:"verzaubert"},
-  {at:10,  name:"Farbe kehrt zurück"},
-  {at:25,  name:"sie öffnet die Augen und lächelt"},
-  {at:45,  name:"sie kann sprechen"},
-  {at:70,  name:"sie kann sich bewegen und winken"},
-  {at:100, name:"sie kann fliegen und tanzen"}
+  {at:12,  name:"Farbe kehrt zurück"},
+  {at:35,  name:"sie öffnet die Augen und lächelt"},
+  {at:75,  name:"sie kann sprechen"},
+  {at:140, name:"sie kann sich bewegen und winken"},
+  {at:220, name:"sie ist frei - sie fliegt und tanzt"}
 ];
+var WISH_TARGET=STAGES[STAGES.length-1].at;   // Der große Wunsch geht in Erfüllung, wenn die Fee ganz frei ist
 function stageFor(c){ var s=0; STAGES.forEach(function(st,i){ if(c>=st.at) s=i; }); return s; }
+/* Einzahl/Mehrzahl: "1 Kristall" statt "1 Kristalle" */
+function kristalle(n){ return n+(n===1?" Kristall":" Kristalle"); }
 /* Nachtrag der Migration: eine schon erreichte Stufe darf nie verloren gehen. */
 if(S.earned < STAGES[S.stage||0].at){ S.earned = STAGES[S.stage||0].at; save(); }
 
@@ -373,7 +399,7 @@ function renderFee(){
   var next=STAGES[S.stage+1];
   if(next){ var prev=STAGES[S.stage].at, span=next.at-prev, have=S.earned-prev;
     $("unlockFill").style.width=Math.max(0,Math.min(100, have/span*100))+"%";
-    $("unlockLab").textContent="Noch "+Math.max(0,next.at-S.earned)+" Kristalle bis: "+next.name;
+    $("unlockLab").textContent="Noch "+kristalle(Math.max(0,next.at-S.earned))+" bis: "+next.name;
   } else { $("unlockFill").style.width="100%"; $("unlockLab").textContent=feeName()+" ist ganz erwacht!"; }
   $("crystalCount").textContent=S.crystals;
 }
@@ -466,7 +492,7 @@ function screenStory(){
     if(!last){ $("screen").querySelector(".story").addEventListener("click", function h(){ idx++; render(); }, {once:true}); }
     else{
       $("yes").addEventListener("click", function(e){ e.stopPropagation(); try{ localStorage.setItem(LS_INTRO,"1"); }catch(x){}
-        burst(); setTimeout(screenMap, 500); });
+        burst(); setTimeout(function(){ S.wish.text ? screenMap() : screenWish(); }, 500); });
       $("later").addEventListener("click", function(e){ e.stopPropagation(); idx=0; render(); });
     }
   }
@@ -523,7 +549,72 @@ function islandNode(id, x, y, land, landD, iconInner, isDue, locked, labelHtml, 
   '</g>';
 }
 
+/* ============ Der große Wunsch ============
+   Ylvies eigenes Fernziel für die ganze Reise. Sie legt ihn selbst fest - das ist
+   der Leuchtturm, auf den alles zuläuft. Erfüllt wird er, wenn die Fee ganz frei
+   ist (WISH_TARGET Kristalle), also am Ende der sechs Wochen. */
+var WISH_IDEAS=["ein Kinobesuch","einmal Pizza backen","ein Tag im Schwimmbad","ein neues Buch",
+  "ein Ausflug in den Zoo","einmal ganz lange aufbleiben","ein Eis essen gehen","ein Bastel-Nachmittag"];
+var STAR_SVG='<svg viewBox="0 0 24 24"><path d="M12 1l3 7.5L23 9.5l-5.5 5 1.5 8L12 18.5 5 22.5l1.5-8L1 9.5l8-1z" fill="#ffe08a" stroke="#e6a52f" stroke-width="1.2"/></svg>';
+
+function screenWish(){
+  showChrome(false);
+  var vorhanden=S.wish.text;
+  $("screen").innerHTML='<div class="story">'+feeSvgBlock()+
+    '<div class="storyText">'+(vorhanden
+      ? '"Du hast dir gewünscht: <b>'+esc(S.wish.text)+'</b>. Willst du etwas anderes wünschen?"'
+      : '"Ylvie, ich schenke dir etwas: einen echten Wunsch! Wenn du mich ganz befreit hast, geht er in Erfüllung. Was wünschst du dir am allermeisten?"')+'</div>'+
+    '<div class="panel">'+
+      '<input class="wishInput" id="wishInput" maxlength="40" placeholder="Mein Wunsch ist ..." autocomplete="off" value="'+esc(S.wish.text)+'">'+
+      '<div class="wishIdeas" id="wishIdeas">'+WISH_IDEAS.map(function(w,i){ return '<button class="wishIdea" data-i="'+i+'">'+w+'</button>'; }).join("")+'</div>'+
+      '<button class="btn pink big" id="wishSave" style="width:100%">Das ist mein Wunsch!</button>'+
+      '<p style="font-size:12px;opacity:.75;margin:10px 0 0">Besprich deinen Wunsch mit Mama oder Papa - dann zählt er richtig.</p>'+
+    '</div></div>';
+  feeStage(S.stage);
+  Array.prototype.forEach.call(document.querySelectorAll(".wishIdea"), function(b){
+    b.addEventListener("click", function(){ $("wishInput").value=WISH_IDEAS[+b.getAttribute("data-i")]; });
+  });
+  $("wishSave").addEventListener("click", function(){
+    var v=$("wishInput").value.trim();
+    if(v.length<3){ $("wishInput").focus(); return; }
+    S.wish.text=v; save();
+    burst();
+    setTimeout(screenMap, 500);
+  });
+}
+function esc(s){ return String(s||"").replace(/[<>&"]/g, function(c){ return {"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;"}[c]; }); }
+
+function wishBannerHtml(){
+  if(!S.wish.text) return '<div class="wishBanner" id="wishBanner">'+
+    '<div class="wstar">'+STAR_SVG+'</div>'+
+    '<div class="wtx"><b>Du hast noch keinen Wunsch</b><span>Tipp hier - '+feeName()+' erfüllt ihn dir am Ende!</span></div></div>';
+  if(S.wish.granted) return '<div class="wishBanner" id="wishBanner">'+
+    '<div class="wstar">'+STAR_SVG+'</div>'+
+    '<div class="wtx"><b>Wunsch erfüllt: '+esc(S.wish.text)+'</b><span>Du hast es geschafft!</span></div></div>';
+  var p=Math.min(100, S.earned/WISH_TARGET*100);
+  return '<div class="wishBanner" id="wishBanner">'+
+    '<div class="wstar">'+STAR_SVG+'</div>'+
+    '<div class="wtx"><b>Dein Wunsch: '+esc(S.wish.text)+'</b>'+
+    '<span>Noch '+kristalle(Math.max(0,WISH_TARGET-S.earned))+', bis '+feeName()+' ganz frei ist</span>'+
+    '<div class="wbar"><i style="width:'+p.toFixed(1)+'%"></i></div></div></div>';
+}
+function screenWishGranted(){
+  showChrome(true); renderFee();
+  $("screen").innerHTML='<div class="card rewardWrap">'+
+    feeSvgBlock().replace('style="','style="width:min(46vw,180px);')+
+    '<h2 style="color:#5a1560;text-shadow:none">Dein Wunsch geht in Erfüllung!</h2>'+
+    '<p style="font-weight:800;font-size:20px;color:#ff5fb6">'+esc(S.wish.text)+'</p>'+
+    '<p style="font-weight:700">Du hast '+feeName()+' ganz befreit. Sie fliegt und tanzt - und dein Wunsch ist verdient!</p>'+
+    '<p style="font-size:12.5px;opacity:.75">Zeig das Mama oder Papa.</p>'+
+    '<button class="btn pink" id="wgOk">Juhu!</button></div>';
+  feeStage(S.stage); burst();
+  say("Dein Wunsch geht in Erfüllung: "+S.wish.text+"!", true);
+  $("wgOk").addEventListener("click", screenMap);
+}
+
 function screenMap(){
+  /* Wunsch erfüllt? Einmalig feiern, bevor die Karte kommt. */
+  if(S.wish.text && !S.wish.granted && S.earned>=WISH_TARGET){ S.wish.granted=true; save(); return screenWishGranted(); }
   showChrome(true); renderFee();
   var due=dueSkills();
   var salonOpen=S.stage>=1;
@@ -548,7 +639,7 @@ function screenMap(){
   var waves=""; for(var wi=0; wi<Math.ceil(MAP_H/115); wi++){ var yy=30+wi*115;
     waves+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; }
 
-  var html='<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 '+MAP_H+'" xmlns="http://www.w3.org/2000/svg">'+
+  var html=wishBannerHtml()+'<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 '+MAP_H+'" xmlns="http://www.w3.org/2000/svg">'+
     '<defs>'+
       '<linearGradient id="parchment" x1="0" y1="0" x2="1" y2="1">'+
         '<stop offset="0" stop-color="#f8ecc8"/><stop offset="55%" stop-color="#efd49c"/><stop offset="1" stop-color="#dcb877"/>'+
@@ -579,6 +670,7 @@ function screenMap(){
     '<rect x="0" y="0" width="380" height="'+MAP_H+'" rx="24" fill="url(#vignette)" pointer-events="none"/>'+
   '</svg></div>';
   $("screen").innerHTML=html;
+  var wb=$("wishBanner"); if(wb) wb.addEventListener("click", screenWish);
   Array.prototype.forEach.call(document.querySelectorAll(".isle"), function(el){
     el.addEventListener("click", function(){
       var id=el.getAttribute("data-id");
@@ -586,11 +678,15 @@ function screenMap(){
       startLesson(id);
     });
   });
-  /* Die Karte ist höher als der Bildschirm - deshalb automatisch zur aktuellen
-     Insel scrollen, damit Ylvie nie suchen muss. */
+  /* Die Karte ist höher als der Bildschirm - zur aktuellen Insel scrollen, damit
+     Ylvie nie suchen muss. Aber nur, wenn sie nicht ohnehin schon zu sehen ist -
+     sonst würde das Wunsch-Banner oben unnötig aus dem Blick rutschen. */
   var aktuelle=ISLANDS[Math.min(S.progress, ISLANDS.length-1)];
   var ziel=document.querySelector('.isle[data-id="'+aktuelle.id+'"]');
-  if(ziel && ziel.scrollIntoView) ziel.scrollIntoView({block:"center"});
+  if(ziel && ziel.scrollIntoView){
+    var sr=$("screen").getBoundingClientRect(), zr=ziel.getBoundingClientRect();
+    if(zr.top < sr.top || zr.bottom > sr.bottom) ziel.scrollIntoView({block:"center"});
+  }
 
   var nm=feeName();
   say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp die Insel an!", true);
@@ -756,7 +852,7 @@ function screenReward(){
   $("screen").innerHTML='<div class="card rewardWrap"><h2 style="color:#5a1560;text-shadow:none">Geschafft!</h2>'+
     '<p class="big">+'+lesson.total+'</p><p style="font-weight:700">Kristalle auf '+lesson.island.name+'</p>'+extra+
     '<button class="btn pink" id="toMap">Zurück zur Zauberkarte</button></div>';
-  say(unlockedNew ? ("Du hast "+lesson.total+" Kristalle gesammelt - und eine neue Insel entdeckt!") : ("Du hast "+lesson.total+" Kristalle gesammelt!"), true);
+  say(unlockedNew ? ("Du hast "+kristalle(lesson.total)+" gesammelt - und eine neue Insel entdeckt!") : ("Du hast "+kristalle(lesson.total)+" gesammelt!"), true);
   $("toMap").addEventListener("click", screenMap); lesson=null;
 }
 
