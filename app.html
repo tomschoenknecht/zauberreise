@@ -231,7 +231,7 @@ if(TEST){
 })();
 
 /* ============ Zustand ============ */
-var SKILLS=["mengen","zehner","uebergang","geld"];
+var SKILLS=["mengen","zehner","uebergang","geld","hunderter","einmaleins"];
 var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],head:["tiara"],extra:["keine"]},
                     equipped:{hair:"goldrosa",dress:"rosalila",face:"zart",head:"tiara",extra:"keine"} };
 /* crystals = Guthaben zum Ausgeben (Salon senkt es)
@@ -271,6 +271,19 @@ function diceGroup(n){ return n<=6 ? dieSVG(n) : dieSVG(5)+dieSVG(n-5); }
 function frame10(n, hiEmpty){ var s='<div class="frame10">';
   for(var i=0;i<10;i++){ var on=i<n, hi=(hiEmpty&&!on)?" hi":""; s+='<div class="cellf'+(on?" on":"")+hi+'"><i></i></div>'; } return s+'</div>'; }
 function coinSVG(v){ var label=(v>=100)?(v/100)+" €":v+" ct"; return '<div class="coin">'+label+'</div>'; }
+/* Zehnerstange = ein Bündel von 10, plus einzelne Einer-Punkte (Zahlenraum bis 100). */
+function tensBar(){ return '<svg width="20" height="70" viewBox="0 0 20 70" style="margin:2px">'+
+  '<rect x="2" y="2" width="16" height="66" rx="4" fill="#8ff0d0" stroke="#1aa892" stroke-width="2"/>'+
+  '<path d="M2 8.6 h16 M2 15.2 h16 M2 21.8 h16 M2 28.4 h16 M2 35 h16 M2 41.6 h16 M2 48.2 h16 M2 54.8 h16 M2 61.4 h16" stroke="#1aa892" stroke-width="1"/></svg>'; }
+function onesDot(){ return '<span style="display:inline-block;width:15px;height:15px;border-radius:50%;background:#ff5fb6;margin:2px;vertical-align:bottom"></span>'; }
+function numberVisual(n){ var t=Math.floor(n/10), e=n%10, s='<div style="display:flex;align-items:flex-end;gap:2px;flex-wrap:wrap;justify-content:center">';
+  for(var i=0;i<t;i++) s+=tensBar();
+  if(e){ s+='<div style="display:flex;flex-wrap:wrap;width:40px;align-content:flex-end">'; for(var j=0;j<e;j++) s+=onesDot(); s+='</div>'; }
+  return s+'</div>'; }
+/* Reihen-Bild fürs Einmaleins: r Reihen mit je c Punkten (strukturierte Menge). */
+function arrayVisual(r,c){ var s='<div style="display:inline-flex;flex-direction:column;gap:5px;background:#fff6fb;border:2px solid var(--pink);border-radius:12px;padding:8px">';
+  for(var i=0;i<r;i++){ s+='<div style="display:flex;gap:5px">'; for(var j=0;j<c;j++) s+='<span style="width:15px;height:15px;border-radius:50%;background:#7b46d6"></span>'; s+='</div>'; }
+  return s+'</div>'; }
 
 /* ============ Aufgaben ============ */
 function rnd(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
@@ -296,20 +309,49 @@ function taskGeld(){ var pool=[1,2,5,10,20], cnt=rnd(2,3), coins=[], sum=0;
   var vis=coins.map(coinSVG).join("");
   return {skill:"geld", q:"Wie viel Geld hat "+feeName()+" im Beutel?", visual:vis, answer:sum, opts:uniqOpts(sum,1,60,4),
   hint:"Nimm die größte Münze zuerst und zähle die anderen dazu.", hintVisual:vis, unit:" ct"}; }
-var GEN={mengen:taskMengen, zehner:taskZehner, uebergang:taskUebergang, geld:taskGeld};
+/* Zahlenraum bis 100: Zehner + Zehner, runde Zahl + Einer, Zehner minus Zehner. */
+function taskHunderter(){
+  var typ=rnd(0,2), a,b,ans,q,vis,hint;
+  if(typ===0){ a=rnd(2,7)*10; b=rnd(1,Math.min(9,(90-a)/10))*10; ans=a+b;
+    q=a+" + "+b+" = ?"; vis=numberVisual(a)+'<div style="font-size:24px;font-weight:800;align-self:center">+</div>'+numberVisual(b);
+    hint="Zähle nur die Zehnerstangen: "+(a/10)+" und "+(b/10)+" Stangen sind "+((a+b)/10)+" Zehner, also "+ans+".";
+  } else if(typ===1){ a=rnd(2,8)*10; b=rnd(1,9); ans=a+b;
+    q=a+" + "+b+" = ?"; vis=numberVisual(a)+'<div style="font-size:24px;font-weight:800;align-self:center">+</div>'+numberVisual(b);
+    hint="Die Zehner bleiben ("+a+"), dazu kommen "+b+" Einer: "+ans+".";
+  } else { a=rnd(4,9)*10; b=rnd(1,(a/10)-1)*10; ans=a-b;
+    q=a+" - "+b+" = ?"; vis=numberVisual(a)+'<div style="font-size:24px;font-weight:800;align-self:center">-</div>'+numberVisual(b);
+    hint="Nimm "+(b/10)+((b/10)===1?" Zehnerstange":" Zehnerstangen")+" weg: "+(a/10)+" minus "+(b/10)+" sind "+((a-b)/10)+" Zehner, also "+ans+".";
+  }
+  return {skill:"hunderter", q:q, visual:vis, answer:ans, opts:uniqOpts(ans,0,100,4), hint:hint, hintVisual:vis};
+}
+/* Einmaleins: Reihen mal Spalten, als strukturiertes Reihen-Bild. */
+function taskEinmaleins(){
+  var reihen=[2,3,4,5,10];
+  var a=reihen[rnd(0,reihen.length-1)], b=rnd(1,10), ans=a*b;
+  return {skill:"einmaleins", q:a+" × "+b+" = ?", visual:arrayVisual(a,b), answer:ans, opts:uniqOpts(ans,1,100,4),
+    hint:"Das sind "+a+" Reihen mit je "+b+". Zähle in "+a+"er-Schritten: "+
+      (function(){ var p=[]; for(var i=1;i<=b;i++) p.push(a*i); return p.join(", "); })()+".",
+    hintVisual:arrayVisual(a,b)};
+}
+var GEN={mengen:taskMengen, zehner:taskZehner, uebergang:taskUebergang, geld:taskGeld, hunderter:taskHunderter, einmaleins:taskEinmaleins};
 
 /* ============ Inseln ============ */
 var ISLANDS=[
-  {id:"funkel", name:"Funkelstein-Insel", sub:"Mengen auf einen Blick", skill:"mengen", land:"#ff8fce", landD:"#e83b8f", x:96, y:118,
+  {id:"funkel", name:"Funkelstein-Insel", sub:"Mengen auf einen Blick", skill:"mengen", land:"#ff8fce", landD:"#e83b8f", x:92, y:104,
    ic:'<svg viewBox="0 0 24 24"><path d="M12 2l7 6-3 14H8L5 8z" fill="#fff" stroke="#c23f8e" stroke-width="1.5"/></svg>'},
-  {id:"zehnerhaus", name:"Das Zehnerhaus", sub:"Wie viel fehlt bis Zehn?", skill:"zehner", land:"#b98bff", landD:"#7b46d6", x:288, y:96,
+  {id:"zehnerhaus", name:"Das Zehnerhaus", sub:"Wie viel fehlt bis Zehn?", skill:"zehner", land:"#b98bff", landD:"#7b46d6", x:290, y:150,
    ic:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1H4a1 1 0 01-1-1z" fill="#fff" stroke="#7b46d6" stroke-width="1.5"/></svg>'},
-  {id:"regenbogen", name:"Regenbogenbucht", sub:"Über die Zehn rechnen", skill:"uebergang", land:"#5fe0cf", landD:"#1aa892", x:104, y:322,
+  {id:"regenbogen", name:"Regenbogenbucht", sub:"Über die Zehn rechnen", skill:"uebergang", land:"#5fe0cf", landD:"#1aa892", x:100, y:290,
    ic:'<svg viewBox="0 0 24 24"><path d="M3 20a9 9 0 0118 0" fill="none" stroke="#fff" stroke-width="3"/><path d="M7 20a5 5 0 0110 0" fill="none" stroke="#ffe08a" stroke-width="3"/></svg>'},
-  {id:"markt", name:"Zaubermarkt-Insel", sub:"Mit Münzen bezahlen", skill:"geld", land:"#ffcf5f", landD:"#f0962f", x:296, y:352,
-   ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fff" stroke="#f0962f" stroke-width="1.5"/><text x="12" y="16" font-size="10" text-anchor="middle" fill="#f0962f" font-weight="bold">€</text></svg>'}
+  {id:"markt", name:"Zaubermarkt-Insel", sub:"Mit Münzen bezahlen", skill:"geld", land:"#ffcf5f", landD:"#f0962f", x:298, y:352,
+   ic:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#fff" stroke="#f0962f" stroke-width="1.5"/><text x="12" y="16" font-size="10" text-anchor="middle" fill="#f0962f" font-weight="bold">€</text></svg>'},
+  {id:"hunderter", name:"Hunderter-Insel", sub:"Rechnen bis 100", skill:"hunderter", land:"#8fd6ff", landD:"#2e86c9", x:96, y:470,
+   ic:'<svg viewBox="0 0 24 24"><text x="12" y="16" font-size="9" text-anchor="middle" fill="#2e86c9" font-weight="bold">100</text><rect x="3" y="4" width="18" height="16" rx="3" fill="none" stroke="#2e86c9" stroke-width="1.5"/></svg>'},
+  {id:"einmaleins", name:"Einmaleins-Insel", sub:"Mal-Reihen entdecken", skill:"einmaleins", land:"#c9a1ff", landD:"#8b3fd6", x:290, y:560,
+   ic:'<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" stroke="#8b3fd6" stroke-width="2.4" stroke-linecap="round"/></svg>'}
 ];
-var SALON_POS={x:200, y:520, land:"#ffe0f6", landD:"#c97ce0"};
+var SALON_POS={x:190, y:690, land:"#ffe0f6", landD:"#c97ce0"};
+var MAP_H=760;   // Kartenhöhe (viewBox), gewachsen mit den zusätzlichen Inseln
 
 /* ============ Fee-Stufen ============ */
 var STAGES=[
@@ -449,7 +491,14 @@ var ISLAND_DECO = {
   zehnerhaus: '<g transform="translate(12,4)"><rect x="-8" y="-2" width="16" height="12" fill="#fff8ea" stroke="#8a5a2a" stroke-width="1"/><path d="M-10,-2 L0,-13 L10,-2 Z" fill="#e05fa0"/></g>',
   regenbogen: '<g transform="translate(-10,8)" opacity=".9"><path d="M-14,4 A14,14 0 0 1 14,4" fill="none" stroke="#fff" stroke-width="3"/><path d="M-14,4 A14,14 0 0 1 14,4" fill="none" stroke="#ffe08a" stroke-width="1.6" stroke-dasharray="0 6.5" stroke-linecap="round" transform="translate(0,0)"/><circle cx="-14" cy="4" r="4" fill="#fff" opacity=".85"/><circle cx="14" cy="4" r="5" fill="#fff" opacity=".85"/></g>',
   markt: '<g transform="translate(12,8)"><path d="M-10,2 L10,2 L8,-6 L-8,-6 Z" fill="#8a5a2a"/><circle cx="-4" cy="-9" r="3.4" fill="#ffe08a" stroke="#e6a52f" stroke-width=".6"/><circle cx="3" cy="-11" r="3.4" fill="#ffe08a" stroke="#e6a52f" stroke-width=".6"/></g>',
-  salon: '<g transform="translate(10,6)"><path d="M-12,4 L0,-12 L12,4 Z" fill="#ffd0ee" stroke="#fff" stroke-width="1"/><path d="M-12,4 L-4,4 L-4,-4 L4,-4 L4,4 L12,4" fill="none" stroke="#fff" stroke-width="1"/><path d="M0,-12 L0,-18" stroke="#c97ce0" stroke-width="1.4"/><path d="M0,-18 L6,-16 L0,-14 Z" fill="#ff5fb6"/></g>'
+  salon: '<g transform="translate(10,6)"><path d="M-12,4 L0,-12 L12,4 Z" fill="#ffd0ee" stroke="#fff" stroke-width="1"/><path d="M-12,4 L-4,4 L-4,-4 L4,-4 L4,4 L12,4" fill="none" stroke="#fff" stroke-width="1"/><path d="M0,-12 L0,-18" stroke="#c97ce0" stroke-width="1.4"/><path d="M0,-18 L6,-16 L0,-14 Z" fill="#ff5fb6"/></g>',
+  hunderter: '<g transform="translate(11,10)">'+
+    '<rect x="-11" y="-4" width="5" height="14" rx="1.4" fill="#8ff0d0" stroke="#1aa892" stroke-width="1"/>'+
+    '<rect x="-4" y="-4" width="5" height="14" rx="1.4" fill="#8ff0d0" stroke="#1aa892" stroke-width="1"/>'+
+    '<rect x="3" y="-4" width="5" height="14" rx="1.4" fill="#8ff0d0" stroke="#1aa892" stroke-width="1"/></g>',
+  einmaleins: '<g transform="translate(-12,8)" fill="#8b3fd6">'+
+    '<circle cx="0" cy="0" r="2"/><circle cx="7" cy="0" r="2"/><circle cx="14" cy="0" r="2"/>'+
+    '<circle cx="0" cy="7" r="2"/><circle cx="7" cy="7" r="2"/><circle cx="14" cy="7" r="2"/></g>'
 };
 var LOCK_ICON='<circle r="19" fill="#8a8a9a"/><rect x="-7" y="-2" width="14" height="11" rx="2.4" fill="#5a5a6a"/><path d="M-5,-2 v-4 a5,5 0 0 1 10,0 v4" fill="none" stroke="#5a5a6a" stroke-width="2.6"/>';
 
@@ -493,43 +542,41 @@ function screenMap(){
   islandsSvg+=islandNode(SALON_ID, SALON_POS.x, SALON_POS.y, SALON_POS.land, SALON_POS.landD, salonIcon,
     false, !salonOpen, "Der Zauber-Salon", salonOpen?"Style deine Fee!":"noch verschlossen", ISLAND_DECO.salon);
 
-  var html='<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 600" xmlns="http://www.w3.org/2000/svg">'+
+  /* Schatzpfad dynamisch aus den Inselpositionen (in Reihenfolge) + Salon */
+  var trailPts=ISLANDS.map(function(i){return [i.x,i.y];}); trailPts.push([SALON_POS.x,SALON_POS.y]);
+  var trail="M"+trailPts.map(function(p){return p[0]+","+p[1];}).join(" L");
+  var waves=""; for(var wi=0; wi<Math.ceil(MAP_H/115); wi++){ var yy=30+wi*115;
+    waves+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; }
+
+  var html='<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 '+MAP_H+'" xmlns="http://www.w3.org/2000/svg">'+
     '<defs>'+
       '<linearGradient id="parchment" x1="0" y1="0" x2="1" y2="1">'+
         '<stop offset="0" stop-color="#f8ecc8"/><stop offset="55%" stop-color="#efd49c"/><stop offset="1" stop-color="#dcb877"/>'+
       '</linearGradient>'+
-      '<radialGradient id="ocean" cx="50%" cy="45%" r="70%">'+
+      '<radialGradient id="ocean" cx="50%" cy="42%" r="75%">'+
         '<stop offset="0" stop-color="#3fb0c9"/><stop offset="1" stop-color="#1c6f8c"/>'+
       '</radialGradient>'+
-      '<radialGradient id="vignette" cx="50%" cy="45%" r="75%">'+
+      '<radialGradient id="vignette" cx="50%" cy="45%" r="80%">'+
         '<stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a220a" stop-opacity=".22"/>'+
       '</radialGradient>'+
     '</defs>'+
-    '<rect x="0" y="0" width="380" height="600" rx="24" fill="url(#ocean)"/>'+
-    (function(){ var w=""; for(var i=0;i<5;i++){ var yy=30+i*115; w+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; } return w; })()+
-    '<path d="M14,26 C10,60 18,90 12,130 C6,180 16,220 10,270 C4,330 16,380 10,430 C5,480 16,520 14,556 '+
-      'C40,574 90,566 130,572 C180,580 230,568 270,574 C310,580 350,568 366,554 '+
-      'C372,510 364,470 370,430 C376,380 366,340 372,290 C378,240 368,190 374,140 '+
-      'C380,90 370,50 366,24 C330,10 280,18 240,10 C190,0 140,12 90,6 C55,2 26,12 14,26 Z" '+
-      'fill="url(#parchment)" stroke="#8a5a2a" stroke-width="3.5" stroke-linejoin="round"/>'+
-    '<rect x="20" y="20" width="340" height="560" rx="14" fill="none" stroke="#a8763f" stroke-width="1.3" stroke-dasharray="2 7" opacity=".65"/>'+
-    '<path d="M330,14 L366,20 L360,54 Z" fill="#dcb877" stroke="#8a5a2a" stroke-width="2" opacity=".9"/>'+
-    '<ellipse cx="70" cy="470" rx="36" ry="20" fill="#8a5a2a" opacity=".1"/>'+
-    '<ellipse cx="320" cy="230" rx="30" ry="17" fill="#8a5a2a" opacity=".09"/>'+
-    '<ellipse cx="170" cy="60" rx="26" ry="13" fill="#8a5a2a" opacity=".08"/>'+
-    '<path d="M96,118 C150,90 230,70 288,96 C250,180 180,220 104,322 C180,300 260,300 296,352 C260,430 220,470 200,520" '+
-      'fill="none" stroke="#8a5a2a" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="1 15" opacity=".85"/>'+
-    '<g transform="translate(332,50)" opacity=".85">'+
+    '<rect x="0" y="0" width="380" height="'+MAP_H+'" rx="24" fill="url(#ocean)"/>'+
+    waves+
+    '<rect x="10" y="10" width="360" height="'+(MAP_H-20)+'" rx="26" fill="url(#parchment)" stroke="#8a5a2a" stroke-width="3.5"/>'+
+    '<rect x="20" y="20" width="340" height="'+(MAP_H-40)+'" rx="18" fill="none" stroke="#a8763f" stroke-width="1.3" stroke-dasharray="2 7" opacity=".6"/>'+
+    '<path d="M336,10 L370,16 L364,50 Z" fill="#dcb877" stroke="#8a5a2a" stroke-width="2" opacity=".9"/>'+   /* Eselsohr */
+    '<ellipse cx="66" cy="400" rx="34" ry="19" fill="#8a5a2a" opacity=".09"/>'+
+    '<ellipse cx="316" cy="250" rx="28" ry="16" fill="#8a5a2a" opacity=".08"/>'+
+    '<ellipse cx="180" cy="630" rx="30" ry="16" fill="#8a5a2a" opacity=".08"/>'+
+    '<path d="'+trail+'" fill="none" stroke="#8a5a2a" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="1 15" opacity=".85"/>'+
+    '<g transform="translate(334,54)" opacity=".85">'+
       '<circle r="24" fill="#f8ecc8" stroke="#8a5a2a" stroke-width="1.5"/>'+
       '<path d="M0,-21 L4.5,-4.5 L21,0 L4.5,4.5 L0,21 L-4.5,4.5 L-21,0 L-4.5,-4.5 Z" fill="#8a5a2a"/>'+
       '<path d="M0,-15 L2,-2 L15,0 L2,2 L0,15 L-2,2 L-15,0 L-2,-2 Z" fill="#c23f2f"/>'+
       '<text y="-29" text-anchor="middle" font="800 10px sans-serif" fill="#8a5a2a">N</text>'+
-      '<text y="34" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">S</text>'+
-      '<text x="30" y="3" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">O</text>'+
-      '<text x="-30" y="3" text-anchor="middle" font="700 8px sans-serif" fill="#8a5a2a">W</text>'+
     '</g>'+
     islandsSvg+
-    '<rect x="0" y="0" width="380" height="600" rx="24" fill="url(#vignette)" pointer-events="none"/>'+
+    '<rect x="0" y="0" width="380" height="'+MAP_H+'" rx="24" fill="url(#vignette)" pointer-events="none"/>'+
   '</svg></div>';
   $("screen").innerHTML=html;
   Array.prototype.forEach.call(document.querySelectorAll(".isle"), function(el){
@@ -539,6 +586,12 @@ function screenMap(){
       startLesson(id);
     });
   });
+  /* Die Karte ist höher als der Bildschirm - deshalb automatisch zur aktuellen
+     Insel scrollen, damit Ylvie nie suchen muss. */
+  var aktuelle=ISLANDS[Math.min(S.progress, ISLANDS.length-1)];
+  var ziel=document.querySelector('.isle[data-id="'+aktuelle.id+'"]');
+  if(ziel && ziel.scrollIntoView) ziel.scrollIntoView({block:"center"});
+
   var nm=feeName();
   say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp die Insel an!", true);
 }

@@ -309,6 +309,38 @@ sofort "Geschafft"; Pause führt zur Karte, Karte zeigt "Abschnitt 2 von 3";
 Wiedereinstieg startet in Abschnitt 2 Aufgabe 1; nach Abschnitt 3 kommt "Geschafft!"
 mit Gesamtsumme +38 und Freischaltung der nächsten Insel. Keine Konsolenfehler.
 
+### 2026-07-15 – Zwei neue Lern-Inseln: Zahlenraum 100 und Einmaleins
+Damit der Lernstoff über die Ferien mitwächst (nicht nur die Menge, sondern auch
+der Schwierigkeitsgrad). Beide nach Würfelhaus-Prinzip - Struktur statt Abzählen:
+- **Hunderter-Insel** (Rechnen bis 100), 3 Aufgabentypen: Zehner+Zehner (50+30),
+  runde Zahl+Einer (30+6), Zehner-Zehner (70-40). Darstellung: **Zehnerstangen**
+  (Bündel zu 10) plus einzelne Einer-Punkte. Tipps arbeiten mit den Stangen
+  ("Zähle nur die Zehnerstangen: 5 und 2 Stangen sind 7 Zehner, also 70").
+- **Einmaleins-Insel**, Reihen 2/3/4/5/10 mal 1-10. Darstellung: **strukturiertes
+  Reihen-Bild** (r Reihen mit je c Punkten) - Multiplikation als Struktur sichtbar.
+  Tipp zählt in Schritten der Reihe ("5 Reihen mit je 8. Zähle in 5er-Schritten:
+  5, 10, 15 ... 40").
+- Karte auf 6 Lern-Inseln + Salon erweitert, Höhe von 600 auf 760 (viewBox),
+  Schatzpfad wird jetzt dynamisch aus den Inselpositionen gezeichnet (statt
+  hartkodiert) - neue Inseln reihen sich damit automatisch ein.
+- **Auto-Scroll zur aktuellen Insel:** die Karte ist jetzt ~2,2x höher als der
+  Bildschirm (1274 px Inhalt bei 572 px sichtbar). Beim Öffnen springt sie
+  automatisch zur aktuellen Insel, damit Ylvie nie suchen/scrollen muss.
+
+Getestet:
+- 36 Stichproben Hunderter: alle 3 Aufgabentypen ausgewogen verteilt (11/11/14),
+  Rechnungen korrekt, richtige Antwort immer unter den Optionen, keine Doppel.
+- Einmaleins: Reihen-Bild zeigt exakt so viele Punkte wie das Ergebnis
+  (28 Punkte bei 4×7), Rechnungen und Optionen korrekt.
+- Tipps beider Inseln inhaltlich geprüft.
+- **Gefundener Fehler:** "Nimm 1 Zehnerstangen weg" (Mehrzahl bei Einzahl) -
+  korrigiert zu "1 Zehnerstange", mit gezielter Stichprobe bestätigt.
+- Echte Trefferprüfung (elementFromPoint) für die neuen Inseln: anklickbar,
+  keine Ebenen-Blockade. Auto-Scroll bei progress 0 und progress 5 verifiziert.
+- Anmerkung zur Methodik: zweimal fälschlich einen Fehler vermutet (Aufgabentyp
+  "fehlt", Subtraktion mit 10 "kommt nicht vor") - beides war Zufall in zu
+  kleinen Stichproben. Bei Zufallsinhalten immer ausreichend groß stichproben.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):
