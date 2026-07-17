@@ -380,6 +380,24 @@ Getestet: Wunsch-Bildschirm erscheint nach der Challenge, Ideen-Knopf füllt das
 Feld, zu kurze Eingabe wird abgelehnt, Banner zählt korrekt runter, Erfüllung
 löst bei Zielerreichung aus und wird gespeichert, Fee auf Stufe 5. Keine Fehler.
 
+### 2026-07-17 – Haustiere (Die Kuschelwiese)
+Nächster Vision-Punkt, passt zu Ylvies Animal-Crossing-Vorliebe. Neue Datei
+tiere.js (eigene gemeinsame Grafikquelle, bewusst Inline-SVG statt <use> - siehe
+Fee-Lehre zu <use>-Kopien).
+- Vier Tiere zum Adoptieren mit gestaffelten Preisen: Wolkenhase (30),
+  Sternenkätzchen (35), Glitzerdrache (45), Einhorn-Fohlen (55, das seltenste).
+- **Wachstum als Sog:** jedes Tier startet als Ei und wächst mit dem Weiterspielen:
+  Ei -> Baby (nach +8 dazuverdienten Kristallen) -> groß (nach +40). Gemessen an
+  earned seit Adoption, also an Fleiß, nicht an Uhrzeit - das Tier ist ein Grund
+  zum Weitermachen. Kurz vorm Schlüpfen bekommt das Ei einen Riss.
+- Neuer Karten-Ort "Die Kuschelwiese", offen ab der ersten geschafften Insel
+  (davor gesperrt mit Fee-Hinweis). Aktives Tier wählbar, mehrere adoptierbar.
+Getestet: Adoption (Kristallabzug korrekt 60->25), Ei mit Schlüpf-Countdown,
+alle drei Wachstumsstufen mit passenden Statustexten, Ei-Riss kurz vorm Schlüpfen,
+zu teures Tier wird abgelehnt ohne Abzug, Wiese vor erster Insel gesperrt mit
+Hinweis, echte Trefferprüfung (anklickbar, keine Vignette-Blockade), keine
+Konsolenfehler. WICHTIG fürs Deployment: tiere.js ist neue Datei, muss mit hoch.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):
