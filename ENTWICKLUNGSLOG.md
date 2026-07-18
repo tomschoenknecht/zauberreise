@@ -439,8 +439,12 @@ chatten. Zwei ehrliche Weichenstellungen mit Tom geklärt (AskUserQuestion):
 Getestet: Chat öffnet per Fee-Antippen, Begrüßung mit Name, kontextuelle Chips
 (Haustier/Wunsch), Chip- und Freitext-Antworten korrekt, Eingabe wird geleert,
 Porträt-Fallback auf Vektor-Fee (Bild fehlt noch), keine Konsolenfehler.
-OFFEN: Tom legt fee-portrait.png in den Projektordner, dann Bild auch für den
-Befreiungs-Höhepunkt einbauen.
+ERLEDIGT: Tom hat das Bild geliefert (kam als fee-portrait.png.jpg an - doppelte
+Endung; echtes Format ist JPEG, sauber umbenannt zu fee-portrait.jpg). Eingebaut
+als Chat-Porträt und im Wunsch-Erfüllungs-Bildschirm (großer Moment). Porträtrahmen
+im Hochformat (3/4) mit object-fit cover, zeigt die volle stehende Feenfigur und
+schneidet die Sternenhintergrund-Ränder weg. Bild liegt über der Vektor-Fee, die
+als Fallback bleibt. Live geprüft (Bild HTTP 200, lädt 1248x832, keine Fehler).
 
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
