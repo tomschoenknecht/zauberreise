@@ -171,18 +171,56 @@
   .petCard .phave{font-size:11px; font-weight:700; color:#c23f8e;}
 
   /* ---------- Zauber-Salon ---------- */
-  .salonPreview{width:min(46vw,190px); margin:0 auto 6px; aspect-ratio:200/236;}
-  .salonPreview svg{width:100%; display:block; filter:drop-shadow(0 12px 20px rgba(70,15,80,.4));}
+  .salonHead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
+  .salonHead h2{margin:0;}
+  .salonPurse{display:flex; align-items:center; gap:5px; background:linear-gradient(180deg,#fff,#ffe6f7);
+    border:2px solid #fff; border-radius:999px; padding:5px 11px; font-weight:800; color:#c23f8e; font-size:15px; white-space:nowrap;}
+  /* Der Salon-Raum: Spiegel mit Glühbirnen-Rahmen, Vorhang, Schminktisch */
+  .salonRoom{position:relative; width:100%; max-width:340px; margin:0 auto 6px; aspect-ratio:1/0.92;
+    background:linear-gradient(180deg,#ffd9ef 0%,#f6b8dd 60%,#e59ec9 100%); border-radius:22px;
+    box-shadow:0 12px 28px rgba(120,30,100,.3); overflow:hidden;}
+  .salonRoom .wallpaper{position:absolute; inset:0; opacity:.35;
+    background-image:radial-gradient(circle at 20% 25%, #fff6 2px, transparent 2px),
+      radial-gradient(circle at 60% 55%, #fff5 2px, transparent 2px),
+      radial-gradient(circle at 85% 20%, #fff6 2px, transparent 2px);
+    background-size:54px 54px;}
+  .salonRoom .curtain{position:absolute; top:0; bottom:0; width:16%;
+    background:linear-gradient(90deg,#c94f9e,#e57fbf); opacity:.5;}
+  .salonRoom .curtain.l{left:0; border-radius:0 40% 40% 0;} .salonRoom .curtain.r{right:0; border-radius:40% 0 0 40%;}
+  .mirror{position:absolute; left:50%; top:6%; transform:translateX(-50%); width:60%; height:78%;}
+  .mirror .glass{position:absolute; inset:9%; border-radius:50% 50% 46% 46%;
+    background:radial-gradient(circle at 50% 32%, #fff 0%, #ffe9f6 45%, #f3c6e6 100%);
+    box-shadow:inset 0 6px 20px rgba(200,120,180,.5);}
+  .mirror .frame{position:absolute; inset:0; border-radius:50% 50% 46% 46%;
+    border:7px solid transparent; background:linear-gradient(135deg,#ffe08a,#f0a83f) border-box;
+    -webkit-mask:linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;}
+  .mirror .bulb{position:absolute; width:11px; height:11px; border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, #fff, #ffe08a); box-shadow:0 0 8px #ffe9a8; animation:bulbGlow 2.4s ease-in-out infinite;}
+  @keyframes bulbGlow{0%,100%{opacity:.65;}50%{opacity:1;}}
+  .salonRoom .fee{position:absolute; left:50%; top:11%; transform:translateX(-50%); width:40%; height:80%;}
+  .salonRoom .fee svg{width:100%; height:100%; display:block; filter:drop-shadow(0 8px 12px rgba(120,30,100,.35));}
+  .salonRoom .vanity{position:absolute; left:8%; right:8%; bottom:0; height:14%;
+    background:linear-gradient(180deg,#d98fc0,#b3628f); border-radius:12px 12px 0 0; box-shadow:0 -3px 8px rgba(120,30,100,.2);}
+  .salonRoom .bottle{position:absolute; bottom:4%; width:9px; height:16px; border-radius:3px 3px 2px 2px; box-shadow:0 2px 4px rgba(120,30,100,.3);}
+  .salonSpark{position:absolute; color:#fff; font-size:13px; opacity:.9; text-shadow:0 0 6px #ffe9a8; animation:bulbGlow 3s ease-in-out infinite;}
+
   .salonCat{margin:14px 0;}
-  .salonCat h3{color:#fff; font-size:15px; margin:0 0 8px; text-shadow:0 2px 8px rgba(80,20,90,.5);}
+  .salonCat h3{color:#fff; font-size:15px; margin:0 0 8px; text-shadow:0 2px 8px rgba(80,20,90,.5);
+    display:flex; align-items:center; gap:7px;}
+  .salonCat h3 .cico{width:22px; height:22px; flex:0 0 22px;}
   .swatches{display:flex; gap:10px; overflow-x:auto; padding:2px 2px 8px; -webkit-overflow-scrolling:touch;}
   .swatch{flex:0 0 auto; width:74px; display:flex; flex-direction:column; align-items:center; gap:4px;
-    cursor:pointer; opacity:.55;}
-  .swatch.owned{opacity:1;}
-  .swatch.equipped .ring{outline:3px solid var(--gold); outline-offset:2px;}
-  .swatch .ring{width:52px; height:52px; border-radius:50%; border:3px solid #fff; box-shadow:0 6px 14px rgba(90,20,90,.3);}
-  .swatch .lbl{font-size:11px; color:#fff; font-weight:700; text-align:center; text-shadow:0 1px 5px rgba(80,20,90,.5);}
+    cursor:pointer; opacity:.5; transition:transform .1s ease, opacity .2s ease;}
+  .swatch.owned{opacity:1;} .swatch:active{transform:scale(.94);}
+  .swatch.equipped{opacity:1;}
+  .swatch.equipped .ring{outline:3px solid var(--gold); outline-offset:2px; box-shadow:0 0 0 3px rgba(255,224,138,.5),0 6px 14px rgba(90,20,90,.35);}
+  .swatch.equipped:after{content:"✓"; position:absolute; margin-top:-6px; margin-left:34px; background:var(--gold2);
+    color:#6a1550; width:18px; height:18px; border-radius:50%; font-size:12px; font-weight:800; line-height:18px; text-align:center; box-shadow:0 2px 5px rgba(90,20,90,.4);}
+  .swatch .ring{position:relative; width:52px; height:52px; border-radius:50%; border:3px solid #fff;
+    box-shadow:0 6px 14px rgba(90,20,90,.3); display:flex; align-items:center; justify-content:center; font-size:22px;}
+  .swatch .lbl{font-size:11px; color:#fff; font-weight:700; text-align:center; text-shadow:0 1px 5px rgba(80,20,90,.5); line-height:1.15;}
   .swatch .cost{font-size:10.5px; color:var(--gold); font-weight:800;}
+  .swatch .lockmini{font-size:10px; opacity:.85;}
   .sw-hair-goldrosa{background:linear-gradient(160deg,#fff2c6,#ff9ecf);}
   .sw-hair-lila{background:linear-gradient(160deg,#f3e2ff,#a663e0);}
   .sw-hair-meer{background:linear-gradient(160deg,#e3fbff,#3fa8cf);}
@@ -794,9 +832,16 @@ function salonBuy(cat, id){
   S.crystals-=item.cost; owned.push(id); S.salon.equipped[cat]=id; save(); renderFee();
   say(feeName()+" strahlt: Wie schön!", true); screenSalon();
 }
+var SALON_CICO={
+  hair:'<svg class="cico" viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 8v9h3v-7c0-3 1-5 4-5s4 2 4 5v7h3v-9c0-5-3-8-7-8z" fill="#ffdf87" stroke="#c23f8e" stroke-width="1.2"/></svg>',
+  dress:'<svg class="cico" viewBox="0 0 24 24"><path d="M9 3l3 4 3-4 3 6-3 2 2 10H7l2-10-3-2z" fill="#f0a8ec" stroke="#7b46d6" stroke-width="1.1"/></svg>',
+  face:'<svg class="cico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#ffd0ee" stroke="#c23f8e" stroke-width="1.2"/><circle cx="9" cy="11" r="1.4" fill="#7a4a6a"/><circle cx="15" cy="11" r="1.4" fill="#7a4a6a"/><path d="M9 15q3 2 6 0" stroke="#ff5f9e" stroke-width="1.4" fill="none"/></svg>',
+  head:'<svg class="cico" viewBox="0 0 24 24"><path d="M4 16l3-8 5 5 5-5 3 8z" fill="#ffe08a" stroke="#e6a52f" stroke-width="1.1"/><circle cx="12" cy="13" r="1.6" fill="#8ff0d0"/></svg>',
+  extra:'<svg class="cico" viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#ffe08a"/></svg>'
+};
 function salonCatHtml(cat, title){
   var owned=S.salon.owned[cat], equipped=S.salon.equipped[cat];
-  var html='<div class="salonCat"><h3>'+title+'</h3><div class="swatches">';
+  var html='<div class="salonCat"><h3>'+SALON_CICO[cat]+title+'</h3><div class="swatches">';
   FEE_CATALOG[cat].forEach(function(it){
     var isOwned=owned.indexOf(it.id)>=0, isEq=equipped===it.id;
     var glyph = cat==="head" ? {tiara:"♛",blume:"✿",schleife:"🎀",krone:"♛"}[it.id]
@@ -808,11 +853,36 @@ function salonCatHtml(cat, title){
   });
   return html+'</div></div>';
 }
+/* Der Salon-Raum: verzierter Spiegel mit Glühbirnen, Vorhänge, Schminktisch mit Fläschchen. */
+function salonRoomHtml(){
+  var bulbs="", n=11;
+  for(var i=0;i<n;i++){
+    var t=i/(n-1);                                  // 0..1 entlang des Bogens oben herum
+    var ang=Math.PI*(1.15 - t*1.3);                 // linke bis rechte Seite über den Bogen
+    var cx=50+Math.cos(ang)*46, cy=45-Math.sin(ang)*44;
+    bulbs+='<span class="bulb" style="left:'+cx.toFixed(1)+'%;top:'+cy.toFixed(1)+'%;animation-delay:'+(i*0.18).toFixed(2)+'s"></span>';
+  }
+  var bottles="";
+  ["#ff9ecf","#8ff0d0","#ffe08a","#c9a1ff"].forEach(function(c,i){
+    bottles+='<span class="bottle" style="left:'+(14+i*20)+'%;background:linear-gradient(180deg,'+c+',#fff8)"></span>';
+  });
+  return '<div class="salonRoom">'+
+    '<div class="wallpaper"></div><div class="curtain l"></div><div class="curtain r"></div>'+
+    '<div class="mirror"><div class="glass"></div><div class="frame"></div>'+bulbs+'</div>'+
+    '<div class="fee"><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg></div>'+
+    '<div class="vanity"></div>'+bottles+
+    '<span class="salonSpark" style="left:14%;top:16%">✦</span>'+
+    '<span class="salonSpark" style="right:14%;top:24%;animation-delay:1s">✧</span>'+
+    '</div>';
+}
 function screenSalon(){
   showChrome(true); renderFee();
-  var html='<button class="back" id="backBtn">‹ Zurück zur Karte</button>'+
-    '<h2>Der Zauber-Salon</h2>'+
-    '<div class="salonPreview"><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg></div>'+
+  var html='<div class="salonHead">'+
+      '<button class="back" id="backBtn">‹ Karte</button>'+
+      '<div class="salonPurse"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M12 2l7 6-3 14H8L5 8z" fill="#ff86c4" stroke="#fff" stroke-width="1.5"/></svg>'+S.crystals+'</div>'+
+    '</div>'+
+    '<h2 style="margin:0 0 4px">Der Zauber-Salon</h2>'+
+    salonRoomHtml()+
     salonCatHtml("hair","Haare")+salonCatHtml("dress","Kleid")+salonCatHtml("face","Wangen &amp; Lippen")+
     salonCatHtml("head","Kopfschmuck")+salonCatHtml("extra","Extra-Zauber");
   $("screen").innerHTML=html;

@@ -398,6 +398,22 @@ zu teures Tier wird abgelehnt ohne Abzug, Wiese vor erster Insel gesperrt mit
 Hinweis, echte Trefferprüfung (anklickbar, keine Vignette-Blockade), keine
 Konsolenfehler. WICHTIG fürs Deployment: tiere.js ist neue Datei, muss mit hoch.
 
+### 2026-07-17 – Zauber-Salon grafisch aufgewertet
+Vorher: nüchterne Fee-Vorschau über einer Reihe Farbkreise. Jetzt ein richtiger
+Salon-Raum:
+- Verzierter Schmink-Spiegel (goldener Rahmen, gewölbtes Glas) mit 11 rundum
+  angeordneten, sanft glimmenden Glühbirnen (per Bogen-Formel platziert).
+- Die aktuelle Fee steht IM Spiegel (gleiche gemeinsame Quelle, färbt sich beim
+  Stylen live mit).
+- Tapeten-Punktmuster, zwei Vorhänge, Schminktisch mit vier bunten Fläschchen,
+  Funkel-Akzente.
+- Kristall-Guthaben oben rechts sichtbar, jede Kategorie mit eigenem Icon
+  (Haare/Kleid/Gesicht/Kopfschmuck/Extra), ausgewählter Artikel mit Häkchen.
+Getestet: Raum rendert (Spiegel, 11 Birnen, Fee im Spiegel, 4 Fläschchen,
+5 Kategorie-Icons), Kauf funktioniert weiter (80->65 bei Meerblau), Fee im Spiegel
+färbt sich live mit, Guthaben-Anzeige aktualisiert, Häkchen beim gewählten Artikel,
+keine Konsolenfehler. Optische Endabnahme durch Tom (Screenshot hier nicht möglich).
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):
