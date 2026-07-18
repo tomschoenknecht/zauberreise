@@ -414,6 +414,34 @@ Getestet: Raum rendert (Spiegel, 11 Birnen, Fee im Spiegel, 4 Fläschchen,
 färbt sich live mit, Guthaben-Anzeige aktualisiert, Häkchen beim gewählten Artikel,
 keine Konsolenfehler. Optische Endabnahme durch Tom (Screenshot hier nicht möglich).
 
+### 2026-07-17 – Mit der Fee reden + Fee-Grafik-Richtung (Hybrid)
+Tom-Wunsch: Fee "annähernd fotorealistisch und beweglich" + Ylvie will mit der Fee
+chatten. Zwei ehrliche Weichenstellungen mit Tom geklärt (AskUserQuestion):
+- **Grafik = Hybrid:** spielbare Fee bleibt Vektor (umfärbbar/animiert/wächst),
+  zusätzlich ein hochwertiges/fotorealistisches Bild nur für Porträt + großen Moment.
+  Tom hat eine fotorealistische Vorlage (blonde Feenprinzessin, lila Kleid, Krone,
+  Flügel) geschickt. MUSS noch als Datei rein: fee-portrait.png im Projektordner.
+  App ist schon vorbereitet: <img src="fee-portrait.png" onerror=entfernen> über der
+  Vektor-Fee - sobald die Datei da ist, erscheint das Bild automatisch (Chat-Porträt).
+- **Chat = "Verzaubertes Gespräch" (KEIN echtes KI):** bewusst regelbasiert, offline,
+  ohne Kosten/Server. Begründung Kindersicherheit: unkontrollierte KI-Antworten für
+  ein 7-jähriges Kind + API-Schlüssel läge öffentlich offen = nicht verantwortbar.
+  Umsetzung: Fee antworten per Stichwort-Erkennung (Begrüßung, wie-gehts, Name,
+  Haustier, Wunsch, Rechnen, Salon, Geheimnis, Gefühle/Trost, Liebe, tschüss, ja/nein,
+  Fallback). Kontextabhängig (nutzt Fee-Name, aktives Haustier, Wunschtext). Chips zum
+  Antippen + Freitext-Eingabe. Zugang: Fee in der Kopfzeile antippen (ab wach, Stufe 2).
+  Sprachausgabe der Fee-Antworten ab Stufe 3.
+- **Gefundene Fehler in der Worterkennung, behoben:** "hi" traf in "hilf" (Begrüßung
+  statt Rechnen) -> Ganzes-Wort-Prüfung (hasWord) für kurze Wörter. "Wie geht es
+  <Haustier>" landete bei allgemeiner wie-gehts-Antwort -> Reihenfolge: konkrete Themen
+  vor Allgemeinem. "ich mag dich nicht" wurde als Liebeserklärung gelesen ->
+  Negations-Wächter (nicht/kein). Alle drei nachgetestet und korrekt.
+Getestet: Chat öffnet per Fee-Antippen, Begrüßung mit Name, kontextuelle Chips
+(Haustier/Wunsch), Chip- und Freitext-Antworten korrekt, Eingabe wird geleert,
+Porträt-Fallback auf Vektor-Fee (Bild fehlt noch), keine Konsolenfehler.
+OFFEN: Tom legt fee-portrait.png in den Projektordner, dann Bild auch für den
+Befreiungs-Höhepunkt einbauen.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):

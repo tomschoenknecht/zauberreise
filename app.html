@@ -170,6 +170,34 @@
   .petCard .pcost{font-size:11px; font-weight:800; color:#3fae5a;}
   .petCard .phave{font-size:11px; font-weight:700; color:#c23f8e;}
 
+  /* ---------- Mit der Fee reden ---------- */
+  .chatWrap{display:flex; flex-direction:column; height:100%;}
+  .chatTop{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+  .chatPortrait{position:relative; width:64px; height:64px; border-radius:50%; overflow:hidden;
+    border:3px solid #fff; box-shadow:0 6px 16px rgba(90,20,90,.35); flex:0 0 64px; background:linear-gradient(180deg,#bd86e6,#e59ec9);}
+  .chatPortrait img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 12%;}
+  .chatPortrait svg{position:absolute; left:50%; top:8px; transform:translateX(-50%); width:150%; height:150%;}
+  .chatTitle{flex:1;}
+  .chatTitle b{display:block; font-size:clamp(17px,4.6vw,20px); color:#fff; text-shadow:0 2px 10px rgba(90,20,90,.5);}
+  .chatTitle span{font-size:12px; color:#fff; opacity:.85;}
+  .chatBig{width:min(60vw,220px); aspect-ratio:3/2; margin:8px auto 4px; border-radius:20px; overflow:hidden;
+    border:3px solid #fff; box-shadow:0 10px 24px rgba(90,20,90,.32); position:relative; background:linear-gradient(180deg,#7b3fa0,#e59ec9);}
+  .chatBig img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 8%;}
+  .chatBig svg{position:absolute; left:50%; top:6%; transform:translateX(-50%); width:66%; height:130%;}
+  .chatLog{flex:1 1 auto; overflow-y:auto; padding:10px 2px; display:flex; flex-direction:column; gap:8px; -webkit-overflow-scrolling:touch;}
+  .msg{max-width:82%; padding:9px 13px; border-radius:16px; font-size:clamp(14px,3.8vw,16.5px); font-weight:600; line-height:1.35;}
+  .msg.fee{align-self:flex-start; background:rgba(255,255,255,.96); color:var(--plum); border-bottom-left-radius:5px;}
+  .msg.me{align-self:flex-end; background:linear-gradient(180deg,#ffd8ef,var(--pink2)); color:#fff; border-bottom-right-radius:5px;}
+  .chatChips{display:flex; flex-wrap:wrap; gap:7px; padding:6px 0; flex:0 0 auto;}
+  .chatChip{background:rgba(255,255,255,.92); color:var(--plum); border:2px solid var(--pink); border-radius:999px;
+    padding:8px 13px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .chatInputRow{display:flex; gap:8px; flex:0 0 auto; padding-top:4px;}
+  .chatInputRow input{flex:1; font-family:inherit; font-size:16px; font-weight:600; color:#6a1550;
+    border:none; border-radius:14px; padding:11px 14px; outline:3px solid var(--pink); background:#fff5fb; min-width:0;}
+  .chatSend{flex:0 0 auto; border:none; border-radius:14px; padding:0 16px; font-family:inherit; font-weight:800; cursor:pointer;
+    color:#6a1550; background:linear-gradient(180deg,#fff2c8,var(--gold2)); box-shadow:0 5px 0 #d99a2e;}
+  .chatSend:active{transform:translateY(3px); box-shadow:0 2px 0 #d99a2e;}
+
   /* ---------- Zauber-Salon ---------- */
   .salonHead{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px;}
   .salonHead h2{margin:0;}
@@ -1020,15 +1048,104 @@ function screenReward(){
 }
 
 /* ============ Start ============ */
+/* ============ Mit der Fee reden ============
+   Verzaubertes Gespräch: sicher, offline, ohne KI. Die Fee antwortet mit liebevoll
+   geschriebenen Antworten, je nach dem, was Ylvie tippt oder antippt. */
+var chatLog=[];
+function feePortraitHtml(cls){
+  /* Bild fee-portrait.png liegt drüber; fehlt es, wird es entfernt und die
+     gezeichnete Fee zeigt sich. So erscheint das echte Bild automatisch,
+     sobald Tom es in den Projektordner legt. */
+  return '<div class="'+cls+'"><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg>'+
+    '<img src="fee-portrait.png" alt="" onerror="this.remove()"></div>';
+}
+function speakFee(text){
+  if(S.stage<3) return;
+  try{ var u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.pitch=1.5; u.rate=1.0;
+    speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function fairyReply(input){
+  var s=(input||"").toLowerCase();
+  var nm=feeName();
+  var pet = S.pets.active ? PET_NAME(S.pets.active) : "";
+  var wish = S.wish.text;
+  function has(){ for(var i=0;i<arguments.length;i++){ if(s.indexOf(arguments[i])>=0) return true; } return false; }
+  /* Ganzes-Wort-Prüfung für kurze/mehrdeutige Wörter (z. B. "hi" darf nicht in "hilf" treffen) */
+  function hasWord(){ for(var i=0;i<arguments.length;i++){
+    if(new RegExp("(^|[^a-zäöüß])"+arguments[i]+"([^a-zäöüß]|$)").test(s)) return true; } return false; }
+  var negiert = has("nicht","kein");
+  /* Reihenfolge: erst konkrete Themen, dann Allgemeines - damit z. B. die Frage nach
+     dem Haustier nicht vom allgemeinen "wie geht" abgefangen wird. */
+  if(has("wie heißt","wie heisst","dein name","heißt du","heisst du")) return "Ich heiße "+nm+" - den Namen hast DU mir geschenkt. Das vergesse ich nie.";
+  if(has("tier","haustier","hase","katze","kätzchen","drache","einhorn")||(pet&&s.indexOf(pet.toLowerCase())>=0))
+    return pet ? (pet+" hat dich ganz doll lieb! Je mehr du übst, desto größer wird es.") : "Auf der Kuschelwiese wartet ein Ei auf dich - daraus wird dein eigenes Tier!";
+  if(has("wunsch","wünsch","wuensch")) return wish ? ("Dein Wunsch \""+wish+"\" geht in Erfüllung, wenn du mich ganz befreit hast. Wir sind auf einem guten Weg!") : "Du darfst dir einen großen Wunsch aussuchen! Tipp auf der Karte oben auf den Stern.";
+  if(has("rechn","mathe","zahl","plus","minus","hilf","einmaleins")) return "Rechnen ist ganz einfach, wenn wir es zusammen machen. Tipp auf eine Insel, dann zeig ich es dir!";
+  if(has("schmink","anziehen","salon","kleid","haare","frisur")) return "Oh ja! Im Zauber-Salon darfst du mich anziehen und schminken. Ich liebe es, wenn du mich hübsch machst.";
+  if(has("geheimnis","geheim")) return "Psst ... ich verrate dir was: In jeder Zahl steckt ein kleiner Zauber. Und du bist die stärkste Zauberin, die ich kenne.";
+  if(has("spiel","langweilig","was machen")) return "Lass uns eine Insel besuchen! Da gibt es Rätsel, Kristalle - und ich werde lebendiger. Kommst du mit?";
+  if(has("traurig","weinen","angst","allein","einsam")) return "Komm her, ich bin bei dir. Alles wird gut - wir zwei schaffen alles zusammen.";
+  if(has("wütend","wuetend","doof","blöd","bloed","hasse","ärger","aerger")) return "Manchmal ist alles zu viel, das kenne ich. Atme einmal tief durch - ich glaub an dich.";
+  if(!negiert && has("lieb","hübsch","huebsch","schön","schoen","süß","suess","beste","mag dich")) return "Ohh, das ist so lieb! Ich hab dich auch ganz doll lieb.";
+  if(has("fliegen","fliegst")) return "Wenn ich ganz frei bin, fliege und tanze ich für dich durch die Luft. Dafür brauche ich nur noch ein bisschen deine Hilfe!";
+  if(has("tschüss","tschuess","ciao","schlafen","müde","muede")||hasWord("bye")) return "Bis bald, meine liebste Ylvie. Ich träume schon von unserem nächsten Abenteuer.";
+  if(hasWord("hallo","hi","hey","hallöchen","moin","servus")||has("guten tag")) return "Hallo Ylvie! Ich freu mich so, dass du da bist.";
+  if(has("wie geht","gehts","gehsts","wie ist es dir")) return "Mir geht es wunderbar - jedes Mal, wenn du rechnest, werde ich ein bisschen lebendiger!";
+  if(hasWord("ja","klar","gerne")) return "Juhu! Ich wusste, dass du Lust hast.";
+  if(hasWord("nein","nö","ne")) return "Das ist auch okay. Wir machen alles in deinem Tempo.";
+  var fallback=[
+    "Das finde ich spannend! Erzähl mir mehr.",
+    "Hihi, mit dir zu reden macht mir Freude. Was möchtest du als Nächstes tun?",
+    "Weißt du was? Du bist heute schon so tapfer gewesen. Sollen wir eine Insel besuchen?",
+    "Ich hör dir so gern zu. Magst du mir ein Geheimnis verraten?"
+  ];
+  return fallback[Math.floor(Math.random()*fallback.length)];
+}
+function chatChips(){
+  var c=["Wie geht es dir?","Erzähl mir ein Geheimnis","Ich hab dich lieb","Hilf mir beim Rechnen"];
+  if(S.pets.active) c.push("Wie geht es "+PET_NAME(S.pets.active)+"?");
+  if(S.wish.text) c.push("Wann geht mein Wunsch in Erfüllung?"); else c.push("Was ist mein Wunsch?");
+  return c;
+}
+function chatAdd(who, text){ chatLog.push({who:who, text:text}); }
+function chatRender(){
+  var log=$("chatLog");
+  log.innerHTML=chatLog.map(function(m){ return '<div class="msg '+(m.who==="fee"?"fee":"me")+'">'+esc(m.text)+'</div>'; }).join("");
+  log.scrollTop=log.scrollHeight;
+}
+function chatSay(text){
+  if(!text || !text.trim()) return;
+  chatAdd("me", text.trim());
+  var reply=fairyReply(text);
+  chatAdd("fee", reply);
+  chatRender(); speakFee(reply);
+}
+function screenChat(){
+  showChrome(false);
+  if(!chatLog.length){ chatAdd("fee", "Hallo Ylvie! Ich bin "+feeName()+". Womit kann ich dir helfen? Du kannst mir alles erzählen."); }
+  var chips=chatChips();
+  $("screen").innerHTML='<div class="chatWrap">'+
+    '<div class="chatTop"><button class="back" id="backBtn">‹ Karte</button></div>'+
+    feePortraitHtml("chatBig")+
+    '<div class="chatTitle" style="text-align:center;margin-bottom:2px"><b>'+feeName()+'</b>'+
+      '<span>'+(S.stage>=3?"Sag mir etwas!":"(sie flüstert noch ganz leise)")+'</span></div>'+
+    '<div class="chatLog" id="chatLog"></div>'+
+    '<div class="chatChips" id="chatChips">'+chips.map(function(c){ return '<button class="chatChip">'+esc(c)+'</button>'; }).join("")+'</div>'+
+    '<div class="chatInputRow"><input id="chatInput" maxlength="60" placeholder="Sag etwas ..." autocomplete="off" spellcheck="false"><button class="chatSend" id="chatSend">Senden</button></div>'+
+  '</div>';
+  chatRender(); speakFee(chatLog[chatLog.length-1].text);
+  $("backBtn").addEventListener("click", screenMap);
+  Array.prototype.forEach.call(document.querySelectorAll(".chatChip"), function(b){
+    b.addEventListener("click", function(){ chatSay(b.textContent); });
+  });
+  $("chatSend").addEventListener("click", function(){ var i=$("chatInput"); chatSay(i.value); i.value=""; i.focus(); });
+  $("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter"){ var i=$("chatInput"); chatSay(i.value); i.value=""; } });
+}
+
 $("feeMini").addEventListener("click", function(){
   giggle();
-  var t;
-  if(S.stage>=5)      t=feeName()+" tanzt vor Freude in der Luft!";
-  else if(S.stage>=4) t=feeName()+" winkt dir zu!";
-  else if(S.stage>=3) t="Ich bin "+feeName()+". Schön, dass du da bist!";
-  else if(S.stage>=2) t=feeName()+" lächelt dich an ...";
-  else                t=feeName()+" schläft noch tief und fest ...";
-  say(t, true);
+  if(S.stage>=2){ screenChat(); return; }   // wach -> reden
+  say(feeName()+" schläft noch tief und fest ... weck sie mit dem Rechnen!", true);
 });
 var seen=false; try{ seen=localStorage.getItem(LS_INTRO)==="1"; }catch(e){}
 if(seen) screenMap(); else screenStory();
