@@ -11,27 +11,33 @@
      5  Flug/Tanz   - schnellerer Flügelschlag, flattert gelegentlich von allein hoch
 
    Gestalten (Salon): feeCustomize(cfg) -> {hair,dress,face,head,extra}, siehe FEE_CATALOG
-   Interaktion:       feeTap()          -> von Berührung aufrufen (winkt ab Stufe 4) */
+   Interaktion:       feeTap()          -> von Berührung aufrufen (winkt ab Stufe 4)
+
+   Grafik 2026-07-18 näher an Toms fotorealistische Vorlage gebracht: lange wellige
+   blonde Haare, fließendes Fliederkleid mit silberner Ranke, Goldkrone mit blauem
+   Edelstein, größere irideszente Flügel, feineres Gesicht mit blauen Augen. Bleibt
+   umfärbbar (CSS-Variablen) und beweglich (transform-Attribute in einer Schleife). */
 (function(){
 "use strict";
 
-/* Farbpaletten für Haare/Kleid: je 3 Verlaufsfarben (hell -> mittel -> dunkel) */
+/* Farbpaletten für Haare/Kleid: je 3 Verlaufsfarben (hell -> mittel -> dunkel).
+   Standard = näher an der Vorlage: goldblond + flieder. */
 var HAIR = {
-  goldrosa: ["#fff2c6","#ffdf87","#ff9ecf"],
+  goldrosa: ["#fff4cf","#ffde86","#e7bd5c"],   /* Gold-Blond (Standard) */
   lila:     ["#f3e2ff","#d9aaff","#a663e0"],
   meer:     ["#e3fbff","#8fe0f5","#3fa8cf"],
   feuer:    ["#ffe3c6","#ff9a5e","#e0503f"],
   regenbogen:["#fff2c6","#ff9ecf","#a663e0"]
 };
 var DRESS = {
-  rosalila: ["#ffe0f6","#f0a8ec","#c97ce0"],
+  rosalila: ["#efe0ff","#cba7ec","#a67fce"],   /* Flieder (Standard) */
   minze:    ["#e3fff5","#8ff0d0","#3fbf9a"],
   sonne:    ["#fff9e0","#ffe08a","#f0b23f"],
   sternennacht:["#e3e9ff","#8fa0e0","#3f4fa0"],
   kristall: ["#ffffff","#fff0c2","#e6a52f"]
 };
 var FACE = {
-  zart:    {cheek:"#ff9ec6", lip:"#ff7fb0"},
+  zart:    {cheek:"#ff9ec6", lip:"#e57fa0"},
   beere:   {cheek:"#e05fa0", lip:"#c23f7e"},
   koralle: {cheek:"#ff8a6a", lip:"#ff6a4e"},
   glitzer: {cheek:"#ff5fd0", lip:"#e83fb6"}
@@ -39,12 +45,12 @@ var FACE = {
 
 /* Katalog: Anzeige-Infos + Kristallpreis (0 = von Anfang an dabei) */
 window.FEE_CATALOG = {
-  hair:  [ {id:"goldrosa", name:"Gold-Rosa",    cost:0},
+  hair:  [ {id:"goldrosa", name:"Gold-Blond",   cost:0},
            {id:"lila",     name:"Lila-Traum",   cost:10},
            {id:"meer",     name:"Meerblau",     cost:15},
            {id:"feuer",    name:"Feuerrot",     cost:15},
            {id:"regenbogen",name:"Regenbogen",  cost:25} ],
-  dress: [ {id:"rosalila", name:"Rosa-Flieder", cost:0},
+  dress: [ {id:"rosalila", name:"Flieder",      cost:0},
            {id:"minze",    name:"Minzgrün",     cost:10},
            {id:"sonne",    name:"Sonnengelb",   cost:10},
            {id:"sternennacht",name:"Sternennacht",cost:15},
@@ -53,7 +59,7 @@ window.FEE_CATALOG = {
            {id:"beere",   name:"Beere",         cost:8},
            {id:"koralle", name:"Koralle",       cost:8},
            {id:"glitzer", name:"Glitzer-Pink",  cost:12} ],
-  head:  [ {id:"tiara",   name:"Sternentiara",  cost:0},
+  head:  [ {id:"tiara",   name:"Goldkrone",     cost:0},
            {id:"blume",   name:"Blütenkranz",   cost:12},
            {id:"schleife",name:"Schleife",      cost:10},
            {id:"krone",   name:"Große Krone",   cost:20} ],
@@ -65,11 +71,9 @@ window.FEE_CATALOG = {
 
 /* WICHTIG - technische Grundlage der Bewegung:
    Die Fee steht einmal in <defs> und wird überall per <use> eingebunden.
-   Nachgemessen: CSS-Animationen auf dem Original wirken sich NICHT auf die
-   <use>-Kopien aus (sie liefen, aber die gezeichnete Fee stand still).
-   Direkt gesetzte Transformationen dagegen kommen zuverlässig in allen Kopien an.
-   Deshalb wird die Bewegung hier von einer zentralen Schleife gerechnet und als
-   SVG-transform-Attribut gesetzt - eine Schleife, alle Kopien bewegen sich synchron. */
+   CSS-Animationen wirken sich NICHT auf <use>-Kopien aus - direkt gesetzte
+   transform-Attribute schon. Deshalb rechnet eine zentrale Schleife die Bewegung
+   und setzt sie als Attribut; alle Kopien bewegen sich synchron. */
 var ORIGIN={
   feeAlive:{x:100,y:150}, feeWingL:{x:96,y:124}, feeWingR:{x:104,y:124}, feeArmR:{x:108,y:114}
 };
@@ -81,7 +85,7 @@ var SVG =
     '<stop offset="0" style="stop-color:var(--fee-hair-1)"/><stop offset="55%" style="stop-color:var(--fee-hair-2)"/><stop offset="100%" style="stop-color:var(--fee-hair-3)"/>'+
   '</linearGradient>'+
   '<linearGradient id="fSkin" x1="0" y1="0" x2="0" y2="1">'+
-    '<stop offset="0" stop-color="#ffe6d6"/><stop offset="1" stop-color="#ffd2bd"/>'+
+    '<stop offset="0" stop-color="#ffe8da"/><stop offset="1" stop-color="#ffd3bd"/>'+
   '</linearGradient>'+
   '<linearGradient id="fGown" x1="0" y1="0" x2="0" y2="1">'+
     '<stop offset="0" style="stop-color:var(--fee-dress-1)"/><stop offset="50%" style="stop-color:var(--fee-dress-2)"/><stop offset="100%" style="stop-color:var(--fee-dress-3)"/>'+
@@ -90,103 +94,125 @@ var SVG =
     '<stop offset="0" style="stop-color:var(--fee-dress-1)"/><stop offset="1" style="stop-color:var(--fee-dress-2)"/>'+
   '</linearGradient>'+
   '<linearGradient id="fGold" x1="0" y1="0" x2="0" y2="1">'+
-    '<stop offset="0" stop-color="#fff0c2"/><stop offset="1" stop-color="#e6a52f"/>'+
+    '<stop offset="0" stop-color="#fff2c2"/><stop offset="1" stop-color="#e0a52f"/>'+
   '</linearGradient>'+
-  '<radialGradient id="fWing" cx="50%" cy="40%" r="60%">'+
-    '<stop offset="0" stop-color="#ffffff" stop-opacity=".92"/>'+
-    '<stop offset="55%" stop-color="#ffd6f5" stop-opacity=".6"/>'+
-    '<stop offset="100%" stop-color="#c4e6ff" stop-opacity=".25"/>'+
+  '<radialGradient id="fWing" cx="46%" cy="38%" r="65%">'+
+    '<stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>'+
+    '<stop offset="45%" stop-color="#ffe6fb" stop-opacity=".6"/>'+
+    '<stop offset="75%" stop-color="#d9c2ff" stop-opacity=".42"/>'+
+    '<stop offset="100%" stop-color="#bfeaff" stop-opacity=".22"/>'+
+  '</radialGradient>'+
+  '<radialGradient id="fFaceShade" cx="50%" cy="45%" r="60%">'+
+    '<stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>'+
+    '<stop offset="100%" stop-color="#e8a98f" stop-opacity=".35"/>'+
   '</radialGradient>'+
 
   '<g id="feeArt"><g id="feeAlive">'+
-    /* Flügel */
-    '<g id="feeWingL" opacity=".82">'+
-      '<path d="M96 118 C60 96 44 108 46 128 C48 150 74 150 96 128 Z" fill="url(#fWing)" stroke="#ffd0f2" stroke-width="1"/>'+
-      '<path d="M96 128 C66 120 52 138 58 156 C64 172 86 160 96 140 Z" fill="url(#fWing)" stroke="#ffd0f2" stroke-width="1"/>'+
+    /* ---------- Flügel (größer, irideszent, zarte Adern) ---------- */
+    '<g id="feeWingL" opacity=".8">'+
+      '<path d="M96 122 C68 100 38 96 36 118 C35 140 66 140 96 128 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
+      '<path d="M96 130 C72 128 50 148 58 172 C66 190 90 168 96 142 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
+      '<path d="M94 126 C74 118 56 116 44 122 M94 136 C76 138 64 150 60 164" stroke="#fff" stroke-width=".7" fill="none" opacity=".5"/>'+
     '</g>'+
-    '<g id="feeWingR" opacity=".82">'+
-      '<path d="M104 118 C140 96 156 108 154 128 C152 150 126 150 104 128 Z" fill="url(#fWing)" stroke="#ffd0f2" stroke-width="1"/>'+
-      '<path d="M104 128 C134 120 148 138 142 156 C136 172 114 160 104 140 Z" fill="url(#fWing)" stroke="#ffd0f2" stroke-width="1"/>'+
+    '<g id="feeWingR" opacity=".8">'+
+      '<path d="M104 122 C132 100 162 96 164 118 C165 140 134 140 104 128 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
+      '<path d="M104 130 C128 128 150 148 142 172 C134 190 110 168 104 142 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
+      '<path d="M106 126 C126 118 144 116 156 122 M106 136 C124 138 136 150 140 164" stroke="#fff" stroke-width=".7" fill="none" opacity=".5"/>'+
     '</g>'+
     /* Extra: Schmetterlinge / Glitzerspur / Sternenstaub (nur einer sichtbar) */
     '<g id="feeExtraSchmetterlinge" style="display:none">'+
-      '<g transform="translate(58,100)"><path d="M0 0 q-8 -8 -2 -14 q6 4 4 12 Z" fill="#ffb0e0"/><path d="M0 0 q8 -8 2 -14 q-6 4 -4 12 Z" fill="#ffd0ee"/></g>'+
-      '<g transform="translate(146,108) scale(.8)"><path d="M0 0 q-8 -8 -2 -14 q6 4 4 12 Z" fill="#b0e0ff"/><path d="M0 0 q8 -8 2 -14 q-6 4 -4 12 Z" fill="#d0f0ff"/></g>'+
+      '<g transform="translate(56,98)"><path d="M0 0 q-8 -8 -2 -14 q6 4 4 12 Z" fill="#ffb0e0"/><path d="M0 0 q8 -8 2 -14 q-6 4 -4 12 Z" fill="#ffd0ee"/></g>'+
+      '<g transform="translate(148,106) scale(.8)"><path d="M0 0 q-8 -8 -2 -14 q6 4 4 12 Z" fill="#b0e0ff"/><path d="M0 0 q8 -8 2 -14 q-6 4 -4 12 Z" fill="#d0f0ff"/></g>'+
     '</g>'+
     '<g id="feeExtraGlitzerspur" style="display:none" fill="#fff">'+
-      '<circle cx="66" cy="150" r="2"/><circle cx="60" cy="164" r="1.4"/><circle cx="70" cy="176" r="1.8"/>'+
-      '<circle cx="134" cy="150" r="2"/><circle cx="140" cy="164" r="1.4"/><circle cx="130" cy="176" r="1.8"/>'+
+      '<circle cx="64" cy="156" r="2"/><circle cx="58" cy="170" r="1.4"/><circle cx="70" cy="182" r="1.8"/>'+
+      '<circle cx="136" cy="156" r="2"/><circle cx="142" cy="170" r="1.4"/><circle cx="130" cy="182" r="1.8"/>'+
     '</g>'+
     '<g id="feeExtraSternenstaub" style="display:none" fill="#ffe08a">'+
-      '<path d="M62 96 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4Z"/>'+
-      '<path d="M140 100 l1.2 2.6 2.6 1.2 -2.6 1.2 -1.2 2.6 -1.2 -2.6 -2.6 -1.2 2.6 -1.2Z"/>'+
-      '<path d="M100 55 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1Z"/>'+
+      '<path d="M60 94 l1.4 3 3 1.4 -3 1.4 -1.4 3 -1.4 -3 -3 -1.4 3 -1.4Z"/>'+
+      '<path d="M142 98 l1.2 2.6 2.6 1.2 -2.6 1.2 -1.2 2.6 -1.2 -2.6 -2.6 -1.2 2.6 -1.2Z"/>'+
+      '<path d="M100 47 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1Z"/>'+
     '</g>'+
-    /* Haare hinten */
-    '<path d="M78 74 C64 92 66 138 74 168 C82 150 86 150 92 156 C90 120 92 96 100 84 C108 96 110 120 108 156 C114 150 118 150 126 168 C134 138 136 92 122 74 Z" fill="url(#fHair)"/>'+
-    /* Kleid */
-    '<path d="M100 112 C92 112 86 118 84 128 L72 200 C84 210 116 210 128 200 L116 128 C114 118 108 112 100 112 Z" fill="url(#fGown)"/>'+
-    '<path d="M100 120 L94 198 M100 120 L108 198 M88 150 L84 196 M112 150 L116 196" stroke="#fff" stroke-width="1.2" opacity=".45" fill="none" stroke-linecap="round"/>'+
-    '<path d="M72 200 C84 210 116 210 128 200" fill="none" stroke="#fff" stroke-width="2" opacity=".7"/>'+
-    /* Mieder */
-    '<path d="M100 100 C93 100 89 106 90 116 C94 122 106 122 110 116 C111 106 107 100 100 100 Z" fill="url(#fBodice)"/>'+
-    /* Arme + Hände (rechter Arm eigene Gruppe, damit er winken kann) */
-    '<path d="M92 114 C82 120 78 134 80 146" stroke="url(#fSkin)" stroke-width="6" fill="none" stroke-linecap="round"/>'+
-    '<circle cx="80" cy="147" r="4" fill="url(#fSkin)"/>'+
+    /* ---------- Haare hinten (lang, wellig) ---------- */
+    '<path d="M80 70 C58 92 58 142 68 180 C72 192 82 190 86 178 C89 152 84 118 97 90 C100 84 100 84 103 90 C116 118 111 152 114 178 C118 190 128 192 132 180 C142 142 142 92 120 70 Z" fill="url(#fHair)"/>'+
+    '<path d="M84 92 C78 120 80 150 86 172 M116 92 C122 120 120 150 114 172" stroke="#fff" stroke-width=".8" fill="none" opacity=".25"/>'+
+    /* ---------- Kleid (langes fließendes Fliederkleid) ---------- */
+    '<path d="M100 116 C89 116 83 123 81 134 L68 210 C84 220 116 220 132 210 L119 134 C117 123 111 116 100 116 Z" fill="url(#fGown)"/>'+
+    /* weiche Falten-Schattierung */
+    '<path d="M92 132 L82 206 M108 132 L118 206" stroke="#7a4a8a" stroke-width="2" opacity=".14" fill="none" stroke-linecap="round"/>'+
+    '<path d="M100 124 L96 208 M100 124 L104 208" stroke="#fff" stroke-width="1.1" opacity=".4" fill="none" stroke-linecap="round"/>'+
+    /* silberne Ranken-Stickerei mittig */
+    '<path d="M100 122 C104 140 96 158 100 176 C103 190 99 200 100 210" stroke="#fff" stroke-width="1" opacity=".6" fill="none"/>'+
+    '<g fill="#fff" opacity=".6"><ellipse cx="96" cy="146" rx="2.4" ry="1.2" transform="rotate(35 96 146)"/><ellipse cx="104" cy="160" rx="2.4" ry="1.2" transform="rotate(-35 104 160)"/><ellipse cx="97" cy="176" rx="2.2" ry="1.1" transform="rotate(35 97 176)"/><ellipse cx="103" cy="192" rx="2.2" ry="1.1" transform="rotate(-35 103 192)"/></g>'+
+    '<path d="M68 210 C84 220 116 220 132 210" fill="none" stroke="#fff" stroke-width="1.6" opacity=".55"/>'+
+    /* ---------- Mieder (Sweetheart) ---------- */
+    '<path d="M100 98 C91 98 86 105 87 118 C93 126 107 126 113 118 C114 105 109 98 100 98 Z" fill="url(#fBodice)"/>'+
+    '<path d="M92 104 C96 111 104 111 108 104" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/>'+
+    /* ---------- Arme + Hände (rechter Arm eigene Gruppe zum Winken) ---------- */
+    '<path d="M91 116 C81 122 77 138 80 151" stroke="url(#fSkin)" stroke-width="5.4" fill="none" stroke-linecap="round"/>'+
+    '<circle cx="80" cy="152" r="3.6" fill="url(#fSkin)"/>'+
     '<g id="feeArmR">'+
-      '<path d="M108 114 C118 120 122 134 120 146" stroke="url(#fSkin)" stroke-width="6" fill="none" stroke-linecap="round"/>'+
-      '<circle cx="120" cy="147" r="4" fill="url(#fSkin)"/>'+
+      '<path d="M109 116 C119 122 123 138 120 151" stroke="url(#fSkin)" stroke-width="5.4" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="120" cy="152" r="3.6" fill="url(#fSkin)"/>'+
     '</g>'+
-    /* Hals + Kopf */
-    '<rect x="96" y="90" width="8" height="12" rx="4" fill="url(#fSkin)"/>'+
-    '<circle cx="100" cy="80" r="15" fill="url(#fSkin)"/>'+
-    '<circle id="feeCheekL" cx="91" cy="83" r="3.2" style="fill:var(--fee-cheek)" opacity=".55"/>'+
-    '<circle id="feeCheekR" cx="109" cy="83" r="3.2" style="fill:var(--fee-cheek)" opacity=".55"/>'+
-    /* Augen geschlossen (Stufe 0-1, und kurz beim Blinzeln) */
+    /* ---------- Hals + Kopf ---------- */
+    '<path d="M96 90 h8 v9 q-4 3 -8 0 Z" fill="url(#fSkin)"/>'+
+    '<circle cx="100" cy="79" r="14.5" fill="url(#fSkin)"/>'+
+    '<circle cx="100" cy="79" r="14.5" fill="url(#fFaceShade)"/>'+
+    '<circle id="feeCheekL" cx="91" cy="84" r="3" style="fill:var(--fee-cheek)" opacity=".5"/>'+
+    '<circle id="feeCheekR" cx="109" cy="84" r="3" style="fill:var(--fee-cheek)" opacity=".5"/>'+
+    /* Augen geschlossen (Stufe 0-1 und beim Blinzeln) */
     '<g id="feeEyesClosed">'+
-      '<path d="M90 78 q4 4 8 0" stroke="#7a4a6a" stroke-width="1.6" fill="none" stroke-linecap="round"/>'+
-      '<path d="M102 78 q4 4 8 0" stroke="#7a4a6a" stroke-width="1.6" fill="none" stroke-linecap="round"/>'+
-      '<path d="M90 78 l-2 3 M92 79 l-1.5 3.2 M110 78 l2 3 M108 79 l1.5 3.2" stroke="#7a4a6a" stroke-width="1" stroke-linecap="round"/>'+
+      '<path d="M90 79 q4 3.5 8 0" stroke="#7a4a6a" stroke-width="1.5" fill="none" stroke-linecap="round"/>'+
+      '<path d="M102 79 q4 3.5 8 0" stroke="#7a4a6a" stroke-width="1.5" fill="none" stroke-linecap="round"/>'+
+      '<path d="M90 79 l-2 2.6 M92 80 l-1.4 2.8 M110 79 l2 2.6 M108 80 l1.4 2.8" stroke="#7a4a6a" stroke-width=".9" stroke-linecap="round"/>'+
     '</g>'+
-    /* Augen offen (ab Stufe 2) */
+    /* Augen offen (ab Stufe 2) - blau, mit Glanz und Wimpern */
     '<g id="feeEyesOpen" style="display:none">'+
-      '<ellipse cx="94" cy="79" rx="3.2" ry="3.8" fill="#fff"/><circle cx="94" cy="79.5" r="2.1" fill="#5a3a8a"/>'+
-      '<circle cx="94.9" cy="78.4" r=".8" fill="#fff"/>'+
-      '<ellipse cx="106" cy="79" rx="3.2" ry="3.8" fill="#fff"/><circle cx="106" cy="79.5" r="2.1" fill="#5a3a8a"/>'+
-      '<circle cx="106.9" cy="78.4" r=".8" fill="#fff"/>'+
-      '<path d="M90.5 76 l-1.5 -1.6 M94 75.2 l-.4 -2 M97.6 76 l1.2 -1.6" stroke="#7a4a6a" stroke-width="1" stroke-linecap="round"/>'+
-      '<path d="M102.4 76 l-1.2 -1.6 M106 75.2 l.4 -2 M109.5 76 l1.5 -1.6" stroke="#7a4a6a" stroke-width="1" stroke-linecap="round"/>'+
+      '<path d="M90 79 q4 -3.4 8 0 q-4 3.4 -8 0 Z" fill="#fff"/>'+
+      '<circle cx="94" cy="79" r="2.7" fill="#4a74c8"/><circle cx="94" cy="79" r="1.2" fill="#20304f"/><circle cx="95" cy="77.8" r=".7" fill="#fff"/>'+
+      '<path d="M102 79 q4 -3.4 8 0 q-4 3.4 -8 0 Z" fill="#fff"/>'+
+      '<circle cx="106" cy="79" r="2.7" fill="#4a74c8"/><circle cx="106" cy="79" r="1.2" fill="#20304f"/><circle cx="107" cy="77.8" r=".7" fill="#fff"/>'+
+      '<path d="M90 79 q4 -3.4 8 0" stroke="#5a3a4a" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+      '<path d="M102 79 q4 -3.4 8 0" stroke="#5a3a4a" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+      '<path d="M90 79 l-2.2 -1.4 M110 79 l2.2 -1.4" stroke="#5a3a4a" stroke-width="1" stroke-linecap="round"/>'+
     '</g>'+
     /* Augenbrauen */
-    '<path d="M90 73 q4 -2 8 0 M102 73 q4 -2 8 0" stroke="#e2b06a" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+    '<path d="M90 73.5 q4 -2 8 -.3 M102 73.2 q4 -1.7 8 .3" stroke="#e0b878" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
     /* Näschen */
-    '<path d="M100 82 q1 1 0 2" stroke="#e0a48a" stroke-width="1" fill="none"/>'+
-    /* Mund ruhig / lächelnd */
-    '<path id="feeMouthCalm" style="fill:var(--fee-lip)" d="M96 87 q4 3 8 0 q-4 1 -8 0 Z"/>'+
-    '<path id="feeMouthSmile" style="fill:var(--fee-lip);display:none" d="M94 86 q6 6 12 0 q-6 3 -12 0 Z"/>'+
-    /* Haare vorne */
-    '<path d="M85 74 C82 66 90 60 100 60 C110 60 118 66 115 74 C110 68 108 66 100 66 C92 66 90 68 85 74 Z" fill="url(#fHair)"/>'+
-    '<path d="M85 74 C80 86 82 96 88 104 C86 92 86 82 90 74 Z" fill="url(#fHair)"/>'+
-    '<path d="M115 74 C120 86 118 96 112 104 C114 92 114 82 110 74 Z" fill="url(#fHair)"/>'+
-    /* Kopfschmuck (nur einer sichtbar) */
+    '<path d="M100 82 q1.2 1.2 0 2.4" stroke="#e0a48a" stroke-width="1" fill="none" stroke-linecap="round"/>'+
+    /* Mund ruhig / lächelnd (fülliger) */
+    '<path id="feeMouthCalm" style="fill:var(--fee-lip)" d="M96 88 q4 2.6 8 0 q-4 1.6 -8 0 Z"/>'+
+    '<path id="feeMouthSmile" style="fill:var(--fee-lip);display:none" d="M95 87 q5 4.6 10 0 q-5 2.6 -10 0 Z"/>'+
+    /* ---------- Haare vorne (Mittelscheitel, Wellen, Strähnen) ---------- */
+    '<path d="M84 72 C81 60 91 55 100 55 C109 55 119 60 116 72 C110 63 106 61 100 61 C94 61 90 63 84 72 Z" fill="url(#fHair)"/>'+
+    '<path d="M84 72 C78 90 81 104 90 114 C86 98 84 84 90 72 Z" fill="url(#fHair)"/>'+
+    '<path d="M116 72 C122 90 119 104 110 114 C114 98 116 84 110 72 Z" fill="url(#fHair)"/>'+
+    '<path d="M100 61 C97 66 96 70 98 75 M100 61 C103 66 104 70 102 75" stroke="#fff" stroke-width=".7" fill="none" opacity=".3"/>'+
+    /* ---------- Kopfschmuck (nur einer sichtbar) ---------- */
+    /* Standard: Goldkrone mit blauem Tropfen-Edelstein (wie Vorlage) */
     '<g id="feeHeadTiara">'+
-      '<path d="M89 63 L94 55 L100 61 L106 55 L111 63 Z" fill="url(#fGold)" stroke="#fff" stroke-width=".6"/>'+
-      '<circle cx="100" cy="60" r="2.4" fill="#bff7e6" stroke="#fff" stroke-width=".6"/>'+
+      '<path d="M87 63 L90 53 L95 60 L100 50 L105 60 L110 53 L113 63 Z" fill="url(#fGold)" stroke="#fff" stroke-width=".6"/>'+
+      '<rect x="87" y="62.5" width="26" height="3.4" rx="1.4" fill="url(#fGold)" stroke="#fff" stroke-width=".4"/>'+
+      '<circle cx="90" cy="53" r="1.2" fill="#fff2c2"/><circle cx="100" cy="50" r="1.3" fill="#fff2c2"/><circle cx="110" cy="53" r="1.2" fill="#fff2c2"/>'+
+      '<path d="M100 55 C102.4 57.5 102.4 60.5 100 62.5 C97.6 60.5 97.6 57.5 100 55 Z" fill="#2a5bd0" stroke="#fff" stroke-width=".5"/>'+
+      '<circle cx="99.2" cy="57.6" r=".6" fill="#bcd4ff"/>'+
     '</g>'+
     '<g id="feeHeadBlume" style="display:none">'+
-      '<circle cx="90" cy="63" r="4" fill="#ff9ec6"/><circle cx="97" cy="59" r="4" fill="#fff2c6"/>'+
-      '<circle cx="104" cy="60" r="4" fill="#c9a1ff"/><circle cx="110" cy="64" r="4" fill="#8ff0d0"/>'+
-      '<circle cx="90" cy="63" r="1.6" fill="#e6a52f"/><circle cx="97" cy="59" r="1.6" fill="#e6a52f"/>'+
-      '<circle cx="104" cy="60" r="1.6" fill="#e6a52f"/><circle cx="110" cy="64" r="1.6" fill="#e6a52f"/>'+
+      '<circle cx="90" cy="61" r="4" fill="#ff9ec6"/><circle cx="97" cy="57" r="4" fill="#fff2c6"/>'+
+      '<circle cx="104" cy="58" r="4" fill="#c9a1ff"/><circle cx="110" cy="62" r="4" fill="#8ff0d0"/>'+
+      '<circle cx="90" cy="61" r="1.6" fill="#e6a52f"/><circle cx="97" cy="57" r="1.6" fill="#e6a52f"/>'+
+      '<circle cx="104" cy="58" r="1.6" fill="#e6a52f"/><circle cx="110" cy="62" r="1.6" fill="#e6a52f"/>'+
     '</g>'+
     '<g id="feeHeadSchleife" style="display:none">'+
-      '<path d="M78 66 C70 60 70 72 78 70 C70 76 72 84 80 76 Z" fill="#ff5fb6" stroke="#fff" stroke-width=".8"/>'+
-      '<circle cx="80" cy="73" r="2.4" fill="#e83f9e"/>'+
+      '<path d="M78 64 C70 58 70 70 78 68 C70 74 72 82 80 74 Z" fill="#ff5fb6" stroke="#fff" stroke-width=".8"/>'+
+      '<circle cx="80" cy="71" r="2.4" fill="#e83f9e"/>'+
     '</g>'+
     '<g id="feeHeadKrone" style="display:none">'+
-      '<path d="M86 64 L91 52 L96 60 L100 50 L104 60 L109 52 L114 64 Z" fill="url(#fGold)" stroke="#fff" stroke-width=".7"/>'+
-      '<circle cx="100" cy="55" r="3" fill="#ff86c4" stroke="#fff" stroke-width=".6"/>'+
-      '<circle cx="90" cy="60" r="1.8" fill="#8ff0d0"/><circle cx="110" cy="60" r="1.8" fill="#8ff0d0"/>'+
+      '<path d="M85 62 L90 50 L96 58 L100 48 L104 58 L110 50 L115 62 Z" fill="url(#fGold)" stroke="#fff" stroke-width=".7"/>'+
+      '<rect x="85" y="61.5" width="30" height="3.6" rx="1.6" fill="url(#fGold)" stroke="#fff" stroke-width=".4"/>'+
+      '<path d="M100 53 C102.6 55.6 102.6 58.8 100 61 C97.4 58.8 97.4 55.6 100 53 Z" fill="#2a5bd0" stroke="#fff" stroke-width=".5"/>'+
+      '<circle cx="90" cy="58" r="1.8" fill="#8ff0d0"/><circle cx="110" cy="58" r="1.8" fill="#ff86c4"/>'+
     '</g>'+
   '</g></g>'+
 '</defs></svg>';
@@ -228,18 +254,16 @@ function startBlink(){
 }
 function stopBlink(){ if(blinkTimer){ clearTimeout(blinkTimer); blinkTimer=null; } }
 
-/* Eine Schleife für alle Bewegungen. Setzt transform-Attribute direkt am Original -
-   das kommt (nachgemessen) in allen <use>-Kopien an. */
+/* Eine Schleife für alle Bewegungen. Setzt transform-Attribute direkt am Original. */
 function frame(now){
   rafId = requestAnimationFrame(frame);
   var t = now/1000;
 
-  /* Körper: ab Stufe 1 atmen, ab Stufe 4 schweben, ab Stufe 5 lebhafter */
   var lift=0, tilt=0;
   if(curStage>=5){ lift = Math.sin(t*1.9)*3.2; tilt = Math.sin(t*1.3)*0.9; }
   else if(curStage>=4){ lift = Math.sin(t*1.3)*2.4; tilt = Math.sin(t*0.9)*0.6; }
   else if(curStage>=1){ lift = Math.sin(t*1.4)*1.6; }
-  if(now < flutterUntil){                       // gelegentliches Hochflattern
+  if(now < flutterUntil){
     var f = 1-(flutterUntil-now)/1500;
     lift -= Math.sin(f*Math.PI)*13;
   }
@@ -247,7 +271,6 @@ function frame(now){
     setT("feeAlive", "translate(0 "+lift.toFixed(2)+") "+(tilt? rot(tilt, ORIGIN.feeAlive):""));
   } else setT("feeAlive", null);
 
-  /* Flügel: reglos -> leicht -> deutlich -> schneller Schlag */
   var amp=0, speed=0;
   if(curStage>=5){ amp=17; speed=11; }
   else if(curStage>=4){ amp=6; speed=3.4; }
@@ -258,14 +281,12 @@ function frame(now){
     setT("feeWingR", rot( Math.abs(w)*0.5 + w*0.5, ORIGIN.feeWingR));
   } else { setT("feeWingL", null); setT("feeWingR", null); }
 
-  /* Winken (ab Stufe 4, nach Berührung) */
   if(now < waveUntil){
     var p = 1-(waveUntil-now)/1500;
     var a = -28 + Math.sin(p*Math.PI*4)*14 - Math.sin(p*Math.PI)*8;
     setT("feeArmR", rot(a, ORIGIN.feeArmR));
   } else setT("feeArmR", null);
 
-  /* Ab Stufe 5 flattert sie ab und zu von allein hoch */
   if(curStage>=5 && now>nextFlutter){ flutterUntil = now+1500; nextFlutter = now+7000+Math.random()*9000; }
 }
 function startLoop(){ if(rafId==null) rafId=requestAnimationFrame(frame); }
