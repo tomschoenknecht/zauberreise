@@ -446,6 +446,28 @@ im Hochformat (3/4) mit object-fit cover, zeigt die volle stehende Feenfigur und
 schneidet die Sternenhintergrund-Ränder weg. Bild liegt über der Vektor-Fee, die
 als Fallback bleibt. Live geprüft (Bild HTTP 200, lädt 1248x832, keine Fehler).
 
+### 2026-07-18 – Fee neu gezeichnet, näher an der fotorealistischen Vorlage
+Tom wollte die gezeichnete Fee an sein hochgeladenes Bild annähern. Fotorealismus
+mit Vektor-SVG bleibt unmöglich (klar kommuniziert) - aber deutlich näher am Motiv:
+- langes, welliges blondes Haar (vorher kürzer, gold-rosa)
+- fließendes Fliederkleid (Sweetheart-Mieder) mit silberner Ranken-Stickerei und
+  weicher Faltenschattierung (vorher schlichtes rosa Kleid)
+- Goldkrone mit blauem Tropfen-Edelstein als Standard-Kopfschmuck (wie Vorlage)
+- größere, irideszente Flügel mit zarten Adern
+- feineres Gesicht: größere blaue Augen mit Glanz und Wimpern, weichere Züge,
+  Wangen-Schattierung, füllere Lippen
+- Standard-Palette auf blond + flieder umgestellt (Katalog-Labels angepasst:
+  "Gold-Blond", "Flieder", "Goldkrone"). IDs unverändert -> bestehende Spielstände
+  behalten ihre Auswahl, sehen nur hübscher aus.
+Struktur/Technik erhalten: alle IDs, Animations-Origins und Customize-Hooks gleich.
+Getestet: 37 Elemente da, keine Konsolenfehler, Umfärben (Haar/Kleid/Kopfschmuck)
+funktioniert, Bewegung läuft (Körper 3,2px, Flügel 16,8°), Geometrie sauber im
+Bildbereich (x36-164, y49-217), keine kaputten Pfade.
+WICHTIG - nicht optisch abgenommen: der Screenshot-Mechanismus der Umgebung
+funktioniert durchgehend nicht (jede Aufnahme läuft ins Timeout, auch auf isolierter
+Testseite). Ich konnte die Fee also nur strukturell/geometrisch prüfen, nicht sehen.
+Optische Abnahme muss Tom auf der Live-Seite machen.
+
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
 hier nur festgehalten, damit nichts verloren geht):
