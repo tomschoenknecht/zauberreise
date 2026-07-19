@@ -463,10 +463,21 @@ Struktur/Technik erhalten: alle IDs, Animations-Origins und Customize-Hooks glei
 Getestet: 37 Elemente da, keine Konsolenfehler, Umfärben (Haar/Kleid/Kopfschmuck)
 funktioniert, Bewegung läuft (Körper 3,2px, Flügel 16,8°), Geometrie sauber im
 Bildbereich (x36-164, y49-217), keine kaputten Pfade.
-WICHTIG - nicht optisch abgenommen: der Screenshot-Mechanismus der Umgebung
-funktioniert durchgehend nicht (jede Aufnahme läuft ins Timeout, auch auf isolierter
-Testseite). Ich konnte die Fee also nur strukturell/geometrisch prüfen, nicht sehen.
-Optische Abnahme muss Tom auf der Live-Seite machen.
+Nachtrag: Tom meldete "viel zu klein, sieh sie dir selbst an". Zwei Dinge:
+1. **Screenshot geht doch** - über die Chrome-DevTools-MCP (mcp__chrome-devtools__
+   take_screenshot), NICHT über die Claude_Browser-Aufnahme (die läuft hier immer ins
+   Timeout). Damit konnte ich die Fee endlich SEHEN. Merke für künftige Grafik-Arbeit:
+   isolierte Testseite bauen + chrome-devtools new_page/navigate_page/take_screenshot.
+2. Beim Ansehen zwei echte Mängel gefunden und behoben:
+   - Figur füllte nur ~72% des viewBox (viel leerer Rand oben) -> wirkte klein.
+     Behoben: feeScale-Gruppe, Figur um 1,25 skaliert und zentriert, füllt jetzt den Rahmen.
+   - Flügel waren grau/klobig -> hellere, opakere iridescente Füllung, größer und
+     zarter geformt. Jetzt schimmernd flieder.
+   Ergebnis (gesehen): hübsche Cartoon-Feenprinzessin, blondes langes Haar, Fliederkleid
+   mit Ranke, Goldkrone mit blauem Stein, blaue Augen, zarte Flügel. Klar stilisiert,
+   nicht fotorealistisch (das Vektor-Limit), aber deutlich näher an der Vorlage und
+   ordentlich groß. Nächste mögliche Politur (falls Tom will): welligeres/volumigeres
+   Haar statt der zwei flachen Strähnen; feinere Augenbrauen.
 
 ### 2026-07-15 – Roadmap-Notiz: große Vision von Tom
 Tom hat den Fahrplan für die kommenden Wochen skizziert (noch nicht gebaut,
