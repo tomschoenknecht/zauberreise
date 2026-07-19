@@ -96,28 +96,31 @@ var SVG =
   '<linearGradient id="fGold" x1="0" y1="0" x2="0" y2="1">'+
     '<stop offset="0" stop-color="#fff2c2"/><stop offset="1" stop-color="#e0a52f"/>'+
   '</linearGradient>'+
-  '<radialGradient id="fWing" cx="46%" cy="38%" r="65%">'+
-    '<stop offset="0" stop-color="#ffffff" stop-opacity=".9"/>'+
-    '<stop offset="45%" stop-color="#ffe6fb" stop-opacity=".6"/>'+
-    '<stop offset="75%" stop-color="#d9c2ff" stop-opacity=".42"/>'+
-    '<stop offset="100%" stop-color="#bfeaff" stop-opacity=".22"/>'+
+  '<radialGradient id="fWing" cx="44%" cy="40%" r="68%">'+
+    '<stop offset="0" stop-color="#ffffff" stop-opacity=".97"/>'+
+    '<stop offset="45%" stop-color="#ffe0fa" stop-opacity=".9"/>'+
+    '<stop offset="80%" stop-color="#e0cbff" stop-opacity=".78"/>'+
+    '<stop offset="100%" stop-color="#c8e4ff" stop-opacity=".6"/>'+
   '</radialGradient>'+
   '<radialGradient id="fFaceShade" cx="50%" cy="45%" r="60%">'+
     '<stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>'+
     '<stop offset="100%" stop-color="#e8a98f" stop-opacity=".35"/>'+
   '</radialGradient>'+
 
-  '<g id="feeArt"><g id="feeAlive">'+
+  /* feeScale füllt den Rahmen: die Figur füllte nur ~72% des viewBox (viel leerer
+     Rand oben), wirkte dadurch klein. Hochskaliert und zentriert. Statisch - die
+     Bewegung sitzt weiter in feeAlive darin, also unberührt. */
+  '<g id="feeArt"><g id="feeScale" transform="translate(-25 -48.4) scale(1.25)"><g id="feeAlive">'+
     /* ---------- Flügel (größer, irideszent, zarte Adern) ---------- */
-    '<g id="feeWingL" opacity=".8">'+
-      '<path d="M96 122 C68 100 38 96 36 118 C35 140 66 140 96 128 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
-      '<path d="M96 130 C72 128 50 148 58 172 C66 190 90 168 96 142 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
-      '<path d="M94 126 C74 118 56 116 44 122 M94 136 C76 138 64 150 60 164" stroke="#fff" stroke-width=".7" fill="none" opacity=".5"/>'+
+    '<g id="feeWingL" opacity=".92">'+
+      '<path d="M95 120 C60 92 26 88 26 116 C26 142 62 142 95 126 Z" fill="url(#fWing)" stroke="#fff" stroke-width="1.2"/>'+
+      '<path d="M95 128 C66 128 40 150 48 178 C58 200 88 172 95 144 Z" fill="url(#fWing)" stroke="#fff" stroke-width="1.2"/>'+
+      '<path d="M90 122 C66 114 46 114 34 120 M90 132 C68 134 54 148 50 166" stroke="#fff" stroke-width=".8" fill="none" opacity=".6"/>'+
     '</g>'+
-    '<g id="feeWingR" opacity=".8">'+
-      '<path d="M104 122 C132 100 162 96 164 118 C165 140 134 140 104 128 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
-      '<path d="M104 130 C128 128 150 148 142 172 C134 190 110 168 104 142 Z" fill="url(#fWing)" stroke="#ffe0f6" stroke-width="1"/>'+
-      '<path d="M106 126 C126 118 144 116 156 122 M106 136 C124 138 136 150 140 164" stroke="#fff" stroke-width=".7" fill="none" opacity=".5"/>'+
+    '<g id="feeWingR" opacity=".92">'+
+      '<path d="M105 120 C140 92 174 88 174 116 C174 142 138 142 105 126 Z" fill="url(#fWing)" stroke="#fff" stroke-width="1.2"/>'+
+      '<path d="M105 128 C134 128 160 150 152 178 C142 200 112 172 105 144 Z" fill="url(#fWing)" stroke="#fff" stroke-width="1.2"/>'+
+      '<path d="M110 122 C134 114 154 114 166 120 M110 132 C132 134 146 148 150 166" stroke="#fff" stroke-width=".8" fill="none" opacity=".6"/>'+
     '</g>'+
     /* Extra: Schmetterlinge / Glitzerspur / Sternenstaub (nur einer sichtbar) */
     '<g id="feeExtraSchmetterlinge" style="display:none">'+
@@ -214,7 +217,7 @@ var SVG =
       '<path d="M100 53 C102.6 55.6 102.6 58.8 100 61 C97.4 58.8 97.4 55.6 100 53 Z" fill="#2a5bd0" stroke="#fff" stroke-width=".5"/>'+
       '<circle cx="90" cy="58" r="1.8" fill="#8ff0d0"/><circle cx="110" cy="58" r="1.8" fill="#ff86c4"/>'+
     '</g>'+
-  '</g></g>'+
+  '</g></g></g>'+
 '</defs></svg>';
 
 var curStage = 0, blinkTimer = null, rafId = null;
