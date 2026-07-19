@@ -136,9 +136,11 @@ var SVG =
       '<path d="M142 98 l1.2 2.6 2.6 1.2 -2.6 1.2 -1.2 2.6 -1.2 -2.6 -2.6 -1.2 2.6 -1.2Z"/>'+
       '<path d="M100 47 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1Z"/>'+
     '</g>'+
-    /* ---------- Haare hinten (lang, wellig) ---------- */
-    '<path d="M80 70 C58 92 58 142 68 180 C72 192 82 190 86 178 C89 152 84 118 97 90 C100 84 100 84 103 90 C116 118 111 152 114 178 C118 190 128 192 132 180 C142 142 142 92 120 70 Z" fill="url(#fHair)"/>'+
-    '<path d="M84 92 C78 120 80 150 86 172 M116 92 C122 120 120 150 114 172" stroke="#fff" stroke-width=".8" fill="none" opacity=".25"/>'+
+    /* ---------- Haare hinten (lang, voll, wellig - Wellen am Rand) ---------- */
+    '<path d="M79 68 C52 86 50 132 60 168 C62 178 58 186 66 190 C72 182 76 188 82 182 C86 174 82 184 89 178 C92 150 85 116 98 90 C100 85 100 85 102 90 C115 116 108 150 111 178 C118 184 114 174 118 182 C124 188 128 182 134 190 C142 186 138 178 140 168 C150 132 148 86 121 68 Z" fill="url(#fHair)"/>'+
+    /* Strähnen-Wellen als Glanzlinien */
+    '<path d="M74 96 C68 122 70 152 78 178 M126 96 C132 122 130 152 122 178" stroke="#fff" stroke-width=".9" fill="none" opacity=".3"/>'+
+    '<path d="M64 110 C60 134 62 158 70 180 M136 110 C140 134 138 158 130 180" stroke="var(--fee-hair-3)" stroke-width="1.1" fill="none" opacity=".35"/>'+
     /* ---------- Kleid (langes fließendes Fliederkleid) ---------- */
     '<path d="M100 116 C89 116 83 123 81 134 L68 210 C84 220 116 220 132 210 L119 134 C117 123 111 116 100 116 Z" fill="url(#fGown)"/>'+
     /* weiche Falten-Schattierung */
@@ -162,8 +164,8 @@ var SVG =
     '<path d="M96 90 h8 v9 q-4 3 -8 0 Z" fill="url(#fSkin)"/>'+
     '<circle cx="100" cy="79" r="14.5" fill="url(#fSkin)"/>'+
     '<circle cx="100" cy="79" r="14.5" fill="url(#fFaceShade)"/>'+
-    '<circle id="feeCheekL" cx="91" cy="84" r="3" style="fill:var(--fee-cheek)" opacity=".5"/>'+
-    '<circle id="feeCheekR" cx="109" cy="84" r="3" style="fill:var(--fee-cheek)" opacity=".5"/>'+
+    '<ellipse id="feeCheekL" cx="90" cy="87" rx="3.2" ry="2.4" style="fill:var(--fee-cheek)" opacity=".45"/>'+
+    '<ellipse id="feeCheekR" cx="110" cy="87" rx="3.2" ry="2.4" style="fill:var(--fee-cheek)" opacity=".45"/>'+
     /* Augen geschlossen (Stufe 0-1 und beim Blinzeln) */
     '<g id="feeEyesClosed">'+
       '<path d="M90 79 q4 3.5 8 0" stroke="#7a4a6a" stroke-width="1.5" fill="none" stroke-linecap="round"/>'+
@@ -180,18 +182,21 @@ var SVG =
       '<path d="M102 79 q4 -3.4 8 0" stroke="#5a3a4a" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
       '<path d="M90 79 l-2.2 -1.4 M110 79 l2.2 -1.4" stroke="#5a3a4a" stroke-width="1" stroke-linecap="round"/>'+
     '</g>'+
-    /* Augenbrauen */
-    '<path d="M90 73.5 q4 -2 8 -.3 M102 73.2 q4 -1.7 8 .3" stroke="#e0b878" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+    /* Augenbrauen (fein, sanft geschwungen) */
+    '<path d="M90.5 73.8 Q94 72 97.5 73.2" stroke="#e6c48c" stroke-width=".9" fill="none" stroke-linecap="round"/>'+
+    '<path d="M102.5 73.2 Q106 72 109.5 73.8" stroke="#e6c48c" stroke-width=".9" fill="none" stroke-linecap="round"/>'+
     /* Näschen */
     '<path d="M100 82 q1.2 1.2 0 2.4" stroke="#e0a48a" stroke-width="1" fill="none" stroke-linecap="round"/>'+
     /* Mund ruhig / lächelnd (fülliger) */
     '<path id="feeMouthCalm" style="fill:var(--fee-lip)" d="M96 88 q4 2.6 8 0 q-4 1.6 -8 0 Z"/>'+
     '<path id="feeMouthSmile" style="fill:var(--fee-lip);display:none" d="M95 87 q5 4.6 10 0 q-5 2.6 -10 0 Z"/>'+
-    /* ---------- Haare vorne (Mittelscheitel, Wellen, Strähnen) ---------- */
-    '<path d="M84 72 C81 60 91 55 100 55 C109 55 119 60 116 72 C110 63 106 61 100 61 C94 61 90 63 84 72 Z" fill="url(#fHair)"/>'+
-    '<path d="M84 72 C78 90 81 104 90 114 C86 98 84 84 90 72 Z" fill="url(#fHair)"/>'+
-    '<path d="M116 72 C122 90 119 104 110 114 C114 98 116 84 110 72 Z" fill="url(#fHair)"/>'+
-    '<path d="M100 61 C97 66 96 70 98 75 M100 61 C103 66 104 70 102 75" stroke="#fff" stroke-width=".7" fill="none" opacity=".3"/>'+
+    /* ---------- Haare vorne (Mittelscheitel, weiche Wellen, Strähnen) ---------- */
+    '<path d="M84 72 C80 59 91 54 100 54 C109 54 120 59 116 72 C111 63 106 60 100 60 C94 60 89 63 84 72 Z" fill="url(#fHair)"/>'+
+    /* linke Strähne, wellig bis über die Brust */
+    '<path d="M84 71 C76 84 79 96 86 106 C81 116 84 126 90 118 C86 108 88 96 92 84 C90 80 86 76 84 71 Z" fill="url(#fHair)"/>'+
+    /* rechte Strähne, wellig */
+    '<path d="M116 71 C124 84 121 96 114 106 C119 116 116 126 110 118 C114 108 112 96 108 84 C110 80 114 76 116 71 Z" fill="url(#fHair)"/>'+
+    '<path d="M100 60 C97 65 96 69 98 74 M100 60 C103 65 104 69 102 74" stroke="#fff" stroke-width=".7" fill="none" opacity=".3"/>'+
     /* ---------- Kopfschmuck (nur einer sichtbar) ---------- */
     /* Standard: Goldkrone mit blauem Tropfen-Edelstein (wie Vorlage) */
     '<g id="feeHeadTiara">'+
