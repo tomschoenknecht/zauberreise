@@ -1,6 +1,6 @@
 # Übergabe – Ylvies Zauberreise
 
-Stand: 2026-07-18. Kompakter Einstieg für die nächste Sitzung. Volldetails im
+Stand: 2026-07-20. Kompakter Einstieg für die nächste Sitzung. Volldetails im
 [ENTWICKLUNGSLOG.md](ENTWICKLUNGSLOG.md); Strategie/Konzept/Persona liegen im
 Strategie-Projekt (siehe unten).
 
@@ -48,6 +48,10 @@ kaputt macht oder ihr etwas wegnimmt.**
                 (CSS-Animationen wirken NICHT auf <use>-Kopien!). feeScale skaliert
                 die Figur, damit sie den Rahmen füllt.
 - tiere.js    - Haustiere (Ei->Baby->groß), petSvg()/PET_CATALOG
+- freundinnen.js - die drei Freundinnen (Figur, Geschichte, Chat-Persönlichkeit).
+                WICHTIG: eigene Farben inline, NICHT wie fee.js über Root-CSS-
+                Variablen - sonst könnte man nicht mehrere Feen gleichzeitig in
+                verschiedenen Farben zeigen. Muster für alle weiteren Charaktere.
 - kichern.js  - Toms echte Kicher-Aufnahme als Base64 (Landingpage)
 - fee-portrait.jpg - Toms fotorealistisches Fee-Bild (Chat-Porträt + Wunsch-Erfüllung)
 - mirostar-...mp3  - Hintergrundmusik (Landingpage)
@@ -68,12 +72,17 @@ kaputt macht oder ihr etwas wegnimmt.**
   Kindersicherheit). Zugang: Fee in der Kopfzeile antippen (ab Stufe 2).
 - Fee neu gezeichnet, näher an Toms Vorlage (blond, Fliederkleid+Ranke, Goldkrone+
   blauer Stein, blaue Augen, zarte Flügel, volleres welliges Haar). Foto-Porträt im Chat.
+- Freundinnen-Lichtung (seit 2026-07-20): drei Freundinnen mit eigenem Design,
+  eigener Geschichte und eigener Chat-Persönlichkeit - Rosalie (Blütenfee, ab 20
+  verdienten Kristallen), Lumi (Sternenfee, ab 60), Perla (Wellenfee, ab 120).
+  Gesperrte bleiben als verschleierte Silhouette mit Kristall-Rest sichtbar.
+  Freischaltung über "earned", damit sie durch Salon-Einkäufe nie verschwinden.
 
 ## Offen (Toms große Vision - noch nicht gebaut)
 Über die Ferien verteilt nachlegen, wenn bei Ylvie die Luft rausgeht:
-1. Freundinnen für die Fee - eigene Charaktere/Designs + eigene Geschichte.
-2. Märchenwald als neue Welt/Umgebung.
-3. Haus, das Ylvie einrichten kann.
+1. Märchenwald als neue Welt/Umgebung.
+2. Haus, das Ylvie einrichten kann.
+Für die Freundinnen später denkbar: im Salon anziehen, eigener Hintergrund je Freundin.
 Kleiner/optional: Zauber-Fragebogen am Anfang (Vorlieben -> Themenwelt einfärben),
 Bastel-Brücke mit Zauberwort (ausdrucken/basteln, Geheimwort freischalten),
 weitere Fee-Politur.

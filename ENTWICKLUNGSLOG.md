@@ -529,4 +529,43 @@ ersten Insel schaltet korrekt die zweite frei (progress 0->1), bereits
 gemeisterte Inseln bleiben klickbar, dritte Insel bleibt weiterhin gesperrt.
 Keine Konsolenfehler.
 
+### 2026-07-20 – Freundinnen der Fee (Vision-Punkt 1 umgesetzt, live)
+
+Erster der drei großen offenen Vision-Punkte gebaut: die Fee bekommt Freundinnen
+mit eigenem Charakter, eigenem Design und eigener Geschichte.
+
+Umgesetzt:
+- **Neue Datei freundinnen.js** als eigene Grafikquelle. Bewusst nach dem Muster
+  von tiere.js (selbst-enthaltenes Inline-SVG mit eigenen Farben) und NICHT nach
+  fee.js: die Fee färbt über Root-CSS-Variablen, damit lassen sich prinzipiell
+  keine zwei unterschiedlich gefärbten Feen gleichzeitig zeigen. Merkposten für
+  alle weiteren Charaktere.
+- **Drei Freundinnen** mit eigener Palette, eigenem Kopfschmuck und eigenem
+  Schweb-Motiv: Rosalie (Blütenfee, ab 20 Kristallen), Lumi (Sternenfee, ab 60),
+  Perla (Wellenfee, ab 120). Themen bewusst Blüte/Stern/Wasser - keine Insekten
+  (Ylvies Angst).
+- **Eigene Geschichte je Freundin** (4 Beats, wie die Eingangsgeschichte) und
+  **eigene Chat-Persönlichkeit** in freundinnen.js - regelbasiert und ohne KI,
+  wie beim Fee-Chat (Kindersicherheit). Jede hat außerdem eine eigene Stimmlage
+  in der Sprachausgabe.
+- **Neuer Kartenort "Freundinnen-Lichtung"** (MAP_H auf 880 gewachsen, Wiese und
+  Salon leicht verschoben). Öffnet mit der ersten Freundin, hüpft mit Callout,
+  wenn eine neue wartet; die Fee kündigt sie in der Sprechblase an.
+- **Freischaltung über "earned"** (verdiente Kristalle), nicht über das Guthaben -
+  eine neue Freundin ist damit ein Grund zum Weitermachen und kann durch Einkäufe
+  im Salon nie wieder verschwinden. Gleiche Logik wie Fee-Stufen und Haustiere.
+- Noch gesperrte Freundinnen bleiben als **verschleierte Silhouette** mit Schloss,
+  Teaser-Satz und "Noch X Kristalle" sichtbar - erzeugt Vorfreude statt Leere.
+- **Rein additiv:** neues Zustandsfeld S.friends wird rückwärtskompatibel
+  migriert; Kristalle, Stufe, Fee, Inseln und Haustiere bleiben unberührt.
+
+Getestet (Testmodus, chrome-devtools): Kartenort erscheint mit Ansage, Lichtung
+zeigt frei/gesperrt korrekt (bei earned 30 nur Rosalie frei, Perla "Noch 90
+Kristalle"), Geschichte läuft durch, Chat antwortet im richtigen Ton, gesperrte
+Karte öffnet nicht. Nach dem Deploy auf der Live-Seite gegengeprüft (earned 70 ->
+Rosalie und Lumi frei, Perla gesperrt). Keine Konsolenfehler.
+
+Offen aus der Vision: Märchenwald, einrichtbares Haus. Später denkbar für die
+Freundinnen: im Salon anziehen, eigener Hintergrund je Freundin.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_
