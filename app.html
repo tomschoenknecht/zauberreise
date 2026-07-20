@@ -170,6 +170,26 @@
   .petCard .pcost{font-size:11px; font-weight:800; color:#3fae5a;}
   .petCard .phave{font-size:11px; font-weight:700; color:#c23f8e;}
 
+  /* ---------- Freundinnen-Lichtung ---------- */
+  .friendGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:4px 0 10px;}
+  .friendCard{position:relative; background:rgba(255,255,255,.15); border:2px solid rgba(255,255,255,.42);
+    border-radius:18px; padding:8px 8px 10px; text-align:center; cursor:pointer; color:#fff;
+    box-shadow:0 6px 16px rgba(90,20,90,.24); transition:transform .08s ease;}
+  .friendCard:active{transform:scale(.97);}
+  .friendCard.locked{cursor:default;}
+  .friendCard .fport{width:100%; aspect-ratio:200/236; border-radius:14px; overflow:hidden; position:relative;
+    background:radial-gradient(circle at 50% 38%, rgba(255,255,255,.28), rgba(255,255,255,.04) 72%);}
+  .friendCard .fport svg{width:100%; height:100%; display:block; filter:drop-shadow(0 5px 9px rgba(70,15,80,.4));}
+  .friendCard .fport.fveil svg{filter:brightness(.45) saturate(.4) blur(1.5px);}
+  .friendCard b{display:block; font-size:14px; margin-top:5px; line-height:1.15; text-shadow:0 2px 8px rgba(80,20,90,.5);}
+  .friendCard .fsub{font-size:11px; opacity:.9; line-height:1.2;}
+  .friendCard .fnew{position:absolute; top:7px; right:7px; z-index:2; background:var(--gold2); color:#6a1550;
+    font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; box-shadow:0 2px 6px rgba(90,20,90,.4);}
+  .friendCard .flock{position:absolute; left:8px; right:8px; top:8px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; aspect-ratio:200/236; background:rgba(40,18,50,.4);
+    border-radius:14px; font-weight:800; font-size:12px; gap:5px;}
+  .friendCard .flock svg{fill:#fff;}
+
   /* ---------- Mit der Fee reden ---------- */
   .chatWrap{display:flex; flex-direction:column; height:100%;}
   .chatTop{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
@@ -303,6 +323,7 @@
 
 <script src="fee.js"></script>
 <script src="tiere.js"></script>
+<script src="freundinnen.js"></script>
 <script src="kichern.js"></script>
 <script>
 (function(){
@@ -347,6 +368,7 @@ var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],hea
    Beides muss getrennt bleiben, sonst schläft die Fee nach einem Einkauf wieder ein. */
 var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, sections:{}, skills:{},
                wish:{text:"", granted:false}, pets:{owned:[], active:"", adoptedAt:{}},
+               friends:{seen:[]},
                salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
@@ -359,6 +381,7 @@ function load(){
     if(!o.sections) o.sections={};
     if(!o.wish) o.wish={text:"", granted:false};
     if(!o.pets) o.pets={owned:[], active:"", adoptedAt:{}};
+    if(!o.friends || !Array.isArray(o.friends.seen)) o.friends={seen:[]};
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -462,9 +485,10 @@ var ISLANDS=[
   {id:"einmaleins", name:"Einmaleins-Insel", sub:"Mal-Reihen entdecken", skill:"einmaleins", land:"#c9a1ff", landD:"#8b3fd6", x:290, y:560,
    ic:'<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" stroke="#8b3fd6" stroke-width="2.4" stroke-linecap="round"/></svg>'}
 ];
-var WIESE_POS={x:92,  y:620, land:"#bff7c9", landD:"#3fae5a"};   // Kuschelwiese: Haustiere
-var SALON_POS={x:236, y:712, land:"#ffe0f6", landD:"#c97ce0"};   // Zauber-Salon
-var MAP_H=800;   // Kartenhöhe (viewBox), gewachsen mit den zusätzlichen Orten
+var WIESE_POS={x:90,   y:614, land:"#bff7c9", landD:"#3fae5a"};   // Kuschelwiese: Haustiere
+var FRIENDS_POS={x:298, y:668, land:"#ffe7c0", landD:"#e0a54a"}; // Freundinnen-Lichtung
+var SALON_POS={x:120,  y:762, land:"#ffe0f6", landD:"#c97ce0"};   // Zauber-Salon
+var MAP_H=880;   // Kartenhöhe (viewBox), gewachsen mit den zusätzlichen Orten
 
 /* ============ Fee-Stufen ============
    Takt für SECHS Wochen: eine Insel bringt ca. 38 Kristalle (24 Aufgaben),
@@ -605,6 +629,7 @@ function burst(){ // kleiner Funkel-Ausbruch
 /* ============ Schatzkarte ============ */
 var SALON_ID="salon";
 var WIESE_ID="wiese";
+var FRIENDS_ID="freunde";
 var ISLAND_BLOB="M0,-36 C14,-37 26,-33 33,-23 C40,-13 40,3 34,13 C28,23 22,31 8,35 C-8,39 -26,34 -33,20 C-40,6 -38,-10 -30,-22 C-22,-34 -10,-35 0,-36 Z";
 
 /* kleine Landschafts-Deko je Insel, gibt der Karte Charakter statt gleicher Farbblasen */
@@ -625,7 +650,10 @@ var ISLAND_DECO = {
     '<path d="M-10,10 q-3,-9 0,-12 q3,3 0,12" fill="#3fae5a"/>'+
     '<path d="M0,10 q-3,-10 0,-14 q3,4 0,14" fill="#4fbf6a"/>'+
     '<path d="M9,10 q-3,-8 0,-11 q3,3 0,11" fill="#3fae5a"/>'+
-    '<circle cx="4" cy="-2" r="2.4" fill="#ffe08a"/></g>'
+    '<circle cx="4" cy="-2" r="2.4" fill="#ffe08a"/></g>',
+  freunde: '<g transform="translate(10,8)">'+
+    '<circle cx="-9" cy="1" r="3.4" fill="#ff9ec6"/><circle cx="0" cy="-3" r="3.6" fill="#c9a1ff"/><circle cx="9" cy="2" r="3.4" fill="#8ff0d0"/>'+
+    '<circle cx="-9" cy="1" r="1.2" fill="#fff"/><circle cx="0" cy="-3" r="1.3" fill="#fff"/><circle cx="9" cy="2" r="1.2" fill="#fff"/></g>'
 };
 var LOCK_ICON='<circle r="19" fill="#8a8a9a"/><rect x="-7" y="-2" width="14" height="11" rx="2.4" fill="#5a5a6a"/><path d="M-5,-2 v-4 a5,5 0 0 1 10,0 v4" fill="none" stroke="#5a5a6a" stroke-width="2.6"/>';
 
@@ -736,13 +764,22 @@ function screenMap(){
   var wieseUnter = !wieseOpen ? "noch verschlossen" : (S.pets.owned.length ? PET_NAME(S.pets.active)+" wartet!" : "Adoptiere ein Tier!");
   islandsSvg+=islandNode(WIESE_ID, WIESE_POS.x, WIESE_POS.y, WIESE_POS.land, WIESE_POS.landD, wieseIcon,
     false, !wieseOpen, "Die Kuschelwiese", wieseUnter, ISLAND_DECO.wiese);
+  /* Freundinnen-Lichtung - offen, sobald die erste Freundin auftaucht (nach earned) */
+  var unlockedFriends=(window.FRIEND_LIST||[]).filter(function(f){ return S.earned>=f.unlock; });
+  var friendsOpen=unlockedFriends.length>0;
+  var newFriend=unlockedFriends.some(function(f){ return S.friends.seen.indexOf(f.id)<0; });
+  var friendsUnter = !friendsOpen ? "noch verschlossen"
+    : (newFriend ? "Eine neue Freundin!" : unlockedFriends.length+(unlockedFriends.length===1?" Freundin":" Freundinnen"));
+  var friendsIcon='<circle cx="9" cy="8" r="3" fill="#fff" stroke="#e0a54a" stroke-width="1.4"/><circle cx="16" cy="8" r="3" fill="#fff" stroke="#e0a54a" stroke-width="1.4"/><path d="M3 20c0-3.5 3-5.5 6-5.5M21 20c0-3.5-3-5.5-6-5.5" fill="none" stroke="#e0a54a" stroke-width="1.5"/>';
+  islandsSvg+=islandNode(FRIENDS_ID, FRIENDS_POS.x, FRIENDS_POS.y, FRIENDS_POS.land, FRIENDS_POS.landD, friendsIcon,
+    newFriend, !friendsOpen, "Freundinnen-Lichtung", friendsUnter, ISLAND_DECO.freunde);
   var salonIcon='<path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#c97ce0" stroke-width="1.3"/>';
   islandsSvg+=islandNode(SALON_ID, SALON_POS.x, SALON_POS.y, SALON_POS.land, SALON_POS.landD, salonIcon,
     false, !salonOpen, "Der Zauber-Salon", salonOpen?"Style deine Fee!":"noch verschlossen", ISLAND_DECO.salon);
 
   /* Schatzpfad dynamisch aus den Inselpositionen (in Reihenfolge) + Wiese + Salon */
   var trailPts=ISLANDS.map(function(i){return [i.x,i.y];});
-  trailPts.push([WIESE_POS.x,WIESE_POS.y]); trailPts.push([SALON_POS.x,SALON_POS.y]);
+  trailPts.push([WIESE_POS.x,WIESE_POS.y]); trailPts.push([FRIENDS_POS.x,FRIENDS_POS.y]); trailPts.push([SALON_POS.x,SALON_POS.y]);
   var trail="M"+trailPts.map(function(p){return p[0]+","+p[1];}).join(" L");
   var waves=""; for(var wi=0; wi<Math.ceil(MAP_H/115); wi++){ var yy=30+wi*115;
     waves+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; }
@@ -784,6 +821,7 @@ function screenMap(){
       var id=el.getAttribute("data-id");
       if(id===SALON_ID){ if(salonOpen) screenSalon(); else say(feeName()+" flüstert: Erst muss ich meine Farbe zurückbekommen, dann kannst du mich schminken.", true); return; }
       if(id===WIESE_ID){ if(wieseOpen) screenWiese(); else say(feeName()+" flüstert: Schaff erst die erste Insel - dann öffnet sich die Kuschelwiese!", true); return; }
+      if(id===FRIENDS_ID){ if(friendsOpen) screenFriends(); else say(feeName()+" flüstert: Sammle noch ein paar Kristalle - dann finde ich meine erste Freundin!", true); return; }
       startLesson(id);
     });
   });
@@ -798,7 +836,8 @@ function screenMap(){
   }
 
   var nm=feeName();
-  say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp die Insel an!", true);
+  if(newFriend) say(nm+" flüstert aufgeregt: Auf der Lichtung wartet eine neue Freundin auf dich!", true);
+  else say(due.length ? (nm+" flüstert: an einem Ort war ich lange nicht ... er ruft dich!") : "Wohin segeln wir, Ylvie? Tipp die Insel an!", true);
 }
 
 /* ============ Kuschelwiese (Haustiere) ============
@@ -924,6 +963,110 @@ function screenSalon(){
     el.addEventListener("click", function(){ salonBuy(el.getAttribute("data-cat"), el.getAttribute("data-id")); });
   });
   say(feeName()+" freut sich: Wie soll ich heute aussehen?", true);
+}
+
+/* ============ Freundinnen-Lichtung ============
+   Eigene Charaktere mit eigener kleiner Geschichte und eigenem Ton (freundinnen.js).
+   Rein zusätzlich - berührt Kristalle/Stufe/Fee nicht. Freigeschaltet über "earned",
+   also über Ylvies Fleiß, damit eine neue Freundin ein Grund zum Weitermachen ist. */
+var friendChatId=null, friendLogs={};
+function friendPortraitHtml(id, cls){ return '<div class="'+cls+'">'+friendSvg(id)+'</div>'; }
+function speakFriend(id, text){
+  if(S.stage<3) return;                          // Sprachausgabe erst ab "Stimme", wie bei der Fee
+  var f=FRIEND_BY(id);
+  try{ var u=new SpeechSynthesisUtterance(text); u.lang="de-DE"; u.pitch=(f&&f.pitch)||1.5; u.rate=1.0;
+    speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function screenFriends(){
+  showChrome(true); renderFee();
+  var html='<button class="back" id="backBtn">‹ Zurück zur Karte</button><h2>Die Freundinnen-Lichtung</h2>'+
+    '<p style="text-align:center;color:#fff;font-weight:700;font-size:13px;opacity:.95;margin:0 0 8px;text-shadow:0 2px 10px rgba(80,20,90,.5)">Je fleißiger du zauberst, desto mehr Freundinnen findet '+feeName()+'.</p>'+
+    '<div class="friendGrid">';
+  FRIEND_LIST.forEach(function(f){
+    var open=S.earned>=f.unlock, seen=S.friends.seen.indexOf(f.id)>=0;
+    if(open){
+      html+='<div class="friendCard" data-id="'+f.id+'">'+
+        (seen?'':'<span class="fnew">Neu!</span>')+
+        '<div class="fport">'+friendSvg(f.id)+'</div>'+
+        '<b>'+esc(f.kurz)+'</b><div class="fsub">'+(seen?"Tipp mich an zum Reden":"Tipp mich an!")+'</div></div>';
+    } else {
+      html+='<div class="friendCard locked" data-id="'+f.id+'">'+
+        '<div class="fport fveil">'+friendSvg(f.id)+'</div>'+
+        '<div class="flock"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="#fff" stroke-width="2"/></svg>'+
+          '<span>Noch '+kristalle(Math.max(0,f.unlock-S.earned))+'</span></div>'+
+        '<b>? ? ?</b><div class="fsub">'+esc(f.sub)+'</div></div>';
+    }
+  });
+  html+='</div>';
+  $("screen").innerHTML=html;
+  $("backBtn").addEventListener("click", screenMap);
+  Array.prototype.forEach.call(document.querySelectorAll(".friendCard"), function(el){
+    el.addEventListener("click", function(){ openFriend(el.getAttribute("data-id")); });
+  });
+  var neue=FRIEND_LIST.filter(function(f){ return S.earned>=f.unlock && S.friends.seen.indexOf(f.id)<0; });
+  say(neue.length ? "Schau, eine neue Freundin ist aufgetaucht! Tipp sie an." : "Mit wem möchtest du reden?", true);
+}
+function openFriend(id){
+  var f=FRIEND_BY(id); if(!f) return;
+  if(S.earned<f.unlock){ say("Diese Freundin schläft noch - sammle noch "+kristalle(f.unlock-S.earned)+", dann kommt sie!", true); return; }
+  if(S.friends.seen.indexOf(id)<0) return screenFriendStory(id);
+  return screenFriendChat(id);
+}
+function screenFriendStory(id){
+  showChrome(false);
+  var f=FRIEND_BY(id), beats=f.story, idx=0;
+  function render(){
+    var last=idx===beats.length-1;
+    var html='<div class="story">'+
+      '<div class="storyFee floaty"><div class="halo"></div>'+friendSvg(id)+'</div>'+
+      '<div class="storyText">'+beats[idx]+'</div>'+
+      '<div class="dots">'+beats.map(function(_,i){ return '<i class="'+(i<=idx?'on':'')+'"></i>'; }).join("")+'</div>';
+    if(!last) html+='<div class="tapHint">Tipp weiter ...</div>';
+    else html+='<div class="challengeBtns"><button class="btn pink big" id="fyes">Ja, wir sind Freundinnen!</button></div>';
+    html+='</div>';
+    $("screen").innerHTML=html;
+    if(!last){ $("screen").querySelector(".story").addEventListener("click", function(){ idx++; render(); speakFriend(id, beats[idx]); }, {once:true}); }
+    else{ $("fyes").addEventListener("click", function(e){ e.stopPropagation();
+      if(S.friends.seen.indexOf(id)<0){ S.friends.seen.push(id); save(); }
+      setTimeout(function(){ screenFriendChat(id); }, 320); }); }
+  }
+  render();
+  speakFriend(id, beats[0]);
+}
+function friendChatRender(){
+  var log=$("chatLog"), arr=friendLogs[friendChatId]||[];
+  log.innerHTML=arr.map(function(m){ return '<div class="msg '+(m.who==="fee"?"fee":"me")+'">'+esc(m.text)+'</div>'; }).join("");
+  log.scrollTop=log.scrollHeight;
+}
+function friendChatSay(text){
+  if(!text || !text.trim()) return;
+  var id=friendChatId; friendLogs[id].push({who:"me", text:text.trim()});
+  var reply=friendReply(id, text); friendLogs[id].push({who:"fee", text:reply});
+  friendChatRender(); speakFriend(id, reply);
+}
+function screenFriendChat(id){
+  showChrome(false);
+  friendChatId=id;
+  var f=FRIEND_BY(id);
+  if(!friendLogs[id]) friendLogs[id]=[{who:"fee", text:friendReply(id,"hallo")}];
+  var chips=["Wie heißt du?","Ich hab dich lieb","Erzähl mir ein Geheimnis","Wollen wir spielen?"];
+  $("screen").innerHTML='<div class="chatWrap">'+
+    '<div class="chatTop"><button class="back" id="backBtn">‹ Freundinnen</button></div>'+
+    friendPortraitHtml(id,"chatBig")+
+    '<div class="chatTitle" style="text-align:center;margin-bottom:2px"><b>'+esc(f.kurz)+'</b>'+
+      '<span>'+esc(f.sub)+'</span></div>'+
+    '<div class="chatLog" id="chatLog"></div>'+
+    '<div class="chatChips" id="chatChips">'+chips.map(function(c){ return '<button class="chatChip">'+esc(c)+'</button>'; }).join("")+'</div>'+
+    '<div class="chatInputRow"><input id="chatInput" maxlength="60" placeholder="Sag etwas ..." autocomplete="off" spellcheck="false"><button class="chatSend" id="chatSend">Senden</button></div>'+
+  '</div>';
+  friendChatRender();
+  var lg=friendLogs[id]; speakFriend(id, lg[lg.length-1].text);
+  $("backBtn").addEventListener("click", screenFriends);
+  Array.prototype.forEach.call(document.querySelectorAll(".chatChip"), function(b){
+    b.addEventListener("click", function(){ friendChatSay(b.textContent); });
+  });
+  $("chatSend").addEventListener("click", function(){ var i=$("chatInput"); friendChatSay(i.value); i.value=""; i.focus(); });
+  $("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter"){ var i=$("chatInput"); friendChatSay(i.value); i.value=""; } });
 }
 
 var lesson=null;
