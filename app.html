@@ -150,6 +150,32 @@
   .wishIdea{background:#fff; border:2px solid var(--pink); color:var(--plum); border-radius:999px;
     padding:7px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;}
 
+  /* ---------- Streak: Sternen-Kette ---------- */
+  .streakBar{display:flex; align-items:center; gap:10px; margin-bottom:10px;
+    background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(255,244,252,.97)); color:var(--plum);
+    border:2.5px solid var(--gold); border-radius:18px; padding:8px 12px; box-shadow:0 8px 20px rgba(90,20,90,.26);}
+  .streakBar .stBadge{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    min-width:54px; padding:4px 8px; border-radius:14px; background:linear-gradient(180deg,var(--gold),var(--gold2)); color:#6a1550;}
+  .streakBar .stBadge b{font-size:23px; line-height:1;}
+  .streakBar .stBadge i{font-size:9.5px; font-style:normal; font-weight:800; line-height:1.05; text-align:center; margin-top:2px;}
+  .streakBar .stDays{flex:1; display:flex; justify-content:space-between; gap:2px;}
+  .streakBar .sday{display:flex; flex-direction:column; align-items:center; gap:1px; flex:1;}
+  .streakBar .sday .sstar{width:26px; height:26px;}
+  .streakBar .sday .sstar svg{width:100%; height:100%; display:block;}
+  .streakBar .sday .sstar.on{filter:drop-shadow(0 1px 3px rgba(230,165,47,.6));}
+  .streakBar .sday span{font-size:9.5px; font-weight:800; opacity:.65;}
+  .streakBar .sday.today .sstar{transform:scale(1.18);}
+  .streakBar .sday.today span{opacity:1; color:var(--pink2);}
+  .streakToast{position:fixed; left:50%; top:14px; transform:translate(-50%,-160%); z-index:80;
+    display:flex; align-items:center; gap:10px; background:linear-gradient(180deg,#fff6d6,var(--gold2)); color:#6a1550;
+    border:2px solid #fff; border-radius:16px; padding:9px 16px 9px 12px; box-shadow:0 10px 26px rgba(90,20,90,.4);
+    pointer-events:none; opacity:0; max-width:88vw; transition:transform .42s cubic-bezier(.2,1.3,.5,1), opacity .42s ease;}
+  .streakToast.show{transform:translate(-50%,0); opacity:1;}
+  .streakToast .stStar{flex:0 0 30px; width:30px; height:30px;}
+  .streakToast .stStar svg{width:100%; height:100%; display:block;}
+  .streakToast .stTx b{display:block; font-size:15px; line-height:1.15;}
+  .streakToast .stTx span{font-size:12px; font-weight:700; opacity:.85;}
+
   /* ---------- Kuschelwiese (Haustiere) ---------- */
   .petStage{width:min(52vw,210px); margin:6px auto 2px; aspect-ratio:1/1;
     background:radial-gradient(circle at 50% 62%, #d6f7dd, #a9ebbb); border-radius:26px;
@@ -368,7 +394,7 @@ var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],hea
    Beides muss getrennt bleiben, sonst schläft die Fee nach einem Einkauf wieder ein. */
 var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, sections:{}, skills:{},
                wish:{text:"", granted:false}, pets:{owned:[], active:"", adoptedAt:{}},
-               friends:{seen:[]},
+               friends:{seen:[]}, streak:{current:0, best:0, last:"", days:[]},
                salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
@@ -382,6 +408,11 @@ function load(){
     if(!o.wish) o.wish={text:"", granted:false};
     if(!o.pets) o.pets={owned:[], active:"", adoptedAt:{}};
     if(!o.friends || !Array.isArray(o.friends.seen)) o.friends={seen:[]};
+    if(!o.streak || typeof o.streak!=="object") o.streak={current:0, best:0, last:"", days:[]};
+    else { if(typeof o.streak.current!=="number") o.streak.current=0;
+      if(typeof o.streak.best!=="number") o.streak.best=0;
+      if(typeof o.streak.last!=="string") o.streak.last="";
+      if(!Array.isArray(o.streak.days)) o.streak.days=[]; }
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
@@ -741,6 +772,61 @@ function screenWishGranted(){
   $("wgOk").addEventListener("click", screenMap);
 }
 
+/* ============ Streak: Sternen-Kette ============
+   Belohnt das tägliche Dranbleiben. Bewusst "klassisch, aber lieb": bei einer
+   Lücke zählt die Serie freundlich wieder ab 1 - nie mit Schuld- oder Verlust-Ton.
+   Der Tagesbonus sind SPENDIERBARE Kristalle (kein "earned") - er treibt die Fee
+   also nicht voran, sondern ist ein Geschenk für Salon/Wiese. So bleibt die
+   Fee-Stufe an echtes Rechnen gekoppelt; ein stiller Stufensprung durchs bloße
+   Einloggen kann nicht passieren. Ein Tag "zählt", sobald Ylvie eine Insel
+   betritt und zu zaubern beginnt. */
+function pad2(n){ return (n<10?"0":"")+n; }
+function todayStr(){ var d=new Date(); return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function shiftDay(s, delta){ var p=s.split("-"); var d=new Date(+p[0], (+p[1])-1, +p[2]); d.setDate(d.getDate()+delta);
+  return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function wdShort(ds){ var p=ds.split("-"); return ["So","Mo","Di","Mi","Do","Fr","Sa"][new Date(+p[0],(+p[1])-1,+p[2]).getDay()]; }
+var streakPending=null;
+function markActiveToday(){
+  var t=todayStr(); if(S.streak.last===t) return;                 // heute schon gezählt
+  var hadHistory=!!S.streak.last, prevBest=S.streak.best, cont=(S.streak.last===shiftDay(t,-1));
+  S.streak.current = cont ? S.streak.current+1 : 1;
+  S.streak.last=t;
+  if(S.streak.current>S.streak.best) S.streak.best=S.streak.current;
+  if(S.streak.days.indexOf(t)<0) S.streak.days.push(t);
+  if(S.streak.days.length>40) S.streak.days=S.streak.days.slice(-40);
+  var bonus=Math.min(2+S.streak.current, 8);
+  S.crystals+=bonus; save(); renderFee();                         // nur Guthaben, NICHT earned
+  streakPending={day:S.streak.current, bonus:bonus,
+    kind:(!hadHistory?"first":(cont?"go":"back")),
+    record:(S.streak.current>prevBest && S.streak.current>=3)};
+}
+function showStreakToast(p){
+  var msg = p.record          ? ("Tag "+p.day+" - neuer Rekord!")
+          : p.kind==="first"  ? "Dein erster Zauber-Stern!"
+          : p.kind==="back"   ? "Schön, dass du wieder da bist!"
+          : ("Tag "+p.day+" in Folge!");
+  var d=document.createElement("div"); d.className="streakToast";
+  d.innerHTML='<div class="stStar">'+STAR_SVG+'</div><div class="stTx"><b>'+msg+'</b><span>+'+kristalle(p.bonus)+' geschenkt</span></div>';
+  document.body.appendChild(d);
+  requestAnimationFrame(function(){ d.classList.add("show"); });
+  setTimeout(function(){ d.classList.remove("show"); setTimeout(function(){ if(d.parentNode) d.remove(); }, 420); }, 2900);
+}
+/* Kette der letzten 7 Tage: ein Stern je Tag, heute hervorgehoben. */
+function streakBarHtml(){
+  if(!S.streak.last) return "";                                   // erst nach dem ersten Zauber-Tag
+  var t=todayStr(), days="";
+  for(var i=6;i>=0;i--){
+    var ds=shiftDay(t,-i), active=S.streak.days.indexOf(ds)>=0, isToday=(i===0);
+    var star = active
+      ? '<svg viewBox="0 0 24 24"><path d="M12 2l3 7.5L23 9.5l-5.5 5 1.5 8L12 18.5 5 22.5l1.5-8L1 9.5l8-1z" fill="#ffd54a" stroke="#e6a52f" stroke-width="1"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M12 2l3 7.5L23 9.5l-5.5 5 1.5 8L12 18.5 5 22.5l1.5-8L1 9.5l8-1z" fill="none" stroke="#c99bf0" stroke-width="1.6" opacity=".7"/></svg>';
+    days+='<div class="sday'+(isToday?" today":"")+'"><div class="sstar'+(active?" on":"")+'">'+star+'</div><span>'+wdShort(ds)+'</span></div>';
+  }
+  return '<div class="streakBar" id="streakBar">'+
+    '<div class="stBadge"><b>'+S.streak.current+'</b><i>Tage<br>in Folge</i></div>'+
+    '<div class="stDays">'+days+'</div></div>';
+}
+
 function screenMap(){
   /* Wunsch erfüllt? Einmalig feiern, bevor die Karte kommt. */
   if(S.wish.text && !S.wish.granted && S.earned>=WISH_TARGET){ S.wish.granted=true; save(); return screenWishGranted(); }
@@ -784,7 +870,7 @@ function screenMap(){
   var waves=""; for(var wi=0; wi<Math.ceil(MAP_H/115); wi++){ var yy=30+wi*115;
     waves+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; }
 
-  var html=wishBannerHtml()+'<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 '+MAP_H+'" xmlns="http://www.w3.org/2000/svg">'+
+  var html=streakBarHtml()+wishBannerHtml()+'<h2>Deine Schatzkarte</h2><div class="mapWrap"><svg viewBox="0 0 380 '+MAP_H+'" xmlns="http://www.w3.org/2000/svg">'+
     '<defs>'+
       '<linearGradient id="parchment" x1="0" y1="0" x2="1" y2="1">'+
         '<stop offset="0" stop-color="#f8ecc8"/><stop offset="55%" stop-color="#efd49c"/><stop offset="1" stop-color="#dcb877"/>'+
@@ -1087,6 +1173,7 @@ function setSectionDone(id, n){ if(!S.sections) S.sections={}; S.sections[id]=n;
 
 function startLesson(id){
   if(islandLocked(id)){ say(feeName()+" flüstert: Eine Insel nach der anderen - lass uns erst hierbleiben.", true); return; }
+  markActiveToday(); if(streakPending){ showStreakToast(streakPending); streakPending=null; }
   var is=ISLANDS.filter(function(i){return i.id===id;})[0];
   var sec=sectionDone(id);
   if(sec>=SECTIONS.length) sec=0;              // Insel erneut spielen -> wieder von vorn
