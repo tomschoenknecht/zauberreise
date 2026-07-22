@@ -568,4 +568,38 @@ Rosalie und Lumi frei, Perla gesperrt). Keine Konsolenfehler.
 Offen aus der Vision: Märchenwald, einrichtbares Haus. Später denkbar für die
 Freundinnen: im Salon anziehen, eigener Hintergrund je Freundin.
 
+### 2026-07-22 – Streak / Sternen-Kette fürs tägliche Dranbleiben (live)
+
+Auf Toms Wunsch ein Streak-Mechanismus, damit Ylvie regelmäßig wiederkommt.
+Bewusst kindgerecht gestaltet (per Rückfrage mit Tom entschieden):
+
+- **"Klassisch, aber lieb":** bei einer Lücke zählt die Serie freundlich wieder
+  ab 1 - aber der Rekord (best) bleibt erhalten und der Ton ist aufmunternd
+  ("Schön, dass du wieder da bist!"), nie mit Schuld- oder Verlust-Sprache.
+  Wichtig, weil es sechs Wochen Ferien sind und Tage ausfallen (Ausflüge etc.) -
+  ein harter Streak-Reset à la Duolingo würde bei ihr eher demotivieren und dem
+  Frust-abfangen-Prinzip widersprechen.
+- **Form: Sternen-Kette** auf der Karte - die letzten 7 Tage als Sterne mit
+  Wochentagen, gemachte Tage golden, heute hervorgehoben; dazu ein Badge
+  "X Tage in Folge".
+- **Toast + Tagesbonus** beim ersten Zaubern des Tages ("Tag X in Folge!" /
+  "neuer Rekord!" / "Dein erster Zauber-Stern!").
+- **Wichtige Design-Entscheidung:** der Tagesbonus sind SPENDIERBARE Kristalle
+  (S.crystals), NICHT "earned". Damit schiebt bloßes tägliches Einloggen die
+  Fee-Stufe nicht still voran - die Fee bleibt an echtes Rechnen gekoppelt, und
+  ein Stufensprung ohne Celebration-Schirm kann nicht passieren. Der Streak
+  belohnt das Wiederkommen mit Geschenk-Kristallen für Salon/Wiese.
+- **Wann ein Tag zählt:** sobald Ylvie eine Insel betritt und zu zaubern beginnt
+  (markActiveToday in startLesson), nicht schon beim bloßen Öffnen der App.
+- Datumsvergleich lokal über "YYYY-MM-DD" (todayStr/shiftDay), Zeitzone = Gerät.
+- **Rein additiv:** neues Feld S.streak wird rückwärtskompatibel migriert;
+  Kristalle-Guthaben, earned, Stufe, Fee, Inseln, Haustiere und Freundinnen
+  bleiben unberührt.
+
+Getestet (Testmodus + live nach Deploy, chrome-devtools): Fortsetzung 2->3
+(+5 Kristalle, Rekord 3, heutiger Stern leuchtet auf), Lücke 4->1 (Rekord 5
+bleibt, "Schön, dass du wieder da bist!"), Erststart migriert alten Stand ohne
+streak-Feld sauber und zählt Tag 1 (+3). Kette zeigt die letzten 7 Tage mit
+Wochentagen korrekt. Keine Konsolenfehler.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_

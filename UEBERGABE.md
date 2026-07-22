@@ -1,6 +1,6 @@
 # Übergabe – Ylvies Zauberreise
 
-Stand: 2026-07-20. Kompakter Einstieg für die nächste Sitzung. Volldetails im
+Stand: 2026-07-22. Kompakter Einstieg für die nächste Sitzung. Volldetails im
 [ENTWICKLUNGSLOG.md](ENTWICKLUNGSLOG.md); Strategie/Konzept/Persona liegen im
 Strategie-Projekt (siehe unten).
 
@@ -77,6 +77,11 @@ kaputt macht oder ihr etwas wegnimmt.**
   verdienten Kristallen), Lumi (Sternenfee, ab 60), Perla (Wellenfee, ab 120).
   Gesperrte bleiben als verschleierte Silhouette mit Kristall-Rest sichtbar.
   Freischaltung über "earned", damit sie durch Salon-Einkäufe nie verschwinden.
+- Streak/Sternen-Kette (seit 2026-07-22): belohnt tägliches Zaubern. Kette der
+  letzten 7 Tage oben auf der Karte + Toast/Bonus beim ersten Zaubern des Tages.
+  "Klassisch, aber lieb": Lücke zählt sanft ab 1, Rekord bleibt, nie Verlust-Ton.
+  WICHTIG: Tagesbonus sind SPENDIERBARE Kristalle (nicht "earned"), damit bloßes
+  Einloggen die Fee nicht voranschiebt. Tag zählt beim Betreten einer Insel.
 
 ## Offen (Toms große Vision - noch nicht gebaut)
 Über die Ferien verteilt nachlegen, wenn bei Ylvie die Luft rausgeht:
