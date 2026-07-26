@@ -50,11 +50,12 @@ window.FEE_CATALOG = {
            {id:"meer",     name:"Meerblau",     cost:15},
            {id:"feuer",    name:"Feuerrot",     cost:15},
            {id:"regenbogen",name:"Regenbogen",  cost:25} ],
-  dress: [ {id:"rosalila", name:"Flieder",      cost:0},
-           {id:"minze",    name:"Minzgrün",     cost:10},
-           {id:"sonne",    name:"Sonnengelb",   cost:10},
-           {id:"sternennacht",name:"Sternennacht",cost:15},
-           {id:"kristall", name:"Kristallweiß-Gold",cost:20} ],
+  /* Echte Kleider-DESIGNS (verschiedene Schnitte, nicht nur Farben) */
+  dress: [ {id:"flieder",  name:"Fliederkleid", cost:0},
+           {id:"ball",     name:"Ballkleid",    cost:12},
+           {id:"blueten",  name:"Blütenkleid",  cost:12},
+           {id:"sternen",  name:"Sternenkleid", cost:16},
+           {id:"kristall", name:"Kristallkleid",cost:20} ],
   face:  [ {id:"zart",    name:"Zart",          cost:0},
            {id:"beere",   name:"Beere",         cost:8},
            {id:"koralle", name:"Koralle",       cost:8},
@@ -77,6 +78,12 @@ window.FEE_CATALOG = {
 var ORIGIN={
   feeAlive:{x:100,y:150}, feeWingL:{x:96,y:124}, feeWingR:{x:104,y:124}, feeArmR:{x:108,y:114}
 };
+
+/* Kleiner fünfzackiger Stern für die Kleider-Verzierung */
+function starAt(x,y,r){ var p="", ri=r*0.45;
+  for(var i=0;i<10;i++){ var rr=(i%2===0)?r:ri, a=-1.5708+i*0.6283;
+    p+=(x+Math.cos(a)*rr).toFixed(1)+","+(y+Math.sin(a)*rr).toFixed(1)+" "; }
+  return '<polygon points="'+p.trim()+'"/>'; }
 
 var SVG =
 '<svg id="feeDefs" width="0" height="0" style="position:absolute" aria-hidden="true">'+
@@ -141,18 +148,56 @@ var SVG =
     /* Strähnen-Wellen als Glanzlinien */
     '<path d="M74 96 C68 122 70 152 78 178 M126 96 C132 122 130 152 122 178" stroke="#fff" stroke-width=".9" fill="none" opacity=".3"/>'+
     '<path d="M64 110 C60 134 62 158 70 180 M136 110 C140 134 138 158 130 180" stroke="var(--fee-hair-3)" stroke-width="1.1" fill="none" opacity=".35"/>'+
-    /* ---------- Kleid (langes fließendes Fliederkleid) ---------- */
-    '<path d="M100 116 C89 116 83 123 81 134 L68 210 C84 220 116 220 132 210 L119 134 C117 123 111 116 100 116 Z" fill="url(#fGown)"/>'+
-    /* weiche Falten-Schattierung */
-    '<path d="M92 132 L82 206 M108 132 L118 206" stroke="#7a4a8a" stroke-width="2" opacity=".14" fill="none" stroke-linecap="round"/>'+
-    '<path d="M100 124 L96 208 M100 124 L104 208" stroke="#fff" stroke-width="1.1" opacity=".4" fill="none" stroke-linecap="round"/>'+
-    /* silberne Ranken-Stickerei mittig */
-    '<path d="M100 122 C104 140 96 158 100 176 C103 190 99 200 100 210" stroke="#fff" stroke-width="1" opacity=".6" fill="none"/>'+
-    '<g fill="#fff" opacity=".6"><ellipse cx="96" cy="146" rx="2.4" ry="1.2" transform="rotate(35 96 146)"/><ellipse cx="104" cy="160" rx="2.4" ry="1.2" transform="rotate(-35 104 160)"/><ellipse cx="97" cy="176" rx="2.2" ry="1.1" transform="rotate(35 97 176)"/><ellipse cx="103" cy="192" rx="2.2" ry="1.1" transform="rotate(-35 103 192)"/></g>'+
-    '<path d="M68 210 C84 220 116 220 132 210" fill="none" stroke="#fff" stroke-width="1.6" opacity=".55"/>'+
-    /* ---------- Mieder (Sweetheart) ---------- */
-    '<path d="M100 98 C91 98 86 105 87 118 C93 126 107 126 113 118 C114 105 109 98 100 98 Z" fill="url(#fBodice)"/>'+
-    '<path d="M92 104 C96 111 104 111 108 104" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/>'+
+    /* ---------- Kleider (wechselbare DESIGNS - nur eines sichtbar) ----------
+       Jedes Kleid ist eine eigene Gruppe mit eigenem Schnitt (Rock + Mieder).
+       feeCustomize({dress}) blendet das gewählte ein. Standard: Fliederkleid. */
+    /* Fliederkleid (Standard, Verlauf über CSS-Variablen wie bisher) */
+    '<g id="feeDress_flieder">'+
+      '<path d="M100 116 C89 116 83 123 81 134 L68 210 C84 220 116 220 132 210 L119 134 C117 123 111 116 100 116 Z" fill="url(#fGown)"/>'+
+      '<path d="M92 132 L82 206 M108 132 L118 206" stroke="#7a4a8a" stroke-width="2" opacity=".14" fill="none" stroke-linecap="round"/>'+
+      '<path d="M100 124 L96 208 M100 124 L104 208" stroke="#fff" stroke-width="1.1" opacity=".4" fill="none" stroke-linecap="round"/>'+
+      '<path d="M100 122 C104 140 96 158 100 176 C103 190 99 200 100 210" stroke="#fff" stroke-width="1" opacity=".6" fill="none"/>'+
+      '<g fill="#fff" opacity=".6"><ellipse cx="96" cy="146" rx="2.4" ry="1.2" transform="rotate(35 96 146)"/><ellipse cx="104" cy="160" rx="2.4" ry="1.2" transform="rotate(-35 104 160)"/><ellipse cx="97" cy="176" rx="2.2" ry="1.1" transform="rotate(35 97 176)"/><ellipse cx="103" cy="192" rx="2.2" ry="1.1" transform="rotate(-35 103 192)"/></g>'+
+      '<path d="M68 210 C84 220 116 220 132 210" fill="none" stroke="#fff" stroke-width="1.6" opacity=".55"/>'+
+      '<path d="M100 98 C91 98 86 105 87 118 C93 126 107 126 113 118 C114 105 109 98 100 98 Z" fill="url(#fBodice)"/>'+
+      '<path d="M92 104 C96 111 104 111 108 104" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/>'+
+    '</g>'+
+    /* Ballkleid (weit, rosa, mit Rüschen und Taillenschleife) */
+    '<g id="feeDress_ball" style="display:none">'+
+      '<path d="M100 116 C86 116 79 125 77 137 L58 208 C82 223 118 223 142 208 L123 137 C121 125 114 116 100 116 Z" fill="#ff9ec6"/>'+
+      '<path d="M62 194 q10 11 19 0 t19 0 t19 0 t19 0" fill="none" stroke="#ffd0e6" stroke-width="3.2" opacity=".95"/>'+
+      '<path d="M68 174 q8 9 16 0 t16 0 t16 0 t16 0" fill="none" stroke="#ffc0dd" stroke-width="2.6" opacity=".85"/>'+
+      '<path d="M100 122 L94 206 M100 122 L106 206" stroke="#fff" stroke-width="1.1" opacity=".4" fill="none" stroke-linecap="round"/>'+
+      '<path d="M100 98 C90 98 85 105 86 118 C92 127 108 127 114 118 C115 105 110 98 100 98 Z" fill="#ff7fb6"/>'+
+      '<path d="M92 104 C96 111 104 111 108 104" fill="none" stroke="#fff" stroke-width="1" opacity=".55"/>'+
+      '<path d="M91 117 q9 -6 18 0 q-9 5 -18 0 Z" fill="#ff5fa0"/><circle cx="100" cy="117" r="2.3" fill="#ffe0ee"/>'+
+    '</g>'+
+    /* Blütenkleid (mintgrün, Blütenblatt-Saum, Blume an der Taille) */
+    '<g id="feeDress_blueten" style="display:none">'+
+      '<path d="M100 116 C88 116 82 124 81 135 L74 197 Q80 208 86 197 Q93 210 100 198 Q107 210 114 197 Q120 208 126 197 L119 135 C118 124 112 116 100 116 Z" fill="#8ff0d0"/>'+
+      '<path d="M100 122 L100 197 M90 140 L84 192 M110 140 L116 192" stroke="#4fbf9a" stroke-width="1" opacity=".5" fill="none"/>'+
+      '<g fill="#c9fff0" opacity=".85"><path d="M92 128 q-6 4 0 9 q6 -4 0 -9Z"/><path d="M108 128 q6 4 0 9 q-6 -4 0 -9Z"/></g>'+
+      '<path d="M100 98 C91 98 86 105 87 118 C93 126 107 126 113 118 C114 105 109 98 100 98 Z" fill="#4fbf9a"/>'+
+      '<circle cx="100" cy="117" r="3.4" fill="#ffd0ee"/><circle cx="100" cy="117" r="1.5" fill="#ffe08a"/>'+
+    '</g>'+
+    /* Sternenkleid (nachtblau, Meerjungfrau-Schnitt, goldene Sterne) */
+    '<g id="feeDress_sternen" style="display:none">'+
+      '<path d="M100 116 C93 116 89 121 88 130 L84 174 C82 188 78 200 70 210 C86 216 114 216 130 210 C122 200 118 188 116 174 L112 130 C111 121 107 116 100 116 Z" fill="#3f4fa0"/>'+
+      '<path d="M70 210 C86 216 114 216 130 210 C124 202 120 194 118 186 C110 192 90 192 82 186 C80 194 76 202 70 210 Z" fill="#2a3576"/>'+
+      '<g fill="#ffe08a">'+starAt(94,150,2.4)+starAt(106,140,2)+starAt(100,168,2.2)+starAt(90,180,1.8)+starAt(110,182,1.8)+'</g>'+
+      '<path d="M70 210 C86 216 114 216 130 210" fill="none" stroke="#dfe6ff" stroke-width="1.4" opacity=".7"/>'+
+      '<path d="M100 98 C91 98 86 105 87 118 C93 126 107 126 113 118 C114 105 109 98 100 98 Z" fill="#2f3f8a"/>'+
+      '<g fill="#ffe08a">'+starAt(100,110,2.4)+'</g>'+
+    '</g>'+
+    /* Kristallkleid (weiß-gold, schimmernd) */
+    '<g id="feeDress_kristall" style="display:none">'+
+      '<path d="M100 116 C89 116 83 123 81 134 L68 210 C84 220 116 220 132 210 L119 134 C117 123 111 116 100 116 Z" fill="#fff6e0"/>'+
+      '<path d="M100 122 L96 208 M100 122 L104 208 M88 140 L80 204 M112 140 L120 204" stroke="#e6a52f" stroke-width=".9" opacity=".45" fill="none" stroke-linecap="round"/>'+
+      '<path d="M68 210 C84 220 116 220 132 210" fill="none" stroke="#e6a52f" stroke-width="2" opacity=".8"/>'+
+      '<g fill="#ffe08a">'+starAt(92,150,2)+starAt(108,166,1.8)+starAt(100,186,2)+'</g>'+
+      '<path d="M100 98 C91 98 86 105 87 118 C93 126 107 126 113 118 C114 105 109 98 100 98 Z" fill="#f0cf7a"/>'+
+      '<path d="M92 104 C96 111 104 111 108 104" fill="none" stroke="#fff" stroke-width="1" opacity=".6"/>'+
+    '</g>'+
     /* ---------- Arme + Hände (rechter Arm eigene Gruppe zum Winken) ---------- */
     '<path d="M91 116 C81 122 77 138 80 151" stroke="url(#fSkin)" stroke-width="5.4" fill="none" stroke-linecap="round"/>'+
     '<circle cx="80" cy="152" r="3.6" fill="url(#fSkin)"/>'+
@@ -324,7 +369,8 @@ window.feeTap=function(){
 window.feeCustomize=function(cfg){
   var r=document.documentElement.style;
   if(cfg.hair && HAIR[cfg.hair]){ var h=HAIR[cfg.hair]; r.setProperty("--fee-hair-1",h[0]); r.setProperty("--fee-hair-2",h[1]); r.setProperty("--fee-hair-3",h[2]); }
-  if(cfg.dress && DRESS[cfg.dress]){ var g=DRESS[cfg.dress]; r.setProperty("--fee-dress-1",g[0]); r.setProperty("--fee-dress-2",g[1]); r.setProperty("--fee-dress-3",g[2]); }
+  var dresses={flieder:"feeDress_flieder", ball:"feeDress_ball", blueten:"feeDress_blueten", sternen:"feeDress_sternen", kristall:"feeDress_kristall"};
+  if(cfg.dress){ Object.keys(dresses).forEach(function(k){ var e=el(dresses[k]); if(e) e.style.display=(cfg.dress===k)?"":"none"; }); }
   if(cfg.face && FACE[cfg.face]){ var f=FACE[cfg.face]; r.setProperty("--fee-cheek",f.cheek); r.setProperty("--fee-lip",f.lip); }
   var heads={tiara:"feeHeadTiara", blume:"feeHeadBlume", schleife:"feeHeadSchleife", krone:"feeHeadKrone"};
   Object.keys(heads).forEach(function(k){ var e=el(heads[k]); if(e) e.style.display=(cfg.head===k)?"block":"none"; });

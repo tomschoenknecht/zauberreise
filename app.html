@@ -39,8 +39,15 @@
 
   /* Kopfzeile */
   .top{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
-  .feeMini{width:66px; flex:0 0 66px; cursor:pointer; filter:drop-shadow(0 6px 10px rgba(80,20,90,.4));}
-  .feeMini svg{width:100%; display:block;}
+  .feeMini{width:84px; flex:0 0 84px; cursor:pointer; position:relative;}
+  .feeMini svg{width:100%; display:block; filter:drop-shadow(0 6px 10px rgba(80,20,90,.4)); transition:filter .7s ease;}
+  /* Aufwach-Stufen sichtbar machen: verzaubert grau/matt, danach wachsendes Leuchten. */
+  .feeMini[data-stage="0"] svg{filter:saturate(.15) brightness(1.08) drop-shadow(0 6px 10px rgba(80,20,90,.4));}
+  .feeMini[data-stage="1"] svg{filter:drop-shadow(0 0 4px rgba(255,224,138,.5)) drop-shadow(0 6px 10px rgba(80,20,90,.4));}
+  .feeMini[data-stage="2"] svg{filter:drop-shadow(0 0 5px rgba(255,224,138,.6)) drop-shadow(0 6px 10px rgba(80,20,90,.4));}
+  .feeMini[data-stage="3"] svg{filter:drop-shadow(0 0 6px rgba(255,224,138,.7)) drop-shadow(0 6px 10px rgba(80,20,90,.4));}
+  .feeMini[data-stage="4"] svg{filter:drop-shadow(0 0 8px rgba(255,214,120,.8)) drop-shadow(0 6px 10px rgba(80,20,90,.4));}
+  .feeMini[data-stage="5"] svg{filter:drop-shadow(0 0 11px rgba(255,214,120,.95)) drop-shadow(0 6px 10px rgba(80,20,90,.4));}
   .fee-locked{filter:saturate(.25) brightness(1.1);}
   .bubble{flex:1; background:rgba(255,255,255,.96); color:var(--plum); border-radius:18px;
     padding:9px 13px; font-size:clamp(13.5px,3.5vw,16.5px); font-weight:700; position:relative;
@@ -176,6 +183,23 @@
   .streakToast .stTx b{display:block; font-size:15px; line-height:1.15;}
   .streakToast .stTx span{font-size:12px; font-weight:700; opacity:.85;}
 
+  /* ---------- Ermutigung: die (fotorealistische) Fee taucht beim Rechnen auf ---------- */
+  /* Während sie erscheint, blenden wir die kleine Kopfzeilen-Fee + Sprechblase aus,
+     damit NICHT zwei Feen gleichzeitig zu sehen sind (nur die eine, die Mut macht). */
+  .top .feeMini, .top .bubble{transition:opacity .3s ease;}
+  .top.cheering .feeMini, .top.cheering .bubble{opacity:0; pointer-events:none;}
+  .feeCheer{position:fixed; left:50%; top:12px; transform:translate(-50%,-170%); z-index:70;
+    display:flex; align-items:center; gap:11px; max-width:92vw;
+    background:rgba(255,255,255,.97); color:var(--plum); border:2.5px solid var(--gold);
+    border-radius:22px; padding:8px 16px 8px 8px; box-shadow:0 12px 30px rgba(90,20,90,.42);
+    pointer-events:none; opacity:0; transition:transform .45s cubic-bezier(.2,1.3,.5,1), opacity .45s ease;}
+  .feeCheer.show{transform:translate(-50%,0); opacity:1;}
+  .feeCheer .fcPic{flex:0 0 60px; width:60px; height:60px; border-radius:50%; overflow:hidden; position:relative;
+    border:3px solid #fff; box-shadow:0 4px 10px rgba(90,20,90,.32); background:linear-gradient(180deg,#bd86e6,#e59ec9);}
+  .feeCheer .fcPic img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 8%;}
+  .feeCheer .fcPic svg{position:absolute; left:50%; top:5px; transform:translateX(-50%); width:150%; height:150%;}
+  .feeCheer .fcTx{font-weight:800; font-size:15px; line-height:1.2; max-width:62vw;}
+
   /* ---------- Kuschelwiese (Haustiere) ---------- */
   .petStage{width:min(52vw,210px); margin:6px auto 2px; aspect-ratio:1/1;
     background:radial-gradient(circle at 50% 62%, #d6f7dd, #a9ebbb); border-radius:26px;
@@ -305,11 +329,12 @@
   .sw-hair-meer{background:linear-gradient(160deg,#e3fbff,#3fa8cf);}
   .sw-hair-feuer{background:linear-gradient(160deg,#ffe3c6,#e0503f);}
   .sw-hair-regenbogen{background:linear-gradient(120deg,#fff2c6,#ff9ecf,#a663e0);}
-  .sw-dress-rosalila{background:linear-gradient(160deg,#ffe0f6,#c97ce0);}
-  .sw-dress-minze{background:linear-gradient(160deg,#e3fff5,#3fbf9a);}
-  .sw-dress-sonne{background:linear-gradient(160deg,#fff9e0,#f0b23f);}
-  .sw-dress-sternennacht{background:linear-gradient(160deg,#e3e9ff,#3f4fa0);}
+  .sw-dress-flieder{background:linear-gradient(160deg,#efe0ff,#a67fce);}
+  .sw-dress-ball{background:linear-gradient(160deg,#ffe0f6,#ff7fb6);}
+  .sw-dress-blueten{background:linear-gradient(160deg,#e3fff5,#4fbf9a);}
+  .sw-dress-sternen{background:linear-gradient(160deg,#8fa0e0,#2a3576);}
   .sw-dress-kristall{background:linear-gradient(160deg,#ffffff,#e6a52f);}
+  .swatch .ring svg{width:60%;height:60%;}
   .sw-face-zart{background:linear-gradient(160deg,#fff,#ff9ec6);}
   .sw-face-beere{background:linear-gradient(160deg,#fff,#e05fa0);}
   .sw-face-koralle{background:linear-gradient(160deg,#fff,#ff8a6a);}
@@ -360,6 +385,31 @@ var $=function(id){return document.getElementById(id);};
 var TEST = new URLSearchParams(location.search).get("test")==="1";
 var NS = TEST ? "_test" : "";
 var LS="yz_state_v1"+NS, LS_NAME="yz_fairyName"+NS, LS_INTRO="yz_introSeen"+NS, LS_MUTED="yz_muted"+NS;
+
+/* ============ Zweiter, zäherer Speicher: Cookie-Spiegel ============
+   iOS/Safari (besonders als Home-Bildschirm-App) und die ITP-Regeln löschen
+   localStorage manchmal beim Neustart - dann wäre Ylvies Fortschritt weg. Deshalb
+   spiegeln wir jeden Spielstand zusätzlich in einen langlebigen Cookie und stellen
+   beim Start aus dem Cookie wieder her, falls localStorage leer ist. */
+function setCookie(k,v){ try{ var d=new Date(); d.setTime(d.getTime()+400*864e5);
+  document.cookie=k+"="+encodeURIComponent(v)+";expires="+d.toUTCString()+";path=/;SameSite=Lax"; }catch(e){} }
+function delCookie(k){ try{ document.cookie=k+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"; }catch(e){} }
+function getCookie(k){ try{ var m=document.cookie.match("(?:^|; )"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"=([^;]*)");
+  return m?decodeURIComponent(m[1]):null; }catch(e){ return null; } }
+/* Beim Start beide Speicher abgleichen: localStorage hat Vorrang; fehlt er, aus dem
+   Cookie zurückholen. Danach ist der localStorage wieder gefüllt. */
+function syncStore(key){
+  var ls=null; try{ ls=localStorage.getItem(key); }catch(e){}
+  if(ls!=null){ setCookie(key, ls); return; }
+  var ck=getCookie(key);
+  if(ck!=null){ try{ localStorage.setItem(key, ck); }catch(e){} }
+}
+[LS, LS_NAME, LS_INTRO, LS_MUTED].forEach(syncStore);
+/* Den Browser bitten, die Daten dauerhaft zu behalten (nicht bei Speicherknappheit
+   oder durch Aufräum-Apps wegräumen). Auf Android/Chrome wird das bei täglich
+   genutzten Seiten in der Regel gewährt. */
+try{ if(navigator.storage && navigator.storage.persist){ navigator.storage.persist(); } }catch(e){}
+
 feeInject();
 if(TEST){
   var testBadge=document.createElement("div");
@@ -387,8 +437,22 @@ if(TEST){
 
 /* ============ Zustand ============ */
 var SKILLS=["mengen","zehner","uebergang","geld","hunderter","einmaleins"];
-var defaultSalon={ owned:{hair:["goldrosa"],dress:["rosalila"],face:["zart"],head:["tiara"],extra:["keine"]},
-                    equipped:{hair:"goldrosa",dress:"rosalila",face:"zart",head:"tiara",extra:"keine"} };
+var defaultSalon={ owned:{hair:["goldrosa"],dress:["flieder"],face:["zart"],head:["tiara"],extra:["keine"]},
+                    equipped:{hair:"goldrosa",dress:"flieder",face:"zart",head:"tiara",extra:"keine"} };
+/* Kleider wurden von reinen Farben auf echte Designs umgestellt: alte Farb-IDs
+   auf das passendste neue Kleid abbilden, damit Ylvies Salon nicht kaputtgeht. */
+var DRESS_MIGRATE={ rosalila:"flieder", minze:"blueten", sonne:"kristall", sternennacht:"sternen", kristall:"kristall" };
+var DRESS_VALID=["flieder","ball","blueten","sternen","kristall"];
+function migrateDresses(sal){
+  if(!sal || !sal.owned) return;
+  var od=sal.owned.dress||[], nd=[];
+  od.forEach(function(x){ var m=DRESS_MIGRATE[x]||x; if(DRESS_VALID.indexOf(m)>=0 && nd.indexOf(m)<0) nd.push(m); });
+  if(nd.indexOf("flieder")<0) nd.unshift("flieder");
+  sal.owned.dress=nd;
+  var eq=(sal.equipped&&sal.equipped.dress)||"flieder"; eq=DRESS_MIGRATE[eq]||eq;
+  if(DRESS_VALID.indexOf(eq)<0 || nd.indexOf(eq)<0) eq="flieder";
+  sal.equipped.dress=eq;
+}
 /* crystals = Guthaben zum Ausgeben (Salon senkt es)
    earned   = insgesamt je verdiente Kristalle - NUR daraus wächst die Fee.
    Beides muss getrennt bleiben, sonst schläft die Fee nach einem Einkauf wieder ein. */
@@ -402,6 +466,7 @@ function load(){
   try{ var raw=localStorage.getItem(LS); if(raw){ var o=JSON.parse(raw);
     SKILLS.forEach(function(s){ if(!o.skills[s]) o.skills[s]=JSON.parse(JSON.stringify(defaults.skills[s])); });
     if(!o.salon) o.salon=JSON.parse(JSON.stringify(defaultSalon));
+    migrateDresses(o.salon);
     if(typeof o.progress!=="number") o.progress=0;
     if(typeof o.earned!=="number") o.earned=o.crystals||0;  // Feinschliff unten, sobald STAGES bekannt ist
     if(!o.sections) o.sections={};
@@ -416,7 +481,7 @@ function load(){
     return o; } }catch(e){}
   return JSON.parse(JSON.stringify(defaults));
 }
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
+function save(){ var s=JSON.stringify(S); try{ localStorage.setItem(LS, s); }catch(e){} setCookie(LS, s); }
 function feeName(){ try{ return localStorage.getItem(LS_NAME)||"deine Fee"; }catch(e){ return "deine Fee"; } }
 
 /* ============ Erinnerungszauber ============ */
@@ -545,7 +610,7 @@ if(S.earned < STAGES[S.stage||0].at){ S.earned = STAGES[S.stage||0].at; save(); 
 function renderFee(){
   feeStage(S.stage);
   feeCustomize(S.salon.equipped);
-  $("feeMini").classList.toggle("fee-locked", S.stage<1);
+  $("feeMini").setAttribute("data-stage", S.stage);
   var next=STAGES[S.stage+1];
   if(next){ var prev=STAGES[S.stage].at, span=next.at-prev, have=S.earned-prev;
     $("unlockFill").style.width=Math.max(0,Math.min(100, have/span*100))+"%";
@@ -602,7 +667,7 @@ function startMusic(){ if(!musicOn) return; initAudio(); if(audioCtx&&audioCtx.s
 function duck(){ if(bgm.paused||!musicOn) return; setVol(0.09,150); setTimeout(function(){ if(!bgm.paused&&musicOn) setVol(BGM_VOL,900); },850); }
 function renderTone(){ $("icOn").style.display=musicOn?"block":"none"; $("icOff").style.display=musicOn?"none":"block"; }
 $("toneBtn").addEventListener("click", function(e){ e.stopPropagation(); musicOn=!musicOn;
-  try{ localStorage.setItem(LS_MUTED,musicOn?"0":"1"); }catch(e2){} renderTone(); if(musicOn) startMusic(); else setVol(0,500); });
+  try{ localStorage.setItem(LS_MUTED,musicOn?"0":"1"); }catch(e2){} setCookie(LS_MUTED,musicOn?"0":"1"); renderTone(); if(musicOn) startMusic(); else setVol(0,500); });
 renderTone();
 ["pointerdown","touchstart","touchend","click","keydown"].forEach(function(ev){ window.addEventListener(ev,function(){ initAudio(); startMusic(); },{passive:true}); });
 
@@ -641,7 +706,7 @@ function screenStory(){
     feeStage(S.stage);
     if(!last){ $("screen").querySelector(".story").addEventListener("click", function h(){ idx++; render(); }, {once:true}); }
     else{
-      $("yes").addEventListener("click", function(e){ e.stopPropagation(); try{ localStorage.setItem(LS_INTRO,"1"); }catch(x){}
+      $("yes").addEventListener("click", function(e){ e.stopPropagation(); try{ localStorage.setItem(LS_INTRO,"1"); }catch(x){} setCookie(LS_INTRO,"1");
         burst(); setTimeout(function(){ S.wish.text ? screenMap() : screenWish(); }, 500); });
       $("later").addEventListener("click", function(e){ e.stopPropagation(); idx=0; render(); });
     }
@@ -827,6 +892,27 @@ function streakBarHtml(){
     '<div class="stDays">'+days+'</div></div>';
 }
 
+/* ============ Ermutigung beim Rechnen ============
+   Auf Toms/Ylvies Wunsch taucht die Fee zwischendurch auf und macht Mut. Als
+   Gesicht dient das fotorealistische Foto (fee-portrait.jpg); fehlt es, zeigt der
+   Fallback die gezeichnete Fee. Nicht-blockierend, verschwindet von allein. */
+var CHEER_LINES=["Das schaffst du, Ylvie!","Ich bin so stolz auf dich!","Weiter so, meine kleine Zauberin!","Du machst das ganz wunderbar!","Ganz ruhig - du kannst das!","Ich glaub ganz fest an dich!","Du bist so klug, Ylvie!","Zusammen sind wir unschlagbar!"];
+var CHEER_COMFORT=["Kein Problem - wir schaffen das zusammen.","Fast! Beim nächsten Mal klappt es bestimmt.","Nicht schlimm - du wirst immer besser."];
+var cheerEl=null, cheerTimer=null;
+function feeCheer(text){
+  if(cheerEl && cheerEl.parentNode){ cheerEl.remove(); } clearTimeout(cheerTimer);
+  var top=$("topBar"); if(top) top.classList.add("cheering");   // kleine Kopfzeilen-Fee kurz ausblenden
+  var d=document.createElement("div"); d.className="feeCheer";
+  d.innerHTML='<div class="fcPic"><svg viewBox="0 0 200 236"><use href="#feeArt"/></svg>'+
+    '<img src="fee-portrait.jpg" alt="" onerror="this.remove()"></div><div class="fcTx">'+esc(text)+'</div>';
+  document.body.appendChild(d); cheerEl=d;
+  requestAnimationFrame(function(){ d.classList.add("show"); });
+  cheerTimer=setTimeout(function(){ d.classList.remove("show");
+    setTimeout(function(){ if(d.parentNode) d.remove();
+      if(cheerEl===d){ cheerEl=null; var t=$("topBar"); if(t) t.classList.remove("cheering"); } }, 470); }, 3000);
+}
+function cheerRandom(){ feeCheer(pick(CHEER_LINES)); }
+
 function screenMap(){
   /* Wunsch erfüllt? Einmalig feiern, bevor die Karte kommt. */
   if(S.wish.text && !S.wish.granted && S.earned>=WISH_TARGET){ S.wish.granted=true; save(); return screenWishGranted(); }
@@ -1003,7 +1089,8 @@ function salonCatHtml(cat, title){
   FEE_CATALOG[cat].forEach(function(it){
     var isOwned=owned.indexOf(it.id)>=0, isEq=equipped===it.id;
     var glyph = cat==="head" ? {tiara:"♛",blume:"✿",schleife:"🎀",krone:"♛"}[it.id]
-              : cat==="extra" ? {keine:"—",schmetterlinge:"🦋",glitzerspur:"✨",sternenstaub:"⋆"}[it.id] : "";
+              : cat==="extra" ? {keine:"—",schmetterlinge:"🦋",glitzerspur:"✨",sternenstaub:"⋆"}[it.id]
+              : cat==="dress" ? '<svg viewBox="0 0 24 24"><path d="M9 2.5l3 3 3-3 2.4 5.2-2.4 2 2.6 11H6.4l2.6-11-2.4-2z" fill="#fff" opacity=".95"/></svg>' : "";
     html+='<div class="swatch'+(isOwned?" owned":"")+(isEq?" equipped":"")+'" data-cat="'+cat+'" data-id="'+it.id+'">'+
       '<div class="ring sw-'+cat+'-'+it.id+'">'+glyph+'</div>'+
       '<div class="lbl">'+it.name+'</div>'+
@@ -1214,6 +1301,8 @@ function answer(v, btn){
     btn.classList.add("right"); var first=(lesson.tries===0), got=first?2:1;
     lesson.gained+=got; lesson.total+=got; schedule(t.skill, first); var up=addCrystals(got);
     say(pick(["Ja! Genau richtig.","Wunderbar!","Das war zauberhaft.","Richtig!"]), true);
+    lesson.sinceCheer=(lesson.sinceCheer||0)+1;                    // Fee taucht ab und zu zum Ermutigen auf
+    if(lesson.sinceCheer>=3){ lesson.sinceCheer=0; setTimeout(cheerRandom, 380); }
     Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(b){ b.disabled=true; if(b!==btn) b.classList.add("soft"); });
     setTimeout(function(){ lesson.idx++; if(up) return screenLevelUp(); nextTask(); }, 850);
   } else {
@@ -1223,6 +1312,7 @@ function answer(v, btn){
     else{ schedule(t.skill,false); var up2=addCrystals(1); lesson.gained+=1; lesson.total+=1;
       $("hintSlot").innerHTML='<div class="hintbox">Die Antwort ist <b>'+t.answer+(t.unit||"")+'</b>. '+t.hint+'</div>';
       say("Das machen wir zusammen - beim nächsten Mal kannst du es.", true);
+      setTimeout(function(){ feeCheer(pick(CHEER_COMFORT)); }, 400);   // Fee macht Mut nach schwerer Aufgabe
       var b=document.createElement("button"); b.className="btn pink"; b.textContent="Weiter";
       b.addEventListener("click", function(){ lesson.idx++; if(up2) return screenLevelUp(); nextTask(); });
       $("hintSlot").appendChild(b);

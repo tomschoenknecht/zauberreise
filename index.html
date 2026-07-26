@@ -288,10 +288,23 @@
   var LS_NAME = "yz_fairyName"+NS;
   var LS_MUTED = "yz_muted"+NS;
 
+  /* ---- Cookie-Spiegel (zweiter, zäherer Speicher gegen localStorage-Verlust auf iOS) ---- */
+  function setCookie(k,v){ try{ var d=new Date(); d.setTime(d.getTime()+400*864e5);
+    document.cookie=k+"="+encodeURIComponent(v)+";expires="+d.toUTCString()+";path=/;SameSite=Lax"; }catch(e){} }
+  function delCookie(k){ try{ document.cookie=k+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"; }catch(e){} }
+  function getCookie(k){ try{ var m=document.cookie.match("(?:^|; )"+k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"=([^;]*)");
+    return m?decodeURIComponent(m[1]):null; }catch(e){ return null; } }
+  /* Name aus dem Cookie zurückholen, falls localStorage geleert wurde. */
+  (function(){ var ls=null; try{ ls=localStorage.getItem(LS_NAME); }catch(e){}
+    if(ls!=null){ setCookie(LS_NAME, ls); } else { var ck=getCookie(LS_NAME); if(ck!=null){ try{ localStorage.setItem(LS_NAME, ck); }catch(e){} } } })();
+  /* Browser bitten, die Daten dauerhaft zu behalten (Schutz vor Speicher-Aufräumen). */
+  try{ if(navigator.storage && navigator.storage.persist){ navigator.storage.persist(); } }catch(e){}
+
   /* ---- Reset: löscht NUR den echten Spielstand (nicht den Testmodus) ---- */
   if(qs.get("reset")==="1"){
     ["yz_fairyName","yz_muted","yz_state_v1","yz_introSeen"].forEach(function(k){
       try{ localStorage.removeItem(k); }catch(e){}
+      delCookie(k);   // sonst würde der Cookie den Stand direkt wieder herstellen
     });
     var clean=new URL(location.href); clean.searchParams.delete("reset");
     location.replace(clean.toString());
@@ -362,7 +375,7 @@
   }
 
   function savedName(){ try{ return localStorage.getItem(LS_NAME)||""; }catch(e){ return ""; } }
-  function setName(v){ try{ localStorage.setItem(LS_NAME,v); }catch(e){} }
+  function setName(v){ try{ localStorage.setItem(LS_NAME,v); }catch(e){} setCookie(LS_NAME,v); }
   function renderNaming(){
     var nm=savedName(), has=nm.length>0;
     $("namePanel").classList.toggle("hidden", has);
@@ -509,7 +522,7 @@
   $("soundBtn").addEventListener("click", function(e){
     e.stopPropagation();
     musicOn=!musicOn;
-    try{ localStorage.setItem(LS_MUTED, musicOn?"0":"1"); }catch(e2){}
+    try{ localStorage.setItem(LS_MUTED, musicOn?"0":"1"); }catch(e2){} setCookie(LS_MUTED, musicOn?"0":"1");
     renderSound();
     if(musicOn){ startMusic(); } else { setVol(0, 500); }
   });
