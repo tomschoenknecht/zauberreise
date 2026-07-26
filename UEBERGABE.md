@@ -1,6 +1,6 @@
 # Übergabe – Ylvies Zauberreise
 
-Stand: 2026-07-22. Kompakter Einstieg für die nächste Sitzung. Volldetails im
+Stand: 2026-07-26. Kompakter Einstieg für die nächste Sitzung. Volldetails im
 [ENTWICKLUNGSLOG.md](ENTWICKLUNGSLOG.md); Strategie/Konzept/Persona liegen im
 Strategie-Projekt (siehe unten).
 
@@ -10,6 +10,21 @@ Ferien-Abenteuerreise. Kein Verkaufsprodukt. Sie hat am Fr 2026-07-17 15:00 gest
 spielt seither, Toms Rückmeldung: "sie hat Spaß", "gefällt alles super". App ist im
 täglichen Einsatz - deshalb: **niemals einen Zustand ausliefern, der Ylvies Spielstand
 kaputt macht oder ihr etwas wegnimmt.**
+
+## Spielstand (WICHTIG - Verlust auf Android/Chrome)
+- Stand liegt in localStorage (yz_state_v1) UND gespiegelt in einem langlebigen
+  Cookie (Absicherung, seit 2026-07-26). Ist localStorage beim Start leer, wird
+  aus dem Cookie wiederhergestellt (syncStore in app.html/index.html). Zusätzlich
+  navigator.storage.persist(). ?reset=1 löscht beide.
+- Ylvie verliert(e) ihren Fortschritt beim Neustart - Ursache gerätseitig (Android/
+  Chrome, kein iOS/Inkognito/In-App-Browser). Falls es weiter passiert: prüfen, ob
+  eine Cleaner-/Optimierungs-App Chromes Daten löscht, und die App auf den
+  Startbildschirm legen (installierte Seiten bekommen dauerhaften Speicher).
+
+## Kleider (seit 2026-07-26)
+- Echte Designs statt nur Farben: fee.js hat fünf feeDress_*-Gruppen. Neue
+  Charaktere/Kleider IMMER inline gefärbt (nicht über Root-Variablen). Alte Farb-
+  IDs werden in load() via migrateDresses() migriert - beim Ändern nicht vergessen.
 
 ## Live & Deployment
 - Live: https://tomschoenknecht.github.io/zauberreise/

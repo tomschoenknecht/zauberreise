@@ -602,4 +602,49 @@ bleibt, "Schön, dass du wieder da bist!"), Erststart migriert alten Stand ohne
 streak-Feld sauber und zählt Tag 1 (+3). Kette zeigt die letzten 7 Tage mit
 Wochentagen korrekt. Keine Konsolenfehler.
 
+### 2026-07-26 – Kleider-Designs, Ermutigung durch die Fee, größere Fee, Spielstand-Absicherung
+
+Vier Wünsche von Tom/Ylvie in einer Sitzung:
+
+- **Fotorealistische Fee vermisst + soll ermutigen:** Die Foto-Fee
+  (fee-portrait.jpg) taucht jetzt beim Rechnen zwischendurch auf und macht Mut
+  (alle 3 richtigen Antworten + Trost nach einer schweren Aufgabe). Umgesetzt als
+  nicht-blockierende Einblendung (feeCheer). Auf Rückfrage entschied Tom: die
+  FOTOREALISTISCHE Fee ist die Ermutigerin (nicht die gezeichnete).
+- **Kein Doppel (Ylvie/Tom fanden zwei Feen "cringe"):** Während die Foto-Fee
+  erscheint, wird die kleine Kopfzeilen-Fee + Sprechblase ausgeblendet
+  (.top.cheering), damit nie zwei Feen gleichzeitig zu sehen sind.
+- **Fee größer + Veränderung sichtbar:** Kopfzeilen-Fee 66->84px; Aufwach-Stufen
+  über data-stage mit wachsendem Leuchten sichtbarer gemacht.
+- **Echte Kleider WECHSELN (nicht nur Farben):** fee.js hat jetzt fünf Kleid-
+  DESIGNS als eigene Gruppen (feeDress_flieder/ball/blueten/sternen/kristall) mit
+  unterschiedlichen Schnitten (A-Linie, weites Ballkleid, Blütenblatt-Saum,
+  Meerjungfrau, Gold-Gala). feeCustomize({dress}) blendet die gewählte ein.
+  Salon-Kategorie "Kleid" zeigt ein Kleid-Symbol. WICHTIG für die Zukunft: alte
+  Farb-IDs (rosalila/minze/...) werden in load() via migrateDresses() auf die
+  neuen Kleider abgebildet, damit Ylvies Salon nicht kaputtgeht.
+
+- **KRITISCH - Spielstand-Verlust behoben (Absicherung):** Tom meldete, dass
+  Ylvies Fortschritt beim Neustart *immer* weg ist. Diagnose: der Code speichert
+  korrekt (im Test überlebt der Stand jeden Reload), das Gerät ist die Ursache -
+  Android + Chrome (kein iOS, kein Inkognito, kein In-App-Browser laut Tom).
+  Wahrscheinlich eine Aufräum-/Optimierungs-App oder Speicher-Eviction, die
+  Chromes Website-Daten löscht. Gegenmaßnahmen eingebaut:
+  1. **Cookie-Spiegel:** jeder Spielstand wird zusätzlich in einen langlebigen
+     Cookie geschrieben (setCookie/getCookie/syncStore); ist localStorage beim
+     Start leer, wird aus dem Cookie wiederhergestellt. Getestet: localStorage.
+     clear() + reload -> Stand kommt zurück (auch live verifiziert). Gilt für
+     Zustand, Name, Intro, Muted. Reset (?reset=1) löscht jetzt auch die Cookies.
+  2. **navigator.storage.persist()** beim Start (App + Landing), damit der Browser
+     die Daten möglichst nicht wegräumt.
+  Rest-Risiko: Löscht eine Cleaner-App ALLE Browserdaten (inkl. Cookies), hilft
+  nur noch: als App auf den Startbildschirm legen/installieren (installierte Seiten
+  bekommen dauerhaften Speicher) und Chrome von der Cleaner-App ausnehmen.
+  -> Mit Tom zu klären, ob so eine App läuft.
+
+Getestet (Testmodus + live, chrome-devtools): alle 5 Kleider rendern und wechseln
+den Schnitt; Migration alter Farb-IDs korrekt; Ermutigung erscheint im echten
+Ablauf (nur EINE Fee sichtbar); größere Fee ok; Cookie-Restore lokal und live.
+Keine Konsolenfehler.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_
