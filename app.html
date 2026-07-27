@@ -221,6 +221,22 @@
   .tag.faellig{background:#fff0d6; color:#c98a1a;}
   .tag.gut{background:#d9f7e6; color:#2f9a5a;}
 
+  /* ---------- Kauf-Bestätigung (mit Vorschau auf der Fee) ---------- */
+  .buyBar{position:fixed; left:50%; bottom:14px; transform:translate(-50%,160%); z-index:75; width:min(92vw,430px);
+    display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.98); color:var(--plum);
+    border:2.5px solid var(--gold); border-radius:20px; padding:9px 11px; box-shadow:0 12px 30px rgba(90,20,90,.42);
+    opacity:0; transition:transform .35s cubic-bezier(.2,1.3,.5,1), opacity .35s ease;}
+  .buyBar.show{transform:translate(-50%,0); opacity:1;}
+  .buyBar .bbTx{flex:1; min-width:0; line-height:1.2;}
+  .buyBar .bbTx b{display:block; font-size:15px;}
+  .buyBar .bbTx span{font-size:12.5px; opacity:.8;}
+  .buyBar .bbBtns{display:flex; gap:7px; flex:0 0 auto;}
+  .buyBar .bbBtn{appearance:none; border:none; font-family:inherit; font-weight:800; cursor:pointer; border-radius:14px;
+    padding:10px 14px; font-size:14px;}
+  .buyBar .bbNo{background:rgba(200,120,180,.18); color:var(--plum);}
+  .buyBar .bbYes{background:linear-gradient(180deg,#ffd8ef,var(--pink2)); color:#fff; box-shadow:0 4px 0 #c23f8e;}
+  .buyBar .bbYes:active{transform:translateY(2px); box-shadow:0 2px 0 #c23f8e;}
+
   /* ---------- Kuschelwiese (Haustiere) ---------- */
   .petStage{width:min(52vw,210px); margin:6px auto 2px; aspect-ratio:1/1;
     background:radial-gradient(circle at 50% 62%, #d6f7dd, #a9ebbb); border-radius:26px;
@@ -936,6 +952,7 @@ function feeCheer(text){
 function cheerRandom(){ feeCheer(pick(CHEER_LINES)); }
 
 function screenMap(){
+  removeBuyBar();
   /* Wunsch erfüllt? Einmalig feiern, bevor die Karte kommt. */
   if(S.wish.text && !S.wish.granted && S.earned>=WISH_TARGET){ S.wish.granted=true; save(); return screenWishGranted(); }
   showChrome(true); renderFee();
@@ -1054,14 +1071,18 @@ function petStatusText(id){
 }
 function adoptPet(id){
   var item=PET_CATALOG.filter(function(p){return p.id===id;})[0];
-  if(S.pets.owned.indexOf(id)>=0){ S.pets.active=id; save(); return screenWiese(); }   // schon da -> aktiv setzen
+  if(S.pets.owned.indexOf(id)>=0){ removeBuyBar(); S.pets.active=id; save(); return screenWiese(); }   // schon da -> aktiv setzen
   if(S.crystals<item.cost){ say("Dafür brauchst du noch mehr Kristalle - übe weiter!", true); return; }
-  S.crystals-=item.cost; S.pets.owned.push(id); S.pets.active=id; S.pets.adoptedAt[id]=S.earned;
-  save(); renderFee();
-  say(feeName()+" freut sich: Ein "+item.name+"-Ei! Pass gut darauf auf.", true);
-  screenWiese();
+  showBuyConfirm("Das "+item.name+"-Ei", item.cost, function(){
+    if(S.crystals<item.cost){ say("Dafür brauchst du noch mehr Kristalle - übe weiter!", true); return; }
+    S.crystals-=item.cost; S.pets.owned.push(id); S.pets.active=id; S.pets.adoptedAt[id]=S.earned;
+    save(); renderFee();
+    say(feeName()+" freut sich: Ein "+item.name+"-Ei! Pass gut darauf auf.", true);
+    screenWiese();
+  });
 }
 function screenWiese(){
+  removeBuyBar();
   showChrome(true); renderFee();
   var active=S.pets.active || S.pets.owned[0] || "";
   var html='<button class="back" id="backBtn">‹ Zurück zur Karte</button><h2>Die Kuschelwiese</h2>';
@@ -1090,13 +1111,38 @@ function screenWiese(){
 }
 
 /* ============ Zauber-Salon ============ */
+/* Kauf-Bestätigung als Leiste unten. Während sie offen ist, zeigt die Fee oben
+   schon die Vorschau. Nein -> Vorschau zurücknehmen; Ja -> kaufen. */
+function removeBuyBar(){ var b=$("buyBar"); if(b) b.remove(); }
+function showBuyConfirm(name, cost, onYes, onNo){
+  removeBuyBar();
+  var d=document.createElement("div"); d.className="buyBar"; d.id="buyBar";
+  d.innerHTML='<div class="bbTx"><b>'+esc(name)+'</b><span>für '+kristalle(cost)+' kaufen?</span></div>'+
+    '<div class="bbBtns"><button class="bbBtn bbNo">Nein</button><button class="bbBtn bbYes">Ja, kaufen</button></div>';
+  document.body.appendChild(d);
+  requestAnimationFrame(function(){ d.classList.add("show"); });
+  function close(){ d.classList.remove("show"); setTimeout(function(){ if(d.parentNode) d.remove(); }, 300); }
+  d.querySelector(".bbYes").addEventListener("click", function(){ close(); onYes(); });
+  d.querySelector(".bbNo").addEventListener("click", function(){ close(); if(onNo) onNo(); });
+}
 function salonBuy(cat, id){
   var owned=S.salon.owned[cat];
-  if(owned.indexOf(id)>=0){ S.salon.equipped[cat]=id; save(); renderFee(); screenSalon(); return; }
+  if(owned.indexOf(id)>=0){ removeBuyBar(); S.salon.equipped[cat]=id; save(); renderFee(); screenSalon(); return; }
   var item=FEE_CATALOG[cat].filter(function(o){ return o.id===id; })[0];
-  if(!item || S.crystals<item.cost) { say("Dafür brauchst du noch mehr Kristalle - übe weiter!", true); return; }
-  S.crystals-=item.cost; owned.push(id); S.salon.equipped[cat]=id; save(); renderFee();
-  say(feeName()+" strahlt: Wie schön!", true); screenSalon();
+  if(!item) return;
+  if(S.crystals<item.cost){ say("Dafür brauchst du noch mehr Kristalle - übe weiter!", true); return; }
+  /* Vorschau: die Fee schon mal so anziehen (ohne zu kaufen) */
+  var preview={}; Object.keys(S.salon.equipped).forEach(function(k){ preview[k]=S.salon.equipped[k]; });
+  preview[cat]=id; feeCustomize(preview);
+  say(feeName()+" dreht sich: Na, wie sieht das aus?", true);
+  showBuyConfirm(item.name, item.cost, function(){          // Ja
+    if(S.crystals<item.cost){ say("Dafür brauchst du noch mehr Kristalle - übe weiter!", true); renderFee(); return; }
+    S.crystals-=item.cost; owned.push(id); S.salon.equipped[cat]=id; save(); renderFee();
+    say(feeName()+" strahlt: Wie schön!", true); screenSalon();
+  }, function(){                                             // Nein -> Vorschau zurücknehmen
+    renderFee();
+    say(feeName()+" nickt: Kein Problem, schau dich ruhig um.", true);
+  });
 }
 var SALON_CICO={
   hair:'<svg class="cico" viewBox="0 0 24 24"><path d="M12 3c-4 0-7 3-7 8v9h3v-7c0-3 1-5 4-5s4 2 4 5v7h3v-9c0-5-3-8-7-8z" fill="#ffdf87" stroke="#c23f8e" stroke-width="1.2"/></svg>',
@@ -1143,6 +1189,7 @@ function salonRoomHtml(){
     '</div>';
 }
 function screenSalon(){
+  removeBuyBar();
   showChrome(true); renderFee();
   var html='<div class="salonHead">'+
       '<button class="back" id="backBtn">‹ Karte</button>'+
