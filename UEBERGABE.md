@@ -21,6 +21,13 @@ kaputt macht oder ihr etwas wegnimmt.**
   eine Cleaner-/Optimierungs-App Chromes Daten löscht, und die App auf den
   Startbildschirm legen (installierte Seiten bekommen dauerhaften Speicher).
 
+## Eltern-Bereich (seit 2026-07-26, über ?eltern=1)
+- Versteckte Elternansicht: Lernreport (pro Bereich Sicherheit/Trefferquote/geübt,
+  Status-Tags, "am meisten üben") + Rettungscode zum Sichern/Wiederherstellen des
+  kompletten Spielstands (YZ1:base64). Restore schreibt localStorage + Cookie.
+- Kauf im Salon/Wiese fragt jetzt zurück ("… für X Kristalle kaufen?") und zeigt
+  im Salon vorab eine Vorschau auf der Fee (showBuyConfirm).
+
 ## Kleider (seit 2026-07-26)
 - Echte Designs statt nur Farben: fee.js hat fünf feeDress_*-Gruppen. Neue
   Charaktere/Kleider IMMER inline gefärbt (nicht über Root-Variablen). Alte Farb-

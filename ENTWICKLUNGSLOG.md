@@ -647,4 +647,30 @@ den Schnitt; Migration alter Farb-IDs korrekt; Ermutigung erscheint im echten
 Ablauf (nur EINE Fee sichtbar); größere Fee ok; Cookie-Restore lokal und live.
 Keine Konsolenfehler.
 
+### 2026-07-26 (Teil 2) – Eltern-Bereich, Rettungscode, Kauf-Rückfrage + Vorschau
+
+- **Eltern-Bereich (versteckt über ?eltern=1):**
+  - **Lernreport:** pro Rechenbereich Sicherheit (str), Trefferquote (1. Versuch)
+    und wie oft geübt, mit Status-Tags (sitzt gut / Baustelle / Wiederholung
+    fällig / noch nicht geübt); oben Zusammenfassung (Fee-Stufe, Inseln, Kristalle,
+    Serie, Aufgaben) und "Am meisten üben: …". Daten liegen ohnehin im Spielstand.
+  - **Rettungscode:** kompletter Spielstand als kopierbarer Code (YZ1:base64) zum
+    Sichern (an sich selbst schicken) und Wiederherstellen - überlebt auch einen
+    Total-Verlust auf dem Gerät und funktioniert geräteübergreifend. Restore mit
+    Sicherheitsabfrage, schreibt in localStorage UND Cookie. Getestet: nach
+    komplettem Löschen (localStorage + Cookies) alles wieder da.
+- **Kauf-Rückfrage + Vorschau (gegen versehentliches Ausgeben):** Tippt Ylvie ein
+  noch nicht gekauftes Salon-Angebot an, zieht die Fee es zur VORSCHAU schon an,
+  und unten kommt "… für X Kristalle kaufen?" mit Nein/Ja. Nein nimmt die Vorschau
+  zurück (keine Abbuchung). Gleiche Rückfrage beim Adoptieren eines Tiers.
+  (showBuyConfirm/removeBuyBar; Aufräumen in screenSalon/screenWiese/screenMap.)
+
+Getestet (chrome-devtools): Report korrekt (erkennt Zehnerübergang als Baustelle);
+Vorschau zeigt das Kleid, Nein setzt zurück ohne Abbuchung, Ja kauft; Tier-Kauf
+mit Rückfrage; Backup/Restore-Zyklus vollständig. Alles live. Keine Konsolenfehler.
+
+Offen/als Nächstes: Freundinnen als fotorealistische KI-Bilder (Tom generiert sie
+in Grok; Beschreibungen geliefert). Dateinamen zum Einbinden: rosalie.jpg,
+lumi.jpg, perla.jpg im Projektordner - dann Foto mit SVG-Fallback wie fee-portrait.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_
