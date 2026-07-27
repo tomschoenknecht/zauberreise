@@ -200,6 +200,27 @@
   .feeCheer .fcPic svg{position:absolute; left:50%; top:5px; transform:translateX(-50%); width:150%; height:150%;}
   .feeCheer .fcTx{font-weight:800; font-size:15px; line-height:1.2; max-width:62vw;}
 
+  /* ---------- Eltern-Bereich (?eltern=1) ---------- */
+  .eltern{padding-bottom:24px;}
+  .eltern .eh{color:#7b46d6; margin:0 0 8px; font-size:16px;}
+  .eltern .ep{font-size:12.5px; color:#6a4a7a; line-height:1.4; margin:0 0 8px;}
+  .eltern .ecode{width:100%; height:72px; font-family:"Courier New",monospace; font-size:11px; border:2px solid var(--pink);
+    border-radius:12px; padding:8px; resize:vertical; color:#5a1560; background:#fff7fc; margin-bottom:8px; word-break:break-all;}
+  .repTop{background:#fbf1ff; border-radius:12px; padding:10px 12px; margin-bottom:10px; font-size:13.5px; color:#5a1560; line-height:1.7;}
+  .repTop .repTipp{margin-top:6px; color:#c23f8e; font-weight:800;}
+  .repRow{border-top:1px solid #f0d9ee; padding:9px 0;}
+  .repRow .repHead{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .repRow .repHead b{color:#5a1560; font-size:14.5px;}
+  .repRow .repSub{font-size:11.5px; color:#8a6a9a; margin:1px 0 5px;}
+  .repRow .repStats{display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:#6a4a7a; align-items:center;}
+  .rd{display:inline-block; width:9px; height:9px; border-radius:50%; background:#e5d3ee; margin-left:2px; vertical-align:middle;}
+  .rd.on{background:var(--gold2);}
+  .tag{font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:999px; white-space:nowrap;}
+  .tag.neu{background:#eee; color:#888;}
+  .tag.ueben{background:#ffe0ea; color:#c23f5a;}
+  .tag.faellig{background:#fff0d6; color:#c98a1a;}
+  .tag.gut{background:#d9f7e6; color:#2f9a5a;}
+
   /* ---------- Kuschelwiese (Haustiere) ---------- */
   .petStage{width:min(52vw,210px); margin:6px auto 2px; aspect-ratio:1/1;
     background:radial-gradient(circle at 50% 62%, #d6f7dd, #a9ebbb); border-radius:26px;
@@ -383,6 +404,7 @@ var $=function(id){return document.getElementById(id);};
 /* Testmodus: eigener Speicherbereich, rührt Ylvies echten Spielstand nie an.
    Über index.html?test=1 -> "Tritt ein" betreten, oder direkt app.html?test=1 öffnen. */
 var TEST = new URLSearchParams(location.search).get("test")==="1";
+var ELTERN = new URLSearchParams(location.search).get("eltern")==="1";   // versteckter Eltern-Bereich
 var NS = TEST ? "_test" : "";
 var LS="yz_state_v1"+NS, LS_NAME="yz_fairyName"+NS, LS_INTRO="yz_introSeen"+NS, LS_MUTED="yz_muted"+NS;
 
@@ -1467,13 +1489,110 @@ function screenChat(){
   $("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter"){ var i=$("chatInput"); chatSay(i.value); i.value=""; } });
 }
 
+/* ============ Eltern-Bereich (über ?eltern=1) ============
+   Für Tom: Lernstand sehen und Spielstand sichern/wiederherstellen. Bewusst über
+   die URL versteckt, damit Ylvie nicht hineingerät. */
+var SKILL_META={
+  mengen:["Mengen erkennen","Anzahl auf einen Blick statt zählen"],
+  zehner:["Zehnerhaus","Ergänzen zur vollen Zehn"],
+  uebergang:["Zehnerübergang","Über die Zehn rechnen"],
+  geld:["Mit Geld rechnen","Münzen zusammenzählen"],
+  hunderter:["Zahlenraum bis 100","Zehner und Einer"],
+  einmaleins:["Einmaleins","Mal-Reihen"]
+};
+function repDots(n,max){ var s=""; for(var i=0;i<max;i++) s+='<span class="rd'+(i<n?" on":"")+'"></span>'; return s; }
+function reportHtml(){
+  var now=Date.now(), weakest=null, weakStr=6;
+  var rows=SKILLS.map(function(s){
+    var k=S.skills[s], m=SKILL_META[s];
+    var quote=k.seen>0?Math.round(k.right/k.seen*100):null;
+    var faellig=k.seen>0 && k.due<=now;
+    var status = k.seen===0 ? '<span class="tag neu">noch nicht geübt</span>'
+      : (k.str<=1 || (quote!=null&&quote<60)) ? '<span class="tag ueben">Baustelle</span>'
+      : (faellig ? '<span class="tag faellig">Wiederholung fällig</span>' : '<span class="tag gut">sitzt gut</span>');
+    if(k.seen>0 && k.str<weakStr){ weakStr=k.str; weakest=m[0]; }
+    return '<div class="repRow"><div class="repHead"><b>'+m[0]+'</b>'+status+'</div>'+
+      '<div class="repSub">'+m[1]+'</div>'+
+      '<div class="repStats"><span>Sicherheit '+repDots(k.str,5)+'</span>'+
+      '<span>Trefferquote: '+(quote==null?"–":quote+"%")+'</span>'+
+      '<span>geübt: '+k.seen+'×</span></div></div>';
+  }).join("");
+  var doneIslands=ISLANDS.filter(function(i){ return sectionDone(i.id)>=SECTIONS.length; }).length;
+  var st=STAGES[S.stage]?STAGES[S.stage].name:"";
+  var head='<div class="repTop">'+
+    '<div><b>Fee-Stufe:</b> '+S.stage+' von 5 ('+esc(st)+')</div>'+
+    '<div><b>Inseln geschafft:</b> '+doneIslands+' von '+ISLANDS.length+'</div>'+
+    '<div><b>Verdiente Kristalle:</b> '+S.earned+'</div>'+
+    '<div><b>Serie:</b> '+S.streak.current+' Tage in Folge (Rekord '+S.streak.best+')</div>'+
+    '<div><b>Aufgaben gelöst:</b> '+S.solved+'</div>'+
+    (weakest?'<div class="repTipp">Am meisten üben: '+esc(weakest)+'</div>':'')+
+  '</div>';
+  return head+rows;
+}
+function makeBackup(){
+  var g=function(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } };
+  var bundle={ v:1, state:S, name:g(LS_NAME), muted:g(LS_MUTED) };
+  return "YZ1:"+btoa(unescape(encodeURIComponent(JSON.stringify(bundle))));
+}
+function restoreBackup(code){
+  code=(code||"").trim(); if(code.indexOf("YZ1:")===0) code=code.slice(4);
+  var json=decodeURIComponent(escape(atob(code)));
+  var b=JSON.parse(json), st=(b&&b.state)?b.state:b;
+  if(!st || typeof st!=="object" || !st.skills) throw new Error("kein gültiger Stand");
+  var sjson=JSON.stringify(st);
+  try{ localStorage.setItem(LS, sjson); }catch(e){} setCookie(LS, sjson);
+  try{ localStorage.setItem(LS_INTRO, "1"); }catch(e){} setCookie(LS_INTRO, "1");
+  if(b && b.name){ try{ localStorage.setItem(LS_NAME, b.name); }catch(e){} setCookie(LS_NAME, b.name); }
+  if(b && b.muted){ try{ localStorage.setItem(LS_MUTED, b.muted); }catch(e){} setCookie(LS_MUTED, b.muted); }
+  return true;
+}
+function screenEltern(){
+  showChrome(false);
+  var code=makeBackup();
+  $("screen").innerHTML='<div class="eltern">'+
+    '<h2 style="margin-top:4px">Für Eltern</h2>'+
+    '<div class="card" style="text-align:left">'+
+      '<h3 class="eh">Lernstand von '+esc(feeName())+'</h3>'+reportHtml()+
+    '</div>'+
+    '<div class="card" style="text-align:left;margin-top:12px">'+
+      '<h3 class="eh">Spielstand sichern</h3>'+
+      '<p class="ep">Kopiere diesen Code und schick ihn dir selbst (z.B. per Nachricht). Damit kannst du den Fortschritt jederzeit wiederherstellen - auch auf einem anderen Gerät.</p>'+
+      '<textarea class="ecode" id="bkCode" readonly>'+esc(code)+'</textarea>'+
+      '<button class="btn pink" id="bkCopy" style="width:100%">Code kopieren</button>'+
+      '<h3 class="eh" style="margin-top:18px">Spielstand wiederherstellen</h3>'+
+      '<p class="ep">Gesicherten Code hier einfügen. Achtung: überschreibt den aktuellen Stand auf diesem Gerät.</p>'+
+      '<textarea class="ecode" id="rsCode" placeholder="Code hier einfügen ..."></textarea>'+
+      '<button class="btn ghost" id="rsBtn" style="width:100%">Wiederherstellen</button>'+
+      '<div id="rsMsg" class="ep" style="margin-top:8px;font-weight:700"></div>'+
+    '</div>'+
+    '<button class="btn" id="elBack" style="width:100%;margin-top:14px">Zurück zum Spiel</button>'+
+  '</div>';
+  $("bkCopy").addEventListener("click", function(){
+    var ta=$("bkCode"); ta.focus(); ta.select();
+    var ok=false;
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value); ok=true; } }catch(e){}
+    if(!ok){ try{ ok=document.execCommand("copy"); }catch(e){} }
+    $("bkCopy").textContent = ok ? "Kopiert!" : "Markiert - jetzt kopieren";
+  });
+  var armed=false;
+  $("rsBtn").addEventListener("click", function(){
+    var c=$("rsCode").value.trim();
+    if(!c){ $("rsMsg").textContent="Bitte erst einen Code einfügen."; return; }
+    if(!armed){ armed=true; $("rsBtn").textContent="Sicher? Aktuellen Stand überschreiben"; return; }
+    try{ restoreBackup(c); $("rsMsg").textContent="Wiederhergestellt! Lade neu ...";
+      setTimeout(function(){ location.href="app.html"; }, 800); }
+    catch(e){ armed=false; $("rsBtn").textContent="Wiederherstellen"; $("rsMsg").textContent="Das war kein gültiger Code. Bitte noch einmal prüfen."; }
+  });
+  $("elBack").addEventListener("click", function(){ location.href="app.html"; });
+}
+
 $("feeMini").addEventListener("click", function(){
   giggle();
   if(S.stage>=2){ screenChat(); return; }   // wach -> reden
   say(feeName()+" schläft noch tief und fest ... weck sie mit dem Rechnen!", true);
 });
 var seen=false; try{ seen=localStorage.getItem(LS_INTRO)==="1"; }catch(e){}
-if(seen) screenMap(); else screenStory();
+if(ELTERN) screenEltern(); else if(seen) screenMap(); else screenStory();
 })();
 </script>
 </body>
