@@ -680,4 +680,19 @@ im Chat-Portrait und in der Befreiungs-Geschichte (dort im gerahmten heroImg
 statt der Vektor-Figur). Getestet lokal und live: alle drei Fotos laden und
 rendern. Keine Konsolenfehler.
 
+### 2026-07-28 (Teil 2) – App-Icon aus Canva + Manifest
+
+- Erstes Bild direkt über den Canva-Connector erstellt (generate-design, Typ
+  logo): App-Icon "goldene Krone mit blauem Stein + Funkel-Stern", passend zum
+  Fee-Motiv. Als icon.png eingebunden, plus schlankes manifest.json (OHNE
+  Service-Worker) und apple-touch-icon/favicon in app.html + index.html. Damit
+  bekommt "Zum Startbildschirm hinzufügen" ein schönes Icon + Namen und startet
+  im Vollbild - passt zum Speicher-Fix (installierte Seite = dauerhafter Speicher).
+- MERK für Canva-Export: Die presigned Export-URLs von export-download.canva.com
+  laufen wegen Uhr-Schieflage auf Canvas Seite quasi sofort ab (AccessDenied
+  "Request has expired"). Workaround, der funktioniert hat: die Kandidaten-
+  Thumbnail-URL (design.canva.ai/...) mit curl UND einem Bild-Accept-Header
+  ziehen (`-H "Accept: image/png,image/*"`), sonst liefert der Server HTML.
+  Ergab ein 400x400-PNG - für ein Icon ausreichend.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_
