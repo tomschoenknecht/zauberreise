@@ -1,0 +1,13 @@
+{
+  "name": "Ylvies Zauberreise",
+  "short_name": "Zauberreise",
+  "start_url": "./app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#6a2fa8",
+  "theme_color": "#7b3fa0",
+  "icons": [
+    { "src": "icon.png", "sizes": "400x400", "type": "image/png", "purpose": "any" }
+  ]
+}
