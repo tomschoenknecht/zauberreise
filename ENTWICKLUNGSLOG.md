@@ -669,8 +669,15 @@ Getestet (chrome-devtools): Report korrekt (erkennt Zehnerübergang als Baustell
 Vorschau zeigt das Kleid, Nein setzt zurück ohne Abbuchung, Ja kauft; Tier-Kauf
 mit Rückfrage; Backup/Restore-Zyklus vollständig. Alles live. Keine Konsolenfehler.
 
-Offen/als Nächstes: Freundinnen als fotorealistische KI-Bilder (Tom generiert sie
-in Grok; Beschreibungen geliefert). Dateinamen zum Einbinden: rosalie.jpg,
-lumi.jpg, perla.jpg im Projektordner - dann Foto mit SVG-Fallback wie fee-portrait.
+### 2026-07-28 – Freundinnen als fotorealistische Bilder (live)
+
+Tom hat die drei Freundinnen in Grok als fotorealistische KI-Bilder erstellt
+(kindgerecht, ~Ylvies Alter, passend zur Foto-Fee). Eingebunden als rosalie.jpg
+(Blütenfee), lumi.jpg (Sternenfee), perla.jpg (Wellenfee) im Projektordner.
+friendPortraitHtml legt das Foto über die gezeichnete Figur; onerror entfernt
+das <img> -> Vektor-Fallback (wie fee-portrait). Sichtbar in den Lichtung-Karten,
+im Chat-Portrait und in der Befreiungs-Geschichte (dort im gerahmten heroImg
+statt der Vektor-Figur). Getestet lokal und live: alle drei Fotos laden und
+rendern. Keine Konsolenfehler.
 
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_

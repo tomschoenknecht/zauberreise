@@ -75,7 +75,9 @@ kaputt macht oder ihr etwas wegnimmt.**
                 Variablen - sonst könnte man nicht mehrere Feen gleichzeitig in
                 verschiedenen Farben zeigen. Muster für alle weiteren Charaktere.
 - kichern.js  - Toms echte Kicher-Aufnahme als Base64 (Landingpage)
-- fee-portrait.jpg - Toms fotorealistisches Fee-Bild (Chat-Porträt + Wunsch-Erfüllung)
+- fee-portrait.jpg - Toms fotorealistisches Fee-Bild (Chat, Ermutigung, Wunsch)
+- rosalie.jpg / lumi.jpg / perla.jpg - fotorealistische Bilder der drei Freundinnen
+                 (Foto über der gezeichneten Figur, onerror -> Vektor-Fallback)
 - mirostar-...mp3  - Hintergrundmusik (Landingpage)
 - .claude/server.js - lokaler Vorschau-Server
 
