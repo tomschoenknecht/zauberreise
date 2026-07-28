@@ -276,6 +276,8 @@
     align-items:center; justify-content:center; aspect-ratio:200/236; background:rgba(40,18,50,.4);
     border-radius:14px; font-weight:800; font-size:12px; gap:5px;}
   .friendCard .flock svg{fill:#fff;}
+  /* Foto der Freundin über der gezeichneten Figur (Fallback, falls Bild fehlt) */
+  .fphoto{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 6%; border-radius:inherit; display:block;}
 
   /* ---------- Mit der Fee reden ---------- */
   .chatWrap{display:flex; flex-direction:column; height:100%;}
@@ -1212,7 +1214,13 @@ function screenSalon(){
    Rein zusätzlich - berührt Kristalle/Stufe/Fee nicht. Freigeschaltet über "earned",
    also über Ylvies Fleiß, damit eine neue Freundin ein Grund zum Weitermachen ist. */
 var friendChatId=null, friendLogs={};
-function friendPortraitHtml(id, cls){ return '<div class="'+cls+'">'+friendSvg(id)+'</div>'; }
+/* Fotorealistische Bilder der Freundinnen (von Tom erstellt). Liegt eines nicht
+   vor, entfernt onerror das <img> und die gezeichnete Figur bleibt als Fallback. */
+var FRIEND_PHOTO={ bluete:"rosalie.jpg", stern:"lumi.jpg", welle:"perla.jpg" };
+function friendPhoto(id){ return FRIEND_PHOTO[id]||""; }
+function friendPortraitHtml(id, cls){
+  return '<div class="'+cls+'">'+friendSvg(id)+'<img class="fphoto" src="'+friendPhoto(id)+'" alt="" onerror="this.remove()"></div>';
+}
 function speakFriend(id, text){
   if(S.stage<3) return;                          // Sprachausgabe erst ab "Stimme", wie bei der Fee
   var f=FRIEND_BY(id);
@@ -1229,7 +1237,7 @@ function screenFriends(){
     if(open){
       html+='<div class="friendCard" data-id="'+f.id+'">'+
         (seen?'':'<span class="fnew">Neu!</span>')+
-        '<div class="fport">'+friendSvg(f.id)+'</div>'+
+        '<div class="fport">'+friendSvg(f.id)+'<img class="fphoto" src="'+friendPhoto(f.id)+'" alt="" onerror="this.remove()"></div>'+
         '<b>'+esc(f.kurz)+'</b><div class="fsub">'+(seen?"Tipp mich an zum Reden":"Tipp mich an!")+'</div></div>';
     } else {
       html+='<div class="friendCard locked" data-id="'+f.id+'">'+
@@ -1260,7 +1268,7 @@ function screenFriendStory(id){
   function render(){
     var last=idx===beats.length-1;
     var html='<div class="story">'+
-      '<div class="storyFee floaty"><div class="halo"></div>'+friendSvg(id)+'</div>'+
+      friendPortraitHtml(id,"heroImg floaty")+
       '<div class="storyText">'+beats[idx]+'</div>'+
       '<div class="dots">'+beats.map(function(_,i){ return '<i class="'+(i<=idx?'on':'')+'"></i>'; }).join("")+'</div>';
     if(!last) html+='<div class="tapHint">Tipp weiter ...</div>';
