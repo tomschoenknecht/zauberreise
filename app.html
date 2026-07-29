@@ -243,9 +243,17 @@
   /* ---------- Kuschelwiese (Haustiere) ---------- */
   .petStage{width:min(52vw,210px); margin:6px auto 2px; aspect-ratio:1/1;
     background:radial-gradient(circle at 50% 62%, #d6f7dd, #a9ebbb); border-radius:26px;
-    border:3px solid #fff; box-shadow:0 10px 24px rgba(60,120,60,.3); position:relative; overflow:hidden;}
+    border:3px solid #fff; box-shadow:0 10px 24px rgba(60,120,60,.3); position:relative; overflow:hidden;
+    transition:transform .45s ease;}
+  /* Wachstum sichtbar machen: Ei mittel, Baby klein, Groß voll (Rahmen skaliert mit). */
+  .petStage.stage-0{transform:scale(.82);} .petStage.stage-1{transform:scale(.72);} .petStage.stage-2{transform:scale(1);}
   .petStage .grass{position:absolute; left:0; right:0; bottom:0; height:26%;
     background:linear-gradient(180deg,#7fd898,#4fbf6a);}
+  /* Tier-/Ei-Foto über der gezeichneten Figur (Fallback, falls ein Bild fehlt) */
+  .petMedia{position:absolute; inset:0;}
+  .petMedia svg{width:100%; height:100%; display:block;}
+  .petPhoto{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .petStage .petMedia{animation:petFloat 3.6s ease-in-out infinite; inset:-8px;}
   .petFloat{animation:petFloat 3.6s ease-in-out infinite;}
   @keyframes petFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
   .petName{text-align:center; font-weight:800; font-size:clamp(17px,4.6vw,21px); color:#fff;
@@ -255,7 +263,7 @@
   .petCard{flex:0 0 auto; width:96px; background:rgba(255,255,255,.92); border-radius:16px; padding:8px 6px;
     text-align:center; cursor:pointer; border:3px solid transparent; box-shadow:0 6px 14px rgba(60,120,60,.22); color:var(--plum);}
   .petCard.active{border-color:var(--gold);}
-  .petCard .thumb{width:66px; height:66px; margin:0 auto;}
+  .petCard .thumb{width:66px; height:66px; margin:0 auto; position:relative; overflow:hidden; border-radius:12px;}
   .petCard b{display:block; font-size:12px; margin-top:3px; line-height:1.15;}
   .petCard .pcost{font-size:11px; font-weight:800; color:#3fae5a;}
   .petCard .phave{font-size:11px; font-weight:700; color:#c23f8e;}
@@ -1086,6 +1094,21 @@ function adoptPet(id){
     screenWiese();
   });
 }
+/* Fotorealistische (Canva-)Bilder der Tiere: Ei-Foto in der Ei-Stufe, Tier-Foto
+   als Baby (klein) und Groß. Liegt über der gezeichneten Figur; fehlt ein Bild,
+   entfernt onerror das <img> und die gezeichnete Figur bleibt als Fallback. */
+var PET_IMG={
+  wolkenhase:{tier:"pet-wolkenhase.png", ei:"ei-wolkenhase.png"},
+  sternkatze:{tier:"pet-sternkatze.png", ei:"ei-sternkatze.png"},
+  glitzerdrache:{tier:"pet-glitzerdrache.png", ei:"ei-glitzerdrache.png"},
+  einhorn:{tier:"pet-einhorn.png", ei:"ei-einhorn.png"}
+};
+function petImgSrc(id, stufe){ var m=PET_IMG[id]; if(!m) return ""; return stufe<=0 ? (m.ei||"") : (m.tier||""); }
+function petVisual(id, stufe, fastGeschluepft){
+  var src=petImgSrc(id, stufe), vec=petSvg(id, stufe, fastGeschluepft);
+  if(!src) return vec;
+  return '<div class="petMedia">'+vec+'<img class="petPhoto" src="'+src+'" alt="" onerror="this.remove()"></div>';
+}
 function screenWiese(){
   removeBuyBar();
   showChrome(true); renderFee();
@@ -1093,8 +1116,7 @@ function screenWiese(){
   var html='<button class="back" id="backBtn">‹ Zurück zur Karte</button><h2>Die Kuschelwiese</h2>';
   if(active){
     var st=petStage(active);
-    html+='<div class="petStage"><div class="grass"></div>'+
-      '<div class="petFloat" style="position:absolute;left:15%;right:15%;top:12%;bottom:14%">'+petSvg(active, st, petAlmostHatch(active))+'</div></div>'+
+    html+='<div class="petStage stage-'+st+'">'+petVisual(active, st, petAlmostHatch(active))+'</div>'+
       '<div class="petName">'+(st===0?"Dein "+PET_NAME(active)+"-Ei":PET_NAME(active))+'</div>'+
       '<div class="petStatus">'+petStatusText(active)+'</div>';
   } else {
@@ -1102,7 +1124,7 @@ function screenWiese(){
   }
   html+='<div class="petShelf">'+PET_CATALOG.map(function(p){
     var owned=S.pets.owned.indexOf(p.id)>=0, isActive=p.id===active;
-    var thumb=petSvg(p.id, owned?petStage(p.id):0, false);
+    var thumb=petVisual(p.id, owned?petStage(p.id):0, false);
     return '<div class="petCard'+(isActive?' active':'')+'" data-id="'+p.id+'">'+
       '<div class="thumb">'+thumb+'</div><b>'+p.name+'</b>'+
       (owned ? '<div class="phave">'+(isActive?'dabei':'auswählen')+'</div>' : '<div class="pcost">'+p.cost+' ✦</div>')+'</div>';
