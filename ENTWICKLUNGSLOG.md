@@ -695,4 +695,23 @@ rendern. Keine Konsolenfehler.
   ziehen (`-H "Accept: image/png,image/*"`), sonst liefert der Server HTML.
   Ergab ein 400x400-PNG - für ein Icon ausreichend.
 
+### 2026-07-29 – Haustiere als Canva-Bilder (mit Entwicklung), Märchenwald-Asset
+
+- **Haustiere** von Vektor auf fotorealistisch-niedliche Canva-Bilder umgestellt
+  (3D-Plüschlook): pet-*.png (Tier) + ei-*.png (Ei) für alle vier Tiere. petVisual()
+  in app.html zeigt Ei-Foto in der Ei-Stufe, Tier-Foto als Baby (klein) und Groß;
+  die gezeichnete Figur aus tiere.js bleibt als onerror-Fallback. Wachstum sichtbar
+  über Rahmen-Skalierung (stage-0/1/2). Tom wollte die Entwicklung durchgängig
+  stimmig sehen -> Konzept: EIN Tier-Bild, das als Baby klein und groß groß gezeigt
+  wird, plus passendes Ei (garantiert konsistent). Kuschelwiese zeigt das Tier jetzt
+  als gerahmte magische Szene (eigener Bildhintergrund) statt Vektor-Wiese.
+- **Canva-Stolperfallen notiert:** (1) design_type "logo" erzeugt für "Ei" gern
+  ein TEXT-LOGO ("Cloud Egg") statt eines Eis - im Prompt hart "no text/letters/logo"
+  fordern und die Kandidaten prüfen. (2) Bild-Generierung hat ein KONTINGENT
+  (Fehler "quota limit"); war nach kurzer Zeit wieder da (eher Tempo-Limit).
+- **Märchenwald-Hintergrund** (Kandidat 2, atmosphärischer Wald) als maerchenwald.png
+  lokal gesichert (400x711, weich - reicht für einen abgedunkelten Hintergrund).
+  NOCH NICHT eingebunden/committet: Die eigentliche Märchenwald-Welt (neuer Kartenort
+  mit diesem Hintergrund) ist als eigenes Feature offen - Inhalt/Ablauf mit Tom klären.
+
 _(Weitere Einträge folgen mit Ylvies Reaktionen.)_
