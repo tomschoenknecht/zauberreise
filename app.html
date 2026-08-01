@@ -240,6 +240,23 @@
   .buyBar .bbYes{background:linear-gradient(180deg,#ffd8ef,var(--pink2)); color:#fff; box-shadow:0 4px 0 #c23f8e;}
   .buyBar .bbYes:active{transform:translateY(2px); box-shadow:0 2px 0 #c23f8e;}
 
+  /* ---------- Märchenwald ---------- */
+  .forestScene{position:relative; width:100%; max-width:400px; margin:4px auto 2px; aspect-ratio:400/560; max-height:56vh;
+    border-radius:20px; overflow:hidden; border:3px solid #fff; box-shadow:0 12px 28px rgba(50,20,70,.42);}
+  .forestBg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .fSecret{position:absolute; width:36px; height:36px; transform:translate(-50%,-50%); border:none; padding:0; cursor:pointer;
+    border-radius:50%; background:radial-gradient(circle, rgba(255,247,205,.98), rgba(255,224,138,.55) 45%, transparent 70%);
+    box-shadow:0 0 14px 5px rgba(255,235,150,.7); animation:secretPulse 1.8s ease-in-out infinite;}
+  @keyframes secretPulse{0%,100%{transform:translate(-50%,-50%) scale(.82); opacity:.7;}50%{transform:translate(-50%,-50%) scale(1.18); opacity:1;}}
+  .fSecret.found{background:radial-gradient(circle, rgba(200,255,220,.55), transparent 66%); box-shadow:0 0 7px 2px rgba(150,255,180,.4);
+    animation:none; opacity:.55;}
+  .forestMsg{position:absolute; left:5%; right:5%; bottom:5%; background:rgba(255,255,255,.97); color:var(--plum);
+    border-radius:16px; padding:10px 13px; font-size:13.5px; font-weight:700; line-height:1.35; box-shadow:0 8px 20px rgba(50,20,70,.4);
+    opacity:0; transform:translateY(10px); transition:opacity .3s ease, transform .3s ease; pointer-events:none;}
+  .forestMsg.show{opacity:1; transform:translateY(0);}
+  .forestHint{text-align:center; font-size:12.5px; color:#fff; opacity:.92; font-weight:700;
+    text-shadow:0 2px 8px rgba(50,20,70,.6); margin:7px 0 0;}
+
   /* ---------- Kuschelwiese (Haustiere) ---------- */
   .petStage{width:min(52vw,210px); margin:6px auto 2px; aspect-ratio:1/1;
     background:radial-gradient(circle at 50% 62%, #d6f7dd, #a9ebbb); border-radius:26px;
@@ -510,6 +527,7 @@ function migrateDresses(sal){
 var defaults={ crystals:0, earned:0, stage:0, solved:0, progress:0, sections:{}, skills:{},
                wish:{text:"", granted:false}, pets:{owned:[], active:"", adoptedAt:{}},
                friends:{seen:[]}, streak:{current:0, best:0, last:"", days:[]},
+               forest:{found:[]},
                salon:JSON.parse(JSON.stringify(defaultSalon)) };
 SKILLS.forEach(function(s){ defaults.skills[s]={str:0, due:0, seen:0, right:0}; });
 var S=load();
@@ -524,6 +542,7 @@ function load(){
     if(!o.wish) o.wish={text:"", granted:false};
     if(!o.pets) o.pets={owned:[], active:"", adoptedAt:{}};
     if(!o.friends || !Array.isArray(o.friends.seen)) o.friends={seen:[]};
+    if(!o.forest || !Array.isArray(o.forest.found)) o.forest={found:[]};
     if(!o.streak || typeof o.streak!=="object") o.streak={current:0, best:0, last:"", days:[]};
     else { if(typeof o.streak.current!=="number") o.streak.current=0;
       if(typeof o.streak.best!=="number") o.streak.best=0;
@@ -632,10 +651,11 @@ var ISLANDS=[
   {id:"einmaleins", name:"Einmaleins-Insel", sub:"Mal-Reihen entdecken", skill:"einmaleins", land:"#c9a1ff", landD:"#8b3fd6", x:290, y:560,
    ic:'<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" stroke="#8b3fd6" stroke-width="2.4" stroke-linecap="round"/></svg>'}
 ];
-var WIESE_POS={x:90,   y:614, land:"#bff7c9", landD:"#3fae5a"};   // Kuschelwiese: Haustiere
-var FRIENDS_POS={x:298, y:668, land:"#ffe7c0", landD:"#e0a54a"}; // Freundinnen-Lichtung
-var SALON_POS={x:120,  y:762, land:"#ffe0f6", landD:"#c97ce0"};   // Zauber-Salon
-var MAP_H=880;   // Kartenhöhe (viewBox), gewachsen mit den zusätzlichen Orten
+var WIESE_POS={x:90,   y:610, land:"#bff7c9", landD:"#3fae5a"};   // Kuschelwiese: Haustiere
+var FRIENDS_POS={x:298, y:660, land:"#ffe7c0", landD:"#e0a54a"}; // Freundinnen-Lichtung
+var FOREST_POS={x:110, y:742, land:"#bfe6c0", landD:"#4a8a5a"};  // Märchenwald
+var SALON_POS={x:296,  y:800, land:"#ffe0f6", landD:"#c97ce0"};   // Zauber-Salon
+var MAP_H=920;   // Kartenhöhe (viewBox), gewachsen mit den zusätzlichen Orten
 
 /* ============ Fee-Stufen ============
    Takt für SECHS Wochen: eine Insel bringt ca. 38 Kristalle (24 Aufgaben),
@@ -777,6 +797,19 @@ function burst(){ // kleiner Funkel-Ausbruch
 var SALON_ID="salon";
 var WIESE_ID="wiese";
 var FRIENDS_ID="freunde";
+var FOREST_ID="wald";
+/* Märchenwald: Geheimnis-Lichter, die mit "earned" nach und nach auftauchen.
+   Jedes verrät eine liebe Zauber-Botschaft und schenkt einmalig Kristalle. */
+var FOREST_SECRETS=[
+  {id:"s1", at:20,  x:30, y:76, gift:4, msg:"Ein Zauberlicht flüstert dir ein Geheimnis: Wer übt, öffnet Türen, die niemand sieht."},
+  {id:"s2", at:45,  x:70, y:66, gift:4, msg:"Unter dem leuchtenden Pilz liegt ein Wunschstein. Er sagt: Träum ruhig ganz groß."},
+  {id:"s3", at:80,  x:22, y:50, gift:5, msg:"Der Mond über dem Wald zwinkert dir zu - du gehörst zu den Sternenkindern."},
+  {id:"s4", at:120, x:76, y:42, gift:5, msg:"Ein Tautropfen glitzert und sagt: In dir steckt genug Zauber für den ganzen Wald."},
+  {id:"s5", at:165, x:46, y:82, gift:6, msg:"Die alte Eiche flüstert dein Geheimwort: 'Funkelmut'. Sag es leise, wenn du tapfer sein willst."},
+  {id:"s6", at:210, x:54, y:32, gift:6, msg:"Ganz tief im Wald wartet ein Licht nur für dich. Es sagt: Ich bin so stolz auf dich, Ylvie."}
+];
+function forestAvailable(){ return FOREST_SECRETS.filter(function(s){ return S.earned>=s.at; }); }
+function forestNewCount(){ return forestAvailable().filter(function(s){ return S.forest.found.indexOf(s.id)<0; }).length; }
 var ISLAND_BLOB="M0,-36 C14,-37 26,-33 33,-23 C40,-13 40,3 34,13 C28,23 22,31 8,35 C-8,39 -26,34 -33,20 C-40,6 -38,-10 -30,-22 C-22,-34 -10,-35 0,-36 Z";
 
 /* kleine Landschafts-Deko je Insel, gibt der Karte Charakter statt gleicher Farbblasen */
@@ -800,7 +833,10 @@ var ISLAND_DECO = {
     '<circle cx="4" cy="-2" r="2.4" fill="#ffe08a"/></g>',
   freunde: '<g transform="translate(10,8)">'+
     '<circle cx="-9" cy="1" r="3.4" fill="#ff9ec6"/><circle cx="0" cy="-3" r="3.6" fill="#c9a1ff"/><circle cx="9" cy="2" r="3.4" fill="#8ff0d0"/>'+
-    '<circle cx="-9" cy="1" r="1.2" fill="#fff"/><circle cx="0" cy="-3" r="1.3" fill="#fff"/><circle cx="9" cy="2" r="1.2" fill="#fff"/></g>'
+    '<circle cx="-9" cy="1" r="1.2" fill="#fff"/><circle cx="0" cy="-3" r="1.3" fill="#fff"/><circle cx="9" cy="2" r="1.2" fill="#fff"/></g>',
+  wald: '<g transform="translate(11,9)">'+
+    '<path d="M-8,10 L-8,4 L-13,4 L-8,-3 L-11,-3 L-6,-11 L-1,-3 L-4,-3 L1,4 L-4,4 L-4,10 Z" fill="#3a7a4a"/>'+
+    '<path d="M8,10 L8,5 L4,5 L8,-1 L6,-1 L10,-8 L14,-1 L12,-1 L16,5 L12,5 L12,10 Z" fill="#4a8a5a"/></g>'
 };
 var LOCK_ICON='<circle r="19" fill="#8a8a9a"/><rect x="-7" y="-2" width="14" height="11" rx="2.4" fill="#5a5a6a"/><path d="M-5,-2 v-4 a5,5 0 0 1 10,0 v4" fill="none" stroke="#5a5a6a" stroke-width="2.6"/>';
 
@@ -997,13 +1033,22 @@ function screenMap(){
   var friendsIcon='<circle cx="9" cy="8" r="3" fill="#fff" stroke="#e0a54a" stroke-width="1.4"/><circle cx="16" cy="8" r="3" fill="#fff" stroke="#e0a54a" stroke-width="1.4"/><path d="M3 20c0-3.5 3-5.5 6-5.5M21 20c0-3.5-3-5.5-6-5.5" fill="none" stroke="#e0a54a" stroke-width="1.5"/>';
   islandsSvg+=islandNode(FRIENDS_ID, FRIENDS_POS.x, FRIENDS_POS.y, FRIENDS_POS.land, FRIENDS_POS.landD, friendsIcon,
     newFriend, !friendsOpen, "Freundinnen-Lichtung", friendsUnter, ISLAND_DECO.freunde);
+  /* Märchenwald - öffnet, sobald das erste Geheimnis-Licht auftaucht (nach earned) */
+  var forestOpen=forestAvailable().length>0;
+  var forestNew=forestNewCount()>0;
+  var forestUnter = !forestOpen ? "noch verschlossen"
+    : (forestNew ? "Ein neues Geheimnis!" : "Entdecke die Geheimnisse");
+  var forestIcon='<path d="M12 3l6 9h-3.5l4 6H5.5l4-6H6z" fill="none" stroke="#4a8a5a" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 18v3" stroke="#4a8a5a" stroke-width="1.6"/>';
+  islandsSvg+=islandNode(FOREST_ID, FOREST_POS.x, FOREST_POS.y, FOREST_POS.land, FOREST_POS.landD, forestIcon,
+    forestNew, !forestOpen, "Der Märchenwald", forestUnter, ISLAND_DECO.wald);
   var salonIcon='<path d="M12 2l2.4 5.5L20 8l-4.5 3.7L17 18l-5-3.2L7 18l1.5-6.3L4 8l5.6-.5Z" fill="#fff" stroke="#c97ce0" stroke-width="1.3"/>';
   islandsSvg+=islandNode(SALON_ID, SALON_POS.x, SALON_POS.y, SALON_POS.land, SALON_POS.landD, salonIcon,
     false, !salonOpen, "Der Zauber-Salon", salonOpen?"Style deine Fee!":"noch verschlossen", ISLAND_DECO.salon);
 
   /* Schatzpfad dynamisch aus den Inselpositionen (in Reihenfolge) + Wiese + Salon */
   var trailPts=ISLANDS.map(function(i){return [i.x,i.y];});
-  trailPts.push([WIESE_POS.x,WIESE_POS.y]); trailPts.push([FRIENDS_POS.x,FRIENDS_POS.y]); trailPts.push([SALON_POS.x,SALON_POS.y]);
+  trailPts.push([WIESE_POS.x,WIESE_POS.y]); trailPts.push([FRIENDS_POS.x,FRIENDS_POS.y]);
+  trailPts.push([FOREST_POS.x,FOREST_POS.y]); trailPts.push([SALON_POS.x,SALON_POS.y]);
   var trail="M"+trailPts.map(function(p){return p[0]+","+p[1];}).join(" L");
   var waves=""; for(var wi=0; wi<Math.ceil(MAP_H/115); wi++){ var yy=30+wi*115;
     waves+='<path d="M0,'+yy+' Q20,'+(yy-8)+' 40,'+yy+' T80,'+yy+' T120,'+yy+' T160,'+yy+' T200,'+yy+' T240,'+yy+' T280,'+yy+' T320,'+yy+' T360,'+yy+'" fill="none" stroke="#fff" stroke-width="1.6" opacity=".12"/>'; }
@@ -1046,6 +1091,7 @@ function screenMap(){
       if(id===SALON_ID){ if(salonOpen) screenSalon(); else say(feeName()+" flüstert: Erst muss ich meine Farbe zurückbekommen, dann kannst du mich schminken.", true); return; }
       if(id===WIESE_ID){ if(wieseOpen) screenWiese(); else say(feeName()+" flüstert: Schaff erst die erste Insel - dann öffnet sich die Kuschelwiese!", true); return; }
       if(id===FRIENDS_ID){ if(friendsOpen) screenFriends(); else say(feeName()+" flüstert: Sammle noch ein paar Kristalle - dann finde ich meine erste Freundin!", true); return; }
+      if(id===FOREST_ID){ if(forestOpen) screenForest(); else say(feeName()+" flüstert: Der Märchenwald schläft noch - sammle Kristalle, dann leuchten seine Geheimnisse auf!", true); return; }
       startLesson(id);
     });
   });
@@ -1342,6 +1388,36 @@ function screenFriendChat(id){
   });
   $("chatSend").addEventListener("click", function(){ var i=$("chatInput"); friendChatSay(i.value); i.value=""; i.focus(); });
   $("chatInput").addEventListener("keydown", function(e){ if(e.key==="Enter"){ var i=$("chatInput"); friendChatSay(i.value); i.value=""; } });
+}
+
+/* ============ Märchenwald ============
+   Ruhiger Entdecker-Ort: leuchtende Geheimnis-Lichter über dem Wald-Hintergrund.
+   Antippen -> liebe Botschaft der Fee + einmalig ein kleines Kristall-Geschenk
+   (spendierbar, kein "earned"). Rein zusätzlich. */
+function forestTap(id, el){
+  var s=null; for(var i=0;i<FOREST_SECRETS.length;i++){ if(FOREST_SECRETS[i].id===id){ s=FOREST_SECRETS[i]; break; } }
+  if(!s) return;
+  var first=S.forest.found.indexOf(id)<0;
+  if(first){ S.forest.found.push(id); S.crystals+=s.gift; save(); renderFee(); el.classList.add("found"); }
+  var m=$("forestMsg"); if(m){ m.textContent=s.msg+(first?"  (+"+kristalle(s.gift)+")":""); m.classList.add("show"); }
+  say(s.msg, true);
+}
+function screenForest(){
+  showChrome(true); renderFee();
+  var avail=forestAvailable();
+  var lights=avail.map(function(s){
+    var found=S.forest.found.indexOf(s.id)>=0;
+    return '<button class="fSecret'+(found?" found":"")+'" data-id="'+s.id+'" style="left:'+s.x+'%;top:'+s.y+'%" aria-label="Geheimnis"></button>';
+  }).join("");
+  $("screen").innerHTML='<button class="back" id="backBtn">‹ Zurück zur Karte</button><h2>Der Märchenwald</h2>'+
+    '<div class="forestScene"><img class="forestBg" src="maerchenwald.png" alt="">'+lights+
+    '<div class="forestMsg" id="forestMsg"></div></div>'+
+    '<p class="forestHint">Tipp die leuchtenden Lichter an - jedes verrät dir ein Geheimnis.</p>';
+  $("backBtn").addEventListener("click", screenMap);
+  Array.prototype.forEach.call(document.querySelectorAll(".fSecret"), function(el){
+    el.addEventListener("click", function(){ forestTap(el.getAttribute("data-id"), el); });
+  });
+  say(forestNewCount() ? "Der Wald glitzert - ein neues Geheimnis wartet auf dich!" : "Was flüstert dir der Märchenwald heute?", true);
 }
 
 var lesson=null;
